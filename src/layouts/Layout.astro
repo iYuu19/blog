@@ -12,6 +12,8 @@ const {
   title,
   description = "iYuu 的个人题解、总结和复盘笔记。"
 } = Astro.props;
+const canonicalUrl = Astro.url.href;
+const socialImage = new URL("/avatar.jpg", Astro.url).toString();
 ---
 
 <!doctype html>
@@ -20,7 +22,20 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#f4f1eb" />
+    <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:site_name" content="iYuu Notes" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:locale" content="zh_CN" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
     <title>{title}</title>
   </head>
   <body>

@@ -9,7 +9,7 @@ import Layout from "../layouts/Layout.astro";
       <p class="eyebrow">About</p>
       <h1>这是 iYuu 的个人刷题笔记。</h1>
       <p>
-        没打算把它做成很像作品集或者教程站的样子，还是更希望它像一本公开放着的笔记。
+        没打算把它做成很像作品集或者教程站的样子，还是更希望它像一本公开放着、会慢慢长大的笔记。
       </p>
       <p>签名就一句：菜鸟一枚。</p>
     </div>
@@ -39,9 +39,10 @@ import Layout from "../layouts/Layout.astro";
       <ol class="plain-list">
         <li>在 `src/content/blog` 里新建一篇 `.md`。</li>
         <li>本地用 `npm run dev` 看效果。</li>
-        <li>确认没问题后跑 `npm run build`。</li>
-        <li>把新的 `dist` 上传到 Cloudflare Pages。</li>
+        <li>确认没问题后执行 `git add .`、`git commit -m "更新博客"`、`git push`。</li>
+        <li>Cloudflare Pages 会自动拉取 GitHub 并更新线上站点，不需要再手动传 `dist`。</li>
       </ol>
+      <p class="section-note">如果你习惯先在 Word 里写，也没关系，后面整理成 Markdown 放进来就可以。</p>
     </section>
   </section>
 </Layout>

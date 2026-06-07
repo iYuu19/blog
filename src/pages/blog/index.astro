@@ -8,7 +8,11 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
 
-const tags = [...new Set(posts.flatMap((post) => post.data.tags))].slice(0, 12);
+const allTags = [...new Set(posts.flatMap((post) => post.data.tags))];
+const tags = allTags.slice(0, 12);
+const noteCount = posts.filter(
+  (post) => post.data.difficulty === "Notes" || post.data.oj === "总结" || post.data.oj === "经验"
+).length;
 const latest = posts[0];
 const latestDate = latest
   ? new Intl.DateTimeFormat("zh-CN", {
@@ -17,17 +21,38 @@ const latestDate = latest
       day: "2-digit"
     }).format(latest.data.pubDate)
   : "";
+const groupedPosts = Object.entries(
+  posts.reduce<Record<string, typeof posts>>((acc, post) => {
+    const year = String(post.data.pubDate.getFullYear());
+    (acc[year] ??= []).push(post);
+    return acc;
+  }, {})
+).sort((a, b) => Number(b[0]) - Number(a[0]));
 ---
 
 <Layout title="归档 | iYuu Notes" description="按时间整理 iYuu 的题解、总结和复盘。">
   <section class="shell page-intro">
     <p class="eyebrow">Archive</p>
     <h1>归档</h1>
-    <p>这里按时间放所有文章。以后更新题解、总结或者复盘，都会先堆到这里。</p>
+    <p>这里按时间放所有文章。以后更新题解、总结或者复盘，都会先记到这里，再慢慢长成自己的资料库。</p>
     <p class="meta-line">
       目前一共 {posts.length} 篇。
       {latest && <> 最近一篇是 <a href={`/blog/${latest.slug}/`}>{latest.data.title}</a> · {latestDate}</>}
     </p>
+    <dl class="page-stats">
+      <div>
+        <dt>文章</dt>
+        <dd>{posts.length}</dd>
+      </div>
+      <div>
+        <dt>标签</dt>
+        <dd>{allTags.length}</dd>
+      </div>
+      <div>
+        <dt>复盘</dt>
+        <dd>{noteCount}</dd>
+      </div>
+    </dl>
   </section>
 
   <section class="shell archive-page">
@@ -40,13 +65,28 @@ const latestDate = latest
           <li><a href="/about">关于这个站</a></li>
         </ul>
         <p class="index-meta">这里会按时间一直往下记。</p>
+        <div class="index-block">
+          <p class="index-label">浏览建议</p>
+          <p class="index-text">想看最近更新就从上往下读；想按专题翻，可以去标签页。</p>
+        </div>
       </div>
     </aside>
 
     <div class="archive-main">
       <section class="section" id="all-posts">
-        <div class="archive-list">
-          {posts.map((post) => <ArchiveRow post={post} />)}
+        <div class="section-head">
+          <h2>按时间查看</h2>
+          <span class="section-note">从新到旧</span>
+        </div>
+        <div class="year-stack">
+          {groupedPosts.map(([year, items]) => (
+            <section class="archive-year-group">
+              <p class="archive-year">{year}</p>
+              <div class="archive-list">
+                {items.map((post) => <ArchiveRow post={post} />)}
+              </div>
+            </section>
+          ))}
         </div>
       </section>
 

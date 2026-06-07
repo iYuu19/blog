@@ -18,17 +18,36 @@ const dateText = new Intl.DateTimeFormat("zh-CN", {
   month: "long",
   day: "numeric"
 }).format(post.data.pubDate);
+const updatedDateText = post.data.updatedDate
+  ? new Intl.DateTimeFormat("zh-CN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    }).format(post.data.updatedDate)
+  : null;
+const difficultyClassMap: Record<string, string> = {
+  Easy: "difficulty-easy",
+  Medium: "difficulty-medium",
+  Hard: "difficulty-hard",
+  Notes: "difficulty-notes"
+};
+
+const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-notes";
 ---
 
 <Layout title={`${post.data.title} | iYuu Notes`} description={post.data.description}>
   <article class="shell article-shell fade-up">
     <header class="article-header">
+      <p class="article-back">
+        <a href="/blog">返回归档</a>
+      </p>
       <p class="eyebrow">{post.data.oj}</p>
       <h1>{post.data.title}</h1>
       <p class="article-description">{post.data.description}</p>
       <div class="article-meta">
-        <span>{dateText}</span>
-        <span>{post.data.difficulty}</span>
+        <span>发布于 {dateText}</span>
+        {updatedDateText && <span>更新于 {updatedDateText}</span>}
+        <span class:list={["difficulty-pill", difficultyClass]}>{post.data.difficulty}</span>
         <span>{post.data.language}</span>
       </div>
       <div class="tag-row">

@@ -8,13 +8,19 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
 
-const recentPosts = posts.slice(0, 6);
 const noteCandidates = posts.filter(
   (post) => post.data.difficulty === "Notes" || post.data.oj === "总结" || post.data.oj === "经验"
 );
+const noteCount = noteCandidates.length;
 const notePosts = (noteCandidates.length > 0 ? noteCandidates : posts).slice(0, 4);
-const tags = [...new Set(posts.flatMap((post) => post.data.tags))].slice(0, 12);
+const allTags = [...new Set(posts.flatMap((post) => post.data.tags))];
+const tags = allTags.slice(0, 12);
 const latest = posts[0];
+const featuredPost = posts.find((post) => post.data.featured) ?? latest;
+const recentPosts =
+  featuredPost && posts.length > 1
+    ? posts.filter((post) => post.slug !== featuredPost.slug).slice(0, 6)
+    : posts.slice(0, 6);
 const latestDate = latest
   ? new Intl.DateTimeFormat("zh-CN", {
       year: "numeric",
@@ -22,20 +28,28 @@ const latestDate = latest
       day: "2-digit"
     }).format(latest.data.pubDate)
   : "";
+const featuredDate = featuredPost
+  ? new Intl.DateTimeFormat("zh-CN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    }).format(featuredPost.data.pubDate)
+  : "";
 ---
 
 <Layout title="iYuu Notes" description="iYuu 的个人刷题笔记站。">
   <section class="shell intro">
     <img class="intro-avatar" src="/avatar.jpg" alt="iYuu 的头像" />
     <div class="intro-copy">
-      <p class="eyebrow">iYuu Notes</p>
-      <h1>菜鸟一枚，慢慢把刷题过程记下来。</h1>
+      <p class="eyebrow">Personal Blog</p>
+      <h1>iYuu 的刷题笔记</h1>
+      <p class="intro-lead">先把题做明白，再把过程写明白。</p>
       <p>
-        这里主要放题解、专题总结和复盘。写下来不是为了显得厉害，而是为了以后回头看时，
-        能更快找到自己真正卡过的地方。
+        这里会放题解、专题、小结，也会记下第一次卡住的地方。写出来主要是给以后的自己看，
+        顺便也公开留个痕迹。
       </p>
       <p>
-        希望它最后更像一本自己的笔记，而不是一个花里胡哨的首页。
+        不追求像教程站，也不想装成作品集。它更像一个会慢慢长大的公开笔记本。
       </p>
       <div class="hero-links">
         <a href="/blog">看全部文章</a>
@@ -49,53 +63,94 @@ const latestDate = latest
           </p>
         )
       }
+      <dl class="intro-stats">
+        <div>
+          <dt>文章</dt>
+          <dd>{posts.length}</dd>
+        </div>
+        <div>
+          <dt>标签</dt>
+          <dd>{allTags.length}</dd>
+        </div>
+        <div>
+          <dt>复盘</dt>
+          <dd>{noteCount}</dd>
+        </div>
+      </dl>
     </div>
   </section>
 
   <section class="shell home-layout">
     <aside class="index-column">
       <div class="site-index">
-        <p class="index-title">索引</p>
+        <p class="index-title">浏览索引</p>
         <ul class="index-list">
+          <li><a href="#featured">先看这一篇</a></li>
           <li><a href="#recent">最近更新</a></li>
-          <li><a href="#notes">写这些的原因</a></li>
-          <li><a href="#week">这一周</a></li>
+          <li><a href="#notes">写作习惯</a></li>
           <li><a href="#tags">标签</a></li>
           <li><a href="#reviews">总结 / 复盘</a></li>
         </ul>
         <p class="index-meta">目前 {posts.length} 篇，最近更新在 {latestDate || "这几天"}。</p>
+        <div class="index-block">
+          <p class="index-label">现在主要写</p>
+          <p class="index-text">刷题题解、CTF 复盘、专题小结，先把自己真的会回头翻的内容留下来。</p>
+        </div>
+        <div class="index-block">
+          <p class="index-label">更新方式</p>
+          <p class="index-text">本地写 Markdown，push 到 GitHub 之后，Cloudflare Pages 会自动部署。</p>
+        </div>
       </div>
     </aside>
 
     <div class="home-grid">
       <div class="main-column">
+        {
+          featuredPost && (
+            <section class="section" id="featured">
+              <div class="section-head">
+                <h2>先看这一篇</h2>
+                <span class="section-note">{featuredDate}</span>
+              </div>
+              <article class="featured-card">
+                <p class="featured-kicker">
+                  {featuredPost.data.oj} / {featuredPost.data.difficulty}
+                </p>
+                <h3>
+                  <a href={`/blog/${featuredPost.slug}/`}>{featuredPost.data.title}</a>
+                </h3>
+                <p>{featuredPost.data.description}</p>
+                <div class="featured-meta">
+                  <span>{featuredPost.data.language}</span>
+                  <span>{featuredPost.data.tags.length} 个标签</span>
+                </div>
+              </article>
+            </section>
+          )
+        }
+
         <section class="section" id="recent">
           <div class="section-head">
             <h2>最近更新</h2>
             <a class="section-link" href="/blog">查看归档</a>
           </div>
-          <div class="archive-list">
-            {recentPosts.map((post) => <ArchiveRow post={post} />)}
-          </div>
-        </section>
-
-        <section class="section" id="notes">
-          <h2>我希望这里留下什么</h2>
-          <ul class="plain-list">
-            <li>题解尽量写清楚“为什么会想到这个思路”。</li>
-            <li>不只放做对的答案，也会记第一次卡住的地方。</li>
-            <li>专题总结尽量写成以后自己真的会回来看一眼的笔记。</li>
-          </ul>
+          {
+            recentPosts.length > 0 ? (
+              <div class="archive-list">
+                {recentPosts.map((post) => <ArchiveRow post={post} />)}
+              </div>
+            ) : (
+              <p class="empty-feed">现在文章还不多，先从上面那篇开始，后面会慢慢把目录补起来。</p>
+            )
+          }
         </section>
       </div>
 
       <aside class="side-column">
-      <section class="section side-note" id="week">
-        <h2>这一周</h2>
-        <p>
-          先把站点从示例内容换成真实内容了。现在放进来的第一篇是“喵喵宠物医院”，后面再慢慢把自己的题解和复盘补进来。
-        </p>
-      </section>
+        <section class="section side-note" id="notes">
+          <h2>写的时候我想保留什么</h2>
+          <p>先讲题意和判断信号，再讲代码。能把“为什么会想到这条思路”写清楚，就尽量不只贴答案。</p>
+        </section>
 
         <section class="section" id="tags">
           <h2>标签</h2>
@@ -104,12 +159,13 @@ const latestDate = latest
           </div>
         </section>
 
-      <section class="section" id="reviews">
-        <h2>总结 / 复盘</h2>
-        <ul class="link-list">
-          {notePosts.map((post) => (
-            <li>
+        <section class="section" id="reviews">
+          <h2>总结 / 复盘</h2>
+          <ul class="link-list note-list">
+            {notePosts.map((post) => (
+              <li>
                 <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+                <span>{post.data.oj}</span>
               </li>
             ))}
           </ul>

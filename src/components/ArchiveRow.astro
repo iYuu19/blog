@@ -32,15 +32,19 @@ const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-
   </div>
 
   <div class="archive-body">
-    <h3>
-      <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
-    </h3>
-    <div class="archive-meta">
-      <span>{post.data.oj}</span>
-      <span class:list={["difficulty-pill", difficultyClass]}>{post.data.difficulty}</span>
-      <span>{post.data.language}</span>
+    <p class="archive-kicker">{post.data.oj}</p>
+    <div class="archive-title-line">
+      <h3>
+        <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+      </h3>
+      {post.data.featured && <span class="entry-badge">收录</span>}
     </div>
     <p class="archive-summary">{post.data.description}</p>
+    <div class="archive-meta">
+      <span class:list={["difficulty-pill", difficultyClass]}>{post.data.difficulty}</span>
+      <span>{post.data.language}</span>
+      <span>{post.data.tags.length} 个标签</span>
+    </div>
     <div class="tag-row">
       {post.data.tags.slice(0, 4).map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
     </div>
