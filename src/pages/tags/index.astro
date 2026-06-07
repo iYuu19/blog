@@ -1,0 +1,52 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+const posts = await getCollection("blog", ({ data }) => !data.draft);
+
+const tagMap = posts.reduce<Record<string, { count: number; latestTitle: string; latestDate: number }>>(
+  (acc, post) => {
+    for (const tag of post.data.tags) {
+      const publishedAt = post.data.pubDate.valueOf();
+      const previous = acc[tag];
+
+      if (!previous || publishedAt > previous.latestDate) {
+        acc[tag] = {
+          count: (previous?.count ?? 0) + 1,
+          latestTitle: post.data.title,
+          latestDate: publishedAt
+        };
+      } else {
+        previous.count += 1;
+      }
+    }
+
+    return acc;
+  },
+  {}
+);
+
+const tags = Object.entries(tagMap)
+  .map(([name, meta]) => ({ name, ...meta }))
+  .sort((a, b) => b.count - a.count || b.latestDate - a.latestDate);
+---
+
+<Layout title="标签 | iYuu Notes" description="按标签浏览题解与总结。">
+  <section class="shell page-intro fade-up">
+    <p class="eyebrow">Tag Index</p>
+    <h1>标签</h1>
+    <p>按标签翻会比只看日期更方便，尤其是回顾某一类题的时候。</p>
+  </section>
+
+  <section class="shell tag-index-grid section-block">
+    {tags.map((tag) => (
+      <a class="tag-board" href={`/tags/${tag.name}/`}>
+        <div class="tag-board-head">
+          <span class="tag-board-name">#{tag.name}</span>
+          <strong>{tag.count}</strong>
+        </div>
+        <p>最新内容：{tag.latestTitle}</p>
+      </a>
+    ))}
+  </section>
+</Layout>

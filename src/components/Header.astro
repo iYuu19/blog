@@ -1,0 +1,33 @@
+---
+const path = Astro.url.pathname;
+const links = [
+  { href: "/", label: "首页" },
+  { href: "/blog", label: "归档" },
+  { href: "/tags", label: "标签" },
+  { href: "/about", label: "关于" }
+];
+
+const isActive = (href: string) =>
+  href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`);
+---
+
+<header class="site-header">
+  <div class="shell nav-shell">
+    <a class="brand" href="/">
+      <span class="brand-mark">iYuu</span>
+      <span>
+        <strong>iYuu Notes</strong>
+        <small>菜鸟一枚，也在认真刷题</small>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="主导航">
+      {
+        links.map((link) => (
+          <a class:list={["nav-link", isActive(link.href) ? "is-active" : ""]} href={link.href}>
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>

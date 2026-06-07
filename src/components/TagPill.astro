@@ -1,0 +1,18 @@
+---
+interface Props {
+  label: string;
+  href?: string;
+}
+
+const { label, href } = Astro.props;
+---
+
+{
+  href ? (
+    <a class="tag-pill" href={href}>
+      #{label}
+    </a>
+  ) : (
+    <span class="tag-pill">#{label}</span>
+  )
+}

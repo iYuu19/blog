@@ -1,0 +1,43 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import TagPill from "../../components/TagPill.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post }
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const dateText = new Intl.DateTimeFormat("zh-CN", {
+  year: "numeric",
+  month: "long",
+  day: "numeric"
+}).format(post.data.pubDate);
+---
+
+<Layout title={`${post.data.title} | iYuu Notes`} description={post.data.description}>
+  <article class="shell article-shell fade-up">
+    <header class="article-header">
+      <p class="eyebrow">{post.data.oj}</p>
+      <h1>{post.data.title}</h1>
+      <p class="article-description">{post.data.description}</p>
+      <div class="article-meta">
+        <span>{dateText}</span>
+        <span>{post.data.difficulty}</span>
+        <span>{post.data.language}</span>
+      </div>
+      <div class="tag-row">
+        {post.data.tags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
+      </div>
+    </header>
+
+    <div class="article-body prose">
+      <Content />
+    </div>
+  </article>
+</Layout>

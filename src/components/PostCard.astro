@@ -1,0 +1,44 @@
+---
+import type { CollectionEntry } from "astro:content";
+import TagPill from "./TagPill.astro";
+
+interface Props {
+  post: CollectionEntry<"blog">;
+}
+
+const { post } = Astro.props;
+const dateText = new Intl.DateTimeFormat("zh-CN", {
+  year: "numeric",
+  month: "long",
+  day: "numeric"
+}).format(post.data.pubDate);
+
+const difficultyClassMap: Record<string, string> = {
+  Easy: "difficulty-easy",
+  Medium: "difficulty-medium",
+  Hard: "difficulty-hard",
+  Notes: "difficulty-notes"
+};
+
+const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-notes";
+---
+
+<article class="post-card">
+  <div class="post-card-head">
+    <span class="archive-code">{post.data.oj}</span>
+    <span class:list={["difficulty-pill", difficultyClass]}>{post.data.difficulty}</span>
+  </div>
+  <h3>
+    <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+  </h3>
+  <p>{post.data.description}</p>
+  <div class="post-card-footer">
+    <div class="post-meta">
+      <time datetime={post.data.pubDate.toISOString()}>{dateText}</time>
+      <span>{post.data.language}</span>
+    </div>
+    <div class="tag-row">
+      {post.data.tags.slice(0, 3).map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
+    </div>
+  </div>
+</article>

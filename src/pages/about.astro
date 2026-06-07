@@ -1,0 +1,47 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="关于 | iYuu Notes" description="这个站为什么存在，以及 iYuu 打算怎么维护它。">
+  <section class="shell intro about-intro">
+    <img class="intro-avatar" src="/avatar.jpg" alt="iYuu 的头像" />
+    <div class="intro-copy">
+      <p class="eyebrow">About</p>
+      <h1>这是 iYuu 的个人刷题笔记。</h1>
+      <p>
+        没打算把它做成很像作品集或者教程站的样子，还是更希望它像一本公开放着的笔记。
+      </p>
+      <p>签名就一句：菜鸟一枚。</p>
+    </div>
+  </section>
+
+  <section class="shell simple-stack">
+    <section class="section">
+      <h2>这个站主要会写什么</h2>
+      <ul class="plain-list">
+        <li>LeetCode、洛谷、牛客这些平台上的题解。</li>
+        <li>滑动窗口、二分、DP 之类的专题总结。</li>
+        <li>错题复盘、周总结，还有偶尔的碎碎念。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>我想保留的写法</h2>
+      <ul class="plain-list">
+        <li>先讲题意和信号，再讲代码。</li>
+        <li>尽量写出“为什么当时想到这个思路”。</li>
+        <li>会把第一次没做出来的原因也记下来。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>以后怎么更新</h2>
+      <ol class="plain-list">
+        <li>在 `src/content/blog` 里新建一篇 `.md`。</li>
+        <li>本地用 `npm run dev` 看效果。</li>
+        <li>确认没问题后跑 `npm run build`。</li>
+        <li>把新的 `dist` 上传到 Cloudflare Pages。</li>
+      </ol>
+    </section>
+  </section>
+</Layout>

@@ -1,0 +1,61 @@
+---
+import { getCollection } from "astro:content";
+import ArchiveRow from "../../components/ArchiveRow.astro";
+import TagPill from "../../components/TagPill.astro";
+import Layout from "../../layouts/Layout.astro";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const tags = [...new Set(posts.flatMap((post) => post.data.tags))].slice(0, 12);
+const latest = posts[0];
+const latestDate = latest
+  ? new Intl.DateTimeFormat("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).format(latest.data.pubDate)
+  : "";
+---
+
+<Layout title="归档 | iYuu Notes" description="按时间整理 iYuu 的题解、总结和复盘。">
+  <section class="shell page-intro">
+    <p class="eyebrow">Archive</p>
+    <h1>归档</h1>
+    <p>这里按时间放所有文章。以后更新题解、总结或者复盘，都会先堆到这里。</p>
+    <p class="meta-line">
+      目前一共 {posts.length} 篇。
+      {latest && <> 最近一篇是 <a href={`/blog/${latest.slug}/`}>{latest.data.title}</a> · {latestDate}</>}
+    </p>
+  </section>
+
+  <section class="shell archive-page">
+    <aside class="index-column">
+      <div class="site-index">
+        <p class="index-title">归档索引</p>
+        <ul class="index-list">
+          <li><a href="#all-posts">全部文章</a></li>
+          <li><a href="#common-tags">常看标签</a></li>
+          <li><a href="/about">关于这个站</a></li>
+        </ul>
+        <p class="index-meta">这里会按时间一直往下记。</p>
+      </div>
+    </aside>
+
+    <div class="archive-main">
+      <section class="section" id="all-posts">
+        <div class="archive-list">
+          {posts.map((post) => <ArchiveRow post={post} />)}
+        </div>
+      </section>
+
+      <section class="section" id="common-tags">
+        <h2>常看标签</h2>
+        <div class="tag-cloud">
+          {tags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
+        </div>
+      </section>
+    </div>
+  </section>
+</Layout>

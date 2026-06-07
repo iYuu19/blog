@@ -1,0 +1,36 @@
+---
+import { getCollection } from "astro:content";
+import ArchiveRow from "../../components/ArchiveRow.astro";
+import Layout from "../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
+
+  return tags.map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: posts
+        .filter((post) => post.data.tags.includes(tag))
+        .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+    }
+  }));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<Layout title={`${tag} | iYuu Notes`} description={`标签 ${tag} 下的所有文章。`}>
+  <section class="shell page-intro fade-up">
+    <p class="eyebrow">Tag View</p>
+    <h1>#{tag}</h1>
+    <p>这个标签下目前有 {posts.length} 篇内容。</p>
+  </section>
+
+  <section class="shell section-block">
+    <div class="archive-list">
+      {posts.map((post) => <ArchiveRow post={post} />)}
+    </div>
+  </section>
+</Layout>
