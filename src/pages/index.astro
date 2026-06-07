@@ -17,10 +17,9 @@ const allTags = [...new Set(posts.flatMap((post) => post.data.tags))];
 const tags = allTags.slice(0, 12);
 const latest = posts[0];
 const featuredPost = posts.find((post) => post.data.featured) ?? latest;
-const recentPosts =
-  featuredPost && posts.length > 1
-    ? posts.filter((post) => post.slug !== featuredPost.slug).slice(0, 6)
-    : posts.slice(0, 6);
+const recentPosts = featuredPost
+  ? posts.filter((post) => post.slug !== featuredPost.slug).slice(0, 6)
+  : posts.slice(0, 6);
 const latestDate = latest
   ? new Intl.DateTimeFormat("zh-CN", {
       year: "numeric",
