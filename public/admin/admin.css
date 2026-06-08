@@ -1,5 +1,5 @@
 :root {
-  --admin-bg: #eef2f4;
+  --admin-bg: #edf6f3;
   --admin-ink: #152029;
   --admin-muted: #66737f;
   --admin-line: rgba(34, 48, 59, 0.12);
@@ -21,9 +21,10 @@
 body {
   min-width: 320px;
   background:
-    linear-gradient(135deg, rgba(15, 118, 110, 0.12) 0 18%, transparent 18% 100%),
-    linear-gradient(315deg, rgba(217, 79, 50, 0.08) 0 14%, transparent 14% 100%),
-    repeating-linear-gradient(90deg, rgba(21, 32, 41, 0.035) 0 1px, transparent 1px 28px),
+    linear-gradient(135deg, rgba(15, 118, 110, 0.16) 0 16%, transparent 16% 100%),
+    linear-gradient(315deg, rgba(217, 79, 50, 0.13) 0 12%, transparent 12% 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.34) 45%, transparent),
+    repeating-linear-gradient(90deg, rgba(21, 32, 41, 0.05) 0 1px, transparent 1px 30px),
     var(--admin-bg);
   color: var(--admin-ink);
   font-family: inherit;
@@ -45,6 +46,48 @@ body > section {
   z-index: 1;
 }
 
+.admin-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.admin-stage span {
+  position: absolute;
+  display: block;
+  border: 1px solid rgba(15, 118, 110, 0.12);
+  background: rgba(255, 255, 255, 0.32);
+  box-shadow: 0 18px 55px rgba(21, 32, 41, 0.08);
+}
+
+.admin-stage span:nth-child(1) {
+  width: 34vw;
+  height: 34vh;
+  left: -8vw;
+  top: 18vh;
+  transform: rotate(-8deg);
+}
+
+.admin-stage span:nth-child(2) {
+  width: 30vw;
+  height: 42vh;
+  right: -9vw;
+  top: 8vh;
+  transform: rotate(12deg);
+  border-color: rgba(217, 79, 50, 0.12);
+}
+
+.admin-stage span:nth-child(3) {
+  width: 52vw;
+  height: 20vh;
+  left: 24vw;
+  bottom: -8vh;
+  transform: rotate(3deg);
+  border-color: rgba(183, 121, 31, 0.14);
+}
+
 ::selection {
   background: rgba(15, 118, 110, 0.18);
 }
@@ -63,7 +106,7 @@ body > section {
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 30;
+  z-index: 9998;
   width: min(390px, calc(100vw - 24px));
   padding: 18px;
 }
@@ -174,8 +217,8 @@ body > section {
   position: fixed;
   right: 20px;
   bottom: 20px;
-  z-index: 30;
-  width: min(360px, calc(100vw - 24px));
+  z-index: 9999;
+  width: min(420px, calc(100vw - 24px));
 }
 
 .admin-shortcuts__toggle {
@@ -186,7 +229,8 @@ body > section {
 }
 
 .admin-shortcuts__panel {
-  padding: 16px;
+  padding: 18px;
+  border-top: 5px solid var(--admin-teal);
   transform-origin: bottom right;
   transition: opacity 160ms ease, transform 160ms ease;
 }
@@ -277,6 +321,107 @@ button:hover {
 
 a {
   color: var(--admin-teal-dark);
+}
+
+body > div:last-of-type {
+  background:
+    linear-gradient(90deg, rgba(15, 118, 110, 0.08), transparent 36%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.58), transparent 260px) !important;
+  min-height: 100vh;
+}
+
+body > div:last-of-type > div {
+  background: transparent !important;
+}
+
+body > div:last-of-type header,
+body > div:last-of-type [class*="AppHeader"],
+body > div:last-of-type [class*="Toolbar"] {
+  background: rgba(255, 255, 255, 0.86) !important;
+  border-bottom: 1px solid rgba(21, 32, 41, 0.1) !important;
+  box-shadow: 0 10px 24px rgba(21, 32, 41, 0.08) !important;
+  backdrop-filter: blur(16px);
+}
+
+body > div:last-of-type aside,
+body > div:last-of-type [class*="Sidebar"] {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(239, 248, 245, 0.9)) !important;
+  border: 1px solid rgba(21, 32, 41, 0.1) !important;
+  box-shadow: 0 12px 32px rgba(21, 32, 41, 0.1) !important;
+}
+
+body > div:last-of-type main,
+body > div:last-of-type [class*="CollectionMain"],
+body > div:last-of-type [class*="EditorContainer"] {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(237, 246, 243, 0.48)) !important;
+}
+
+body > div:last-of-type article,
+body > div:last-of-type [class*="Card"],
+body > div:last-of-type [class*="EntryCard"],
+body > div:last-of-type [class*="ListCard"],
+body > div:last-of-type [class*="CollectionTop"] {
+  border: 1px solid rgba(21, 32, 41, 0.1) !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  box-shadow: 0 12px 30px rgba(21, 32, 41, 0.1) !important;
+}
+
+body > div:last-of-type a[href*="/admin/#/collections/"] {
+  border-radius: 8px !important;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+body > div:last-of-type a[href*="/admin/#/collections/"]:hover {
+  background: rgba(15, 118, 110, 0.08) !important;
+  color: var(--admin-teal-dark) !important;
+  transform: translateX(2px);
+}
+
+body > div:last-of-type a[href*="/admin/#/collections/blog"],
+body > div:last-of-type a[href*="/admin/#/collections/site"] {
+  color: var(--admin-teal-dark) !important;
+  font-weight: 700 !important;
+}
+
+body > div:last-of-type label {
+  color: #364551 !important;
+  font-weight: 800 !important;
+}
+
+body > div:last-of-type input,
+body > div:last-of-type textarea,
+body > div:last-of-type select {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1px solid rgba(21, 32, 41, 0.16) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 8px 18px rgba(21, 32, 41, 0.05) !important;
+}
+
+body > div:last-of-type input:focus,
+body > div:last-of-type textarea:focus,
+body > div:last-of-type select:focus {
+  background: #ffffff !important;
+  border-color: rgba(15, 118, 110, 0.6) !important;
+  box-shadow:
+    0 0 0 4px rgba(15, 118, 110, 0.13),
+    0 14px 30px rgba(21, 32, 41, 0.08) !important;
+}
+
+body > div:last-of-type button {
+  border-radius: 8px !important;
+  font-weight: 800 !important;
+}
+
+body > div:last-of-type button:not([disabled]) {
+  box-shadow: 0 8px 18px rgba(21, 32, 41, 0.08) !important;
+}
+
+body > div:last-of-type button:not([disabled]):hover {
+  transform: translateY(-1px);
 }
 
 [class*="Sidebar"],
