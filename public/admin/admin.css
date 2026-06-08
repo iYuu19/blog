@@ -1,112 +1,38 @@
 :root {
-  --admin-bg: #edf6f3;
   --admin-ink: #152029;
   --admin-muted: #66737f;
-  --admin-line: rgba(34, 48, 59, 0.12);
-  --admin-panel: rgba(255, 255, 255, 0.92);
-  --admin-panel-strong: #ffffff;
+  --admin-line: rgba(34, 48, 59, 0.14);
+  --admin-panel: rgba(255, 255, 255, 0.96);
   --admin-teal: #0f766e;
   --admin-teal-dark: #0b5f59;
-  --admin-coral: #d94f32;
-  --admin-gold: #b7791f;
-  --admin-shadow: 0 16px 40px rgba(21, 32, 41, 0.12);
-  --admin-soft-shadow: 0 8px 24px rgba(21, 32, 41, 0.08);
-  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --admin-shadow: 0 16px 42px rgba(21, 32, 41, 0.14);
+  --admin-soft-shadow: 0 8px 22px rgba(21, 32, 41, 0.1);
+  --admin-font: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
-* {
+.admin-welcome,
+.admin-shortcuts,
+.admin-welcome *,
+.admin-shortcuts * {
   box-sizing: border-box;
-}
-
-body {
-  min-width: 320px;
-  background:
-    linear-gradient(135deg, rgba(15, 118, 110, 0.16) 0 16%, transparent 16% 100%),
-    linear-gradient(315deg, rgba(217, 79, 50, 0.13) 0 12%, transparent 12% 100%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.34) 45%, transparent),
-    repeating-linear-gradient(90deg, rgba(21, 32, 41, 0.05) 0 1px, transparent 1px 30px),
-    var(--admin-bg);
-  color: var(--admin-ink);
-  font-family: inherit;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.2) 44%, transparent);
-  z-index: 0;
-}
-
-body > div,
-body > main,
-body > section {
-  position: relative;
-  z-index: 1;
-}
-
-.admin-stage {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.admin-stage span {
-  position: absolute;
-  display: block;
-  border: 1px solid rgba(15, 118, 110, 0.12);
-  background: rgba(255, 255, 255, 0.32);
-  box-shadow: 0 18px 55px rgba(21, 32, 41, 0.08);
-}
-
-.admin-stage span:nth-child(1) {
-  width: 34vw;
-  height: 34vh;
-  left: -8vw;
-  top: 18vh;
-  transform: rotate(-8deg);
-}
-
-.admin-stage span:nth-child(2) {
-  width: 30vw;
-  height: 42vh;
-  right: -9vw;
-  top: 8vh;
-  transform: rotate(12deg);
-  border-color: rgba(217, 79, 50, 0.12);
-}
-
-.admin-stage span:nth-child(3) {
-  width: 52vw;
-  height: 20vh;
-  left: 24vw;
-  bottom: -8vh;
-  transform: rotate(3deg);
-  border-color: rgba(183, 121, 31, 0.14);
-}
-
-::selection {
-  background: rgba(15, 118, 110, 0.18);
+  font-family: var(--admin-font);
 }
 
 .admin-welcome,
 .admin-shortcuts__panel {
   border: 1px solid var(--admin-line);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--admin-panel);
   color: var(--admin-ink);
   box-shadow: var(--admin-shadow);
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(16px);
 }
 
 .admin-welcome {
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 9998;
+  z-index: 2147483000;
   width: min(390px, calc(100vw - 24px));
   padding: 18px;
 }
@@ -136,6 +62,7 @@ body > section {
 .admin-welcome__lead {
   margin: 10px 0 0;
   color: var(--admin-muted);
+  font-size: 14px;
   line-height: 1.7;
 }
 
@@ -149,10 +76,11 @@ body > section {
 
 .admin-welcome__list li {
   padding: 10px 12px;
-  border: 1px solid rgba(15, 118, 110, 0.12);
+  border: 1px solid rgba(15, 118, 110, 0.14);
   border-radius: 8px;
   background: rgba(15, 118, 110, 0.06);
   color: #26333d;
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -166,8 +94,9 @@ body > section {
   padding: 11px 12px;
   border: 1px solid rgba(183, 121, 31, 0.18);
   border-radius: 8px;
-  background: rgba(255, 249, 234, 0.88);
+  background: rgba(255, 249, 234, 0.9);
   color: #5b4322;
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -185,11 +114,12 @@ body > section {
   align-items: center;
   justify-content: center;
   min-height: 40px;
-  border-radius: 8px !important;
+  border-radius: 8px;
   font: inherit;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 800;
   text-decoration: none;
-  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, border-color 160ms ease;
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
 
 .admin-welcome__actions a,
@@ -217,7 +147,7 @@ body > section {
   position: fixed;
   right: 20px;
   bottom: 20px;
-  z-index: 9999;
+  z-index: 2147483000;
   width: min(420px, calc(100vw - 24px));
 }
 
@@ -231,8 +161,6 @@ body > section {
 .admin-shortcuts__panel {
   padding: 18px;
   border-top: 5px solid var(--admin-teal);
-  transform-origin: bottom right;
-  transition: opacity 160ms ease, transform 160ms ease;
 }
 
 .admin-shortcuts.is-collapsed .admin-shortcuts__panel {
@@ -241,7 +169,7 @@ body > section {
 
 .admin-shortcuts.is-collapsed .admin-shortcuts__toggle {
   margin-bottom: 0;
-  background: var(--admin-panel-strong);
+  background: #ffffff;
   color: var(--admin-teal-dark);
   box-shadow: var(--admin-soft-shadow);
 }
@@ -261,18 +189,18 @@ body > section {
   box-shadow: 0 5px 14px rgba(21, 32, 41, 0.06);
 }
 
-.admin-shortcuts__grid a:hover,
-.admin-welcome__actions a:hover,
-.admin-welcome__actions button:hover,
-.admin-shortcuts__toggle:hover {
-  transform: translateY(-1px);
-}
-
 .admin-shortcuts__grid a:nth-child(1),
 .admin-shortcuts__grid a:nth-child(4) {
   border-color: rgba(15, 118, 110, 0.22);
   background: rgba(15, 118, 110, 0.08);
   color: var(--admin-teal-dark);
+}
+
+.admin-shortcuts__grid a:hover,
+.admin-welcome__actions a:hover,
+.admin-welcome__actions button:hover,
+.admin-shortcuts__toggle:hover {
+  transform: translateY(-1px);
 }
 
 .admin-shortcuts__status {
@@ -288,39 +216,6 @@ body > section {
 .admin-shortcuts__status strong {
   color: var(--admin-ink);
   font-size: 14px;
-}
-
-button,
-input,
-textarea,
-select {
-  border-radius: 8px !important;
-  font-family: inherit !important;
-}
-
-input,
-textarea,
-select {
-  border-color: rgba(21, 32, 41, 0.18) !important;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: rgba(15, 118, 110, 0.56) !important;
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12) !important;
-}
-
-button {
-  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
-}
-
-button:hover {
-  transform: translateY(-1px);
-}
-
-a {
-  color: var(--admin-teal-dark);
 }
 
 @media (max-width: 920px) {
