@@ -1,0 +1,127 @@
+---
+import { getCollection } from "astro:content";
+import ArchiveRow from "../../components/ArchiveRow.astro";
+import TagPill from "../../components/TagPill.astro";
+import Layout from "../../layouts/Layout.astro";
+import { getCategoryDefinitions, getCategoryName, getCategorySlug } from "../../utils/content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const definitions = await getCategoryDefinitions();
+  const categoryMap = new Map(
+    definitions.map((definition) => [
+      definition.slug!,
+      { name: definition.name, slug: definition.slug!, definition }
+    ])
+  );
+
+  posts.forEach((post) => {
+    const name = getCategoryName(post);
+    const slug = getCategorySlug(post);
+
+    if (!categoryMap.has(slug)) {
+      categoryMap.set(slug, { name, slug, definition: null });
+    }
+  });
+
+  return [...categoryMap.values()].map(({ name, slug, definition }) => {
+    const categoryPosts = posts
+      .filter((post) => getCategorySlug(post) === slug)
+      .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+    return {
+      params: { category: slug },
+      props: {
+        category: name,
+        posts: categoryPosts,
+        definition
+      }
+    };
+  });
+}
+
+const { category, posts, definition } = Astro.props;
+const latestPost = posts[0];
+const latestDateText = latestPost
+  ? new Intl.DateTimeFormat("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).format(latestPost.data.pubDate)
+  : "";
+const topTags = [...new Set(posts.flatMap((post) => post.data.tags))].slice(0, 8);
+const tracks = [...new Set(posts.map((post) => post.data.track).filter(Boolean))];
+const contestCount = new Set(posts.map((post) => post.data.contest || post.data.oj).filter(Boolean)).size;
+const description =
+  definition?.description ?? "这个分类已经在文章里出现了，但还没有在后台“分类中心”里补充说明。";
+const writingFocus =
+  definition?.writingFocus ?? "可以去后台的“分类中心”补一句说明，让这个分类页看起来更完整。";
+const exampleTopics = definition?.exampleTopics ?? [];
+---
+
+<Layout title={`${category} | iYuu Notes`} description={`${category} 分类下的所有文章。`}>
+  <section class="shell page-intro">
+    <p class="eyebrow">Category View</p>
+    <h1>{category}</h1>
+    <p>{description}</p>
+    <dl class="page-stats">
+      <div>
+        <dt>文章数</dt>
+        <dd>{posts.length}</dd>
+      </div>
+      <div>
+        <dt>比赛数</dt>
+        <dd>{contestCount}</dd>
+      </div>
+      <div>
+        <dt>最近更新</dt>
+        <dd>{latestDateText || "待补充"}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="shell category-overview section-block">
+    <article class="guide-card">
+      <p class="guide-card-label">这个分类更适合放什么</p>
+      <h2>{writingFocus}</h2>
+      <p>如果你以后想让这个分类更成体系，后台发文章时继续使用同一个分类名，这里就会自动往下长。</p>
+    </article>
+    <article class="guide-card">
+      <p class="guide-card-label">常见标签</p>
+      <div class="tag-cloud">
+        {topTags.length > 0 ? topTags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />) : <span class="empty-inline">暂时还没有标签</span>}
+      </div>
+    </article>
+  </section>
+
+  {(tracks.length > 0 || exampleTopics.length > 0) && (
+    <section class="shell guide-grid section-block">
+      <article class="guide-card">
+        <p class="guide-card-label">常见方向</p>
+        <h2>{tracks.length > 0 ? tracks.join(" / ") : "等文章继续补充之后会更清楚"}</h2>
+      </article>
+      <article class="guide-card">
+        <p class="guide-card-label">可以写哪些内容</p>
+        {exampleTopics.length > 0 ? (
+          <div class="category-example-row">
+            {exampleTopics.map((topic) => (
+              <span class="tag-pill">{topic}</span>
+            ))}
+          </div>
+        ) : (
+          <p class="empty-inline">这个分类还没有在后台补示例内容。</p>
+        )}
+      </article>
+    </section>
+  )}
+
+  <section class="shell section-block">
+    {posts.length > 0 ? (
+      <div class="archive-list">
+        {posts.map((post) => <ArchiveRow post={post} />)}
+      </div>
+    ) : (
+      <p class="empty-feed">这个分类已经先建好了，但目前还没有公开文章。你可以回到后台 `写文章`，把某篇内容的分类写成“{category}”，这里就会自动出现。</p>
+    )}
+  </section>
+</Layout>

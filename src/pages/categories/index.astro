@@ -1,0 +1,180 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import { getCategoryDefinitions, getCategoryName, getCategorySlug } from "../../utils/content";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+const definitions = await getCategoryDefinitions();
+
+const categoryStats = Object.values(
+  posts.reduce<
+    Record<
+      string,
+      {
+        name: string;
+        slug: string;
+        count: number;
+        latestTitle: string;
+        latestDate: number;
+        latestTrack: string;
+        tags: Map<string, number>;
+      }
+    >
+  >((acc, post) => {
+    const name = getCategoryName(post);
+    const slug = getCategorySlug(post);
+    const previous = acc[slug];
+    const publishedAt = post.data.pubDate.valueOf();
+
+    if (!previous || publishedAt > previous.latestDate) {
+      acc[slug] = {
+        name,
+        slug,
+        count: (previous?.count ?? 0) + 1,
+        latestTitle: post.data.title,
+        latestDate: publishedAt,
+        latestTrack: post.data.track || post.data.contest || post.data.oj || "待补充方向",
+        tags: previous?.tags ?? new Map<string, number>()
+      };
+    } else {
+      previous.count += 1;
+    }
+
+    const current = acc[slug];
+
+    post.data.tags.forEach((tag) => {
+      current.tags.set(tag, (current.tags.get(tag) ?? 0) + 1);
+    });
+
+    return acc;
+  }, {})
+).map((category) => ({
+  ...category,
+  topTags: [...category.tags.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "zh-CN"))
+    .slice(0, 3)
+    .map(([tag]) => tag)
+}));
+
+const definitionMap = new Map(definitions.map((definition) => [definition.slug!, definition]));
+const statMap = new Map(categoryStats.map((category) => [category.slug, category]));
+
+const categories = [
+  ...definitions.map((definition) => {
+    const stats = statMap.get(definition.slug!);
+
+    return {
+      name: definition.name,
+      slug: definition.slug!,
+      description: definition.description,
+      writingFocus: definition.writingFocus,
+      exampleTopics: definition.exampleTopics,
+      sortOrder: definition.sortOrder,
+      count: stats?.count ?? 0,
+      latestTitle: stats?.latestTitle ?? "这个分类已经先建好了，后面可以从后台继续往里发文章。",
+      latestDate: stats?.latestDate ?? 0,
+      latestTrack: stats?.latestTrack ?? definition.writingFocus,
+      latestDateText: stats
+        ? new Intl.DateTimeFormat("zh-CN", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+          }).format(stats.latestDate)
+        : "待补充",
+      topTags: stats?.topTags ?? [],
+      hasPosts: Boolean(stats)
+    };
+  }),
+  ...categoryStats
+    .filter((category) => !definitionMap.has(category.slug))
+    .map((category) => ({
+      ...category,
+      description: "这个分类已经在文章里使用了，但还没有在后台“分类中心”里补说明。",
+      writingFocus: "可以去后台的“分类中心”补一句介绍，让这个分类看起来更清楚。",
+      exampleTopics: [],
+      sortOrder: 999,
+      latestDateText: new Intl.DateTimeFormat("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).format(category.latestDate),
+      hasPosts: true
+    }))
+].sort(
+  (a, b) =>
+    a.sortOrder - b.sortOrder ||
+    b.count - a.count ||
+    b.latestDate - a.latestDate ||
+    a.name.localeCompare(b.name, "zh-CN")
+);
+
+const totalPosts = posts.length;
+const totalCategories = categories.length;
+const newestCategory = categories.find((category) => category.hasPosts);
+---
+
+<Layout title="分类 | iYuu Notes" description="按内容分类浏览文章。">
+  <section class="shell page-intro">
+    <p class="eyebrow">Category Index</p>
+    <h1>分类</h1>
+    <p>这里现在不只是“文章里写了什么分类就显示什么”，还会同时读取后台的“分类中心”说明，所以结构会更清楚。</p>
+    <dl class="page-stats">
+      <div>
+        <dt>分类数</dt>
+        <dd>{totalCategories}</dd>
+      </div>
+      <div>
+        <dt>文章数</dt>
+        <dd>{totalPosts}</dd>
+      </div>
+      <div>
+        <dt>最近活跃</dt>
+        <dd>{newestCategory?.name ?? "待补充"}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="shell guide-grid section-block">
+    <article class="guide-card">
+      <p class="guide-card-label">后台怎么管分类</p>
+      <h2>先看分类中心，再去写文章</h2>
+      <p>你现在可以先在后台左侧的 `分类中心` 里定义分类说明，再回到 `写文章` 里填写同名分类，这样前台结构会更完整。</p>
+    </article>
+    <article class="guide-card">
+      <p class="guide-card-label">怎么理解这里</p>
+      <h2>按写作主题整理，不是按比赛整理</h2>
+      <p>比赛页更像按赛事归档，分类页更像按你自己的写作习惯来整理，比如学习笔记、赛后复盘、工具记录。</p>
+    </article>
+  </section>
+
+  <section class="shell tag-index-grid section-block">
+    {categories.map((category) => (
+      <a class="tag-board category-board category-board-rich" href={`/categories/${category.slug}/`}>
+        <div class="tag-board-head">
+          <span class="tag-board-name">{category.name}</span>
+          <strong>{category.count}</strong>
+        </div>
+        <p class="category-board-description">{category.description}</p>
+        <p class="category-board-track">更适合写：{category.writingFocus}</p>
+        <p>最近内容：{category.latestTitle}</p>
+        {category.exampleTopics.length > 0 && (
+          <div class="category-example-row">
+            {category.exampleTopics.slice(0, 3).map((topic) => (
+              <span class="tag-pill">{topic}</span>
+            ))}
+          </div>
+        )}
+        <div class="category-board-footer">
+          <span>{category.hasPosts ? `最近更新：${category.latestDateText}` : "目前还没有公开文章"}</span>
+          <div class="tag-row">
+            {category.topTags.map((tag) => (
+              <span class="tag-pill">{tag}</span>
+            ))}
+          </div>
+        </div>
+      </a>
+    ))}
+  </section>
+</Layout>

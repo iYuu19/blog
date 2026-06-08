@@ -3,14 +3,38 @@ import { getSiteSettings } from "../utils/site";
 
 const year = new Date().getFullYear();
 const site = await getSiteSettings();
+const footerLinks = site.navLinks?.length
+  ? site.navLinks
+  : [
+      { href: "/", label: "首页" },
+      { href: "/contests", label: "比赛" },
+      { href: "/categories", label: "分类" },
+      { href: "/blog", label: "归档" },
+      { href: "/tags", label: "标签" },
+      { href: "/about", label: "关于" }
+    ];
 ---
 
 <footer class="site-footer">
-  <div class="shell footer-shell">
-    <div>
+  <div class="shell footer-grid">
+    <div class="footer-brand-block">
+      <p class="eyebrow">iYuu Notes</p>
       <strong>{site.siteTitle}</strong>
       <p>{site.footerDescription}</p>
     </div>
-    <p>© {year} {site.copyrightName}</p>
+
+    <nav class="footer-nav" aria-label="页脚导航">
+      {footerLinks.map((link) => (
+        <a class="footer-link-pill" href={link.href}>
+          {link.label}
+        </a>
+      ))}
+    </nav>
+
+    <div class="footer-meta-card">
+      <p class="footer-meta-title">持续补充中</p>
+      <p>这个站会继续往比赛 WP、赛后复盘、专题总结这几个方向慢慢整理。</p>
+      <p>© {year} {site.copyrightName}</p>
+    </div>
   </div>
 </footer>

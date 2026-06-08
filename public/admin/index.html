@@ -4,8 +4,40 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>iYuu Notes 后台</title>
+    <link rel="stylesheet" href="/admin/admin.css" />
   </head>
   <body>
+    <aside class="admin-welcome" id="admin-welcome">
+      <p class="admin-welcome__eyebrow">iYuu Notes 后台</p>
+      <h1>这里主要就做四件事</h1>
+      <ul class="admin-welcome__list">
+        <li><strong>看模板：</strong>左侧点“模板中心”</li>
+        <li><strong>管分类：</strong>左侧点“分类中心”</li>
+        <li><strong>写文章：</strong>左侧点“写文章”</li>
+        <li><strong>改结构：</strong>左侧点“改博客结构”</li>
+      </ul>
+      <p class="admin-welcome__tip">最顺手的节奏是：先看模板，再选分类，最后回到“写文章”开始填。</p>
+      <div class="admin-welcome__actions">
+        <a href="/" target="_blank" rel="noreferrer">查看前台</a>
+        <button type="button" id="admin-welcome-close">我知道了</button>
+      </div>
+    </aside>
+
+    <script>
+      const welcome = document.getElementById("admin-welcome");
+      const closeButton = document.getElementById("admin-welcome-close");
+      const storageKey = "iyuu-admin-welcome-dismissed";
+
+      if (window.localStorage.getItem(storageKey) === "true") {
+        welcome?.setAttribute("hidden", "hidden");
+      }
+
+      closeButton?.addEventListener("click", () => {
+        window.localStorage.setItem(storageKey, "true");
+        welcome?.setAttribute("hidden", "hidden");
+      });
+    </script>
+
     <script src="https://unpkg.com/decap-cms@3.13.0/dist/decap-cms.js"></script>
   </body>
 </html>

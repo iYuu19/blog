@@ -1,0 +1,111 @@
+body {
+  background:
+    radial-gradient(circle at top left, rgba(243, 227, 196, 0.55), transparent 28%),
+    linear-gradient(180deg, #f8f4ed, #f3efe7);
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.admin-welcome {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 20;
+  width: min(360px, calc(100vw - 24px));
+  padding: 18px 18px 16px;
+  border: 1px solid rgba(72, 49, 23, 0.12);
+  border-radius: 22px;
+  background: rgba(255, 252, 246, 0.96);
+  box-shadow: 0 18px 45px rgba(72, 49, 23, 0.16);
+  backdrop-filter: blur(14px);
+}
+
+.admin-welcome[hidden] {
+  display: none;
+}
+
+.admin-welcome__eyebrow {
+  margin: 0 0 6px;
+  color: #8a5a28;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-welcome h1 {
+  margin: 0;
+  color: #20150d;
+  font-size: 1.2rem;
+  line-height: 1.35;
+}
+
+.admin-welcome__list {
+  margin: 14px 0 0;
+  padding-left: 1.1rem;
+  color: #433128;
+  line-height: 1.7;
+}
+
+.admin-welcome__tip {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(210, 144, 70, 0.12);
+  color: #5a3b1c;
+  line-height: 1.6;
+}
+
+.admin-welcome__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.admin-welcome__actions a,
+.admin-welcome__actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border: 1px solid rgba(90, 59, 28, 0.12);
+  border-radius: 999px !important;
+  background: #fffaf2;
+  color: #20150d;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.admin-welcome__actions button {
+  cursor: pointer;
+}
+
+input,
+textarea,
+select,
+button {
+  border-radius: 14px !important;
+}
+
+a,
+button {
+  transition: all 0.18s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 720px) {
+  .admin-welcome {
+    top: auto;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    width: auto;
+  }
+
+  .admin-welcome__actions {
+    flex-direction: column;
+  }
+}

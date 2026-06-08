@@ -9,25 +9,204 @@ locale: zh_Hans
 site_url: https://blog-cx8.pages.dev
 display_url: https://blog-cx8.pages.dev
 logo_url: /avatar.jpg
+publish_mode: simple
 
 media_folder: public/uploads
 public_folder: /uploads
 
 collections:
-  - name: site
-    label: 站点设置
+  - name: category_center
+    label: 分类中心
     delete: false
+    description: 先在这里整理你的分类结构，再去写文章会更清楚。
     editor:
       preview: false
     files:
-      - name: site_settings
-        label: 网站信息
-        file: src/content/site/settings.yaml
+      - name: category_definitions
+        label: 分类列表
+        file: src/content/site-categories/categories.yaml
+        fields:
+          - label: 分类列表
+            name: categories
+            widget: list
+            summary: "{{fields.name}}"
+            hint: 这里相当于你的分类总表。可以先定义分类说明，再去文章里使用这些分类名。
+            fields:
+              - { label: 分类名, name: name, widget: string, hint: 这里写“比赛 WP”“赛后复盘”“学习笔记”这类名字。 }
+              - { label: 链接标识, name: slug, widget: string, required: false, hint: 可选。不填也行，系统会根据分类名自动生成链接。 }
+              - { label: 分类说明, name: description, widget: text, hint: 这段会显示在前台分类中心里，告诉别人这个分类主要放什么。 }
+              - { label: 适合写什么, name: writingFocus, widget: text, hint: 用一句更直白的话提醒自己：这个分类更适合写哪类内容。 }
+              - label: 示例内容
+                name: exampleTopics
+                widget: list
+                required: false
+                field: { label: 示例, name: item, widget: string }
+              - { label: 排序, name: sortOrder, widget: number, value_type: int, default: 100, required: false, hint: 数字越小越靠前。 }
+
+  - name: template_center
+    label: 模板中心
+    delete: false
+    description: 发文章前先看这里，选一个最像的模板，再回去写文章会轻松很多。
+    editor:
+      preview: false
+    files:
+      - name: template_usage
+        label: 模板怎么用
+        file: templates/template-guide.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }
+      - name: general_wp_template
+        label: 通用比赛 WP 模板
+        file: templates/general-match-wp.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }
+      - name: web_wp_template
+        label: Web 比赛 WP 模板
+        file: templates/web-match-wp.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }
+      - name: forensics_wp_template
+        label: 电子取证 / 流量分析模板
+        file: templates/forensics-match-wp.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }
+      - name: review_template
+        label: 赛后复盘模板
+        file: templates/review-template.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }
+      - name: summary_template
+        label: 专题总结模板
+        file: templates/summary-template.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }
+
+  - name: blog
+    label: 写文章
+    label_singular: 文章
+    description: 新建文章、改正文、改分类、加标签都在这里。写之前先看左侧“模板中心”会更顺。
+    folder: src/content/blog
+    create: true
+    delete: true
+    extension: md
+    format: frontmatter
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "{{title}} · {{category}} · {{pubDate}}"
+    sortable_fields:
+      - pubDate
+      - updatedDate
+      - title
+      - featured
+      - draft
+      - category
+    view_filters:
+      - label: 草稿
+        field: draft
+        pattern: true
+      - label: 已发布
+        field: draft
+        pattern: false
+      - label: 首页推荐
+        field: featured
+        pattern: true
+      - label: 比赛 WP
+        field: category
+        pattern: 比赛 WP
+      - label: 赛后复盘
+        field: category
+        pattern: 赛后复盘
+      - label: 专题总结
+        field: category
+        pattern: 专题总结
+    editor:
+      preview: false
+    fields:
+      - { label: 标题, name: title, widget: string, hint: 页面主标题，尽量让人一眼知道这篇在写什么。 }
+      - { label: 摘要, name: description, widget: text, hint: 这段会显示在首页、归档页和列表卡片里。写成“一句话说明这篇记录了什么”会最清楚。 }
+      - { label: 发布时间, name: pubDate, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
+      - { label: 更新日期, name: updatedDate, widget: datetime, required: false, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
+      - label: 分类
+        name: category
+        widget: select
+        default: 比赛 WP
+        create: true
+        hint: 建议先去左侧“分类中心”看一下已有分类名，再回来填写。想新增分类时，也可以先去“分类中心”补一条说明。
+        options:
+          - 比赛 WP
+          - 赛后复盘
+          - 专题总结
+          - 学习笔记
+          - 工具记录
+      - { label: 比赛名, name: contest, widget: string, required: false, hint: 同一场比赛的多篇文章写同一个比赛名，就会自动聚合到比赛页。 }
+      - { label: 比赛标识, name: contestSlug, widget: string, required: false, hint: 用英文或拼音，决定比赛归档链接，如 yellow-river-police-2026。 }
+      - { label: 封面图, name: coverImage, widget: image, required: false, media_folder: "public/contest-covers", public_folder: "/contest-covers" }
+      - label: 方向
+        name: track
+        widget: select
+        required: false
+        create: true
+        hint: 不确定怎么选时，先去“模板中心”看最像哪一种模板。
+        options:
+          - Web
+          - Misc
+          - 电子取证
+          - 流量分析
+          - 逆向
+          - 密码
+          - Pwn
+      - label: 标签
+        name: tags
+        widget: list
+        required: false
+        field: { label: 标签, name: tag, widget: string }
+      - { label: 简称 / OJ, name: oj, widget: string, required: false }
+      - label: 难度 / 备注
+        name: difficulty
+        widget: select
+        default: Notes
+        create: true
+        options:
+          - Notes
+          - Easy
+          - Medium
+          - Hard
+      - { label: 语言, name: language, widget: string, default: Markdown }
+      - { label: 首页推荐, name: featured, widget: boolean, default: false, required: false, hint: 勾上后，这篇更容易出现在首页重点位置。 }
+      - { label: 草稿, name: draft, widget: boolean, default: false, required: false, hint: 草稿不会出现在前台公开页面。 }
+      - { label: 正文, name: body, widget: markdown, hint: 如果不知道正文怎么起手，先去左侧“模板中心”打开最像的模板，再回到这里按那个结构写。 }
+
+  - name: site
+    label: 改博客结构
+    delete: false
+    description: 改博客名称、导航、首页文案、关于页介绍，都在这里。
+    editor:
+      preview: false
+    files:
+      - name: site_brand
+        label: 品牌和基础信息
+        file: src/content/site-brand/brand.yaml
         fields:
           - { label: 品牌简称, name: brandMark, widget: string }
           - { label: 网站标题, name: siteTitle, widget: string }
           - { label: 顶部副标题, name: headerTagline, widget: string }
           - { label: 网站描述, name: siteDescription, widget: text }
+          - { label: 页脚描述, name: footerDescription, widget: text }
+          - { label: 版权名称, name: copyrightName, widget: string }
+      - name: site_navigation
+        label: 导航菜单
+        file: src/content/site-navigation/navigation.yaml
+        fields:
+          - label: 导航链接
+            name: navLinks
+            widget: list
+            hint: 这里控制顶部导航。可以改名字，也可以增加新入口，比如 /categories。
+            fields:
+              - { label: 名称, name: label, widget: string }
+              - { label: 路径, name: href, widget: string, hint: 例如 / /contests /categories /blog /tags /about }
+      - name: site_home
+        label: 首页内容
+        file: src/content/site-home/home.yaml
+        fields:
           - { label: 首页眉题, name: homeEyebrow, widget: string }
           - { label: 首页主标题, name: homeTitle, widget: string }
           - { label: 首页导语, name: homeLead, widget: text }
@@ -35,6 +214,10 @@ collections:
             name: homeIntro
             widget: list
             field: { label: 段落, name: paragraph, widget: text }
+      - name: site_about
+        label: 关于页内容
+        file: src/content/site-about/about.yaml
+        fields:
           - { label: 关于页眉题, name: aboutEyebrow, widget: string }
           - { label: 关于页标题, name: aboutTitle, widget: string }
           - label: 关于页开场
@@ -50,53 +233,16 @@ collections:
             widget: list
             field: { label: 条目, name: item, widget: string }
           - { label: 关于页说明, name: aboutNote, widget: text }
-          - { label: 页脚描述, name: footerDescription, widget: text }
-          - { label: 版权名称, name: copyrightName, widget: string }
 
-  - name: blog
-    label: 文章
-    label_singular: 文章
-    folder: src/content/blog
-    create: true
-    delete: true
-    extension: md
-    format: frontmatter
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    summary: "{{title}} - {{pubDate}}"
-    sortable_fields:
-      - pubDate
-      - updatedDate
-      - title
-      - featured
-      - draft
+  - name: help
+    label: 使用说明
+    delete: false
+    description: 不确定去哪改时先看这里，专门写给后台自己看的。
     editor:
       preview: false
-    fields:
-      - { label: 标题, name: title, widget: string }
-      - { label: 摘要, name: description, widget: text }
-      - { label: 发布时间, name: pubDate, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
-      - { label: 更新日期, name: updatedDate, widget: datetime, required: false, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
-      - label: 分类
-        name: category
-        widget: select
-        options:
-          - 比赛 WP
-          - 赛后复盘
-          - 专题总结
-          - 工具记录
-        default: 比赛 WP
-      - { label: 比赛名, name: contest, widget: string, required: false }
-      - { label: 比赛标识, name: contestSlug, widget: string, required: false, hint: 用英文或拼音，决定比赛归档链接，如 yellow-river-police-2026 }
-      - { label: 封面图, name: coverImage, widget: image, required: false, media_folder: "public/contest-covers", public_folder: "/contest-covers" }
-      - { label: 方向, name: track, widget: string, required: false, hint: 例如 Web、Misc、电子取证 }
-      - label: 标签
-        name: tags
-        widget: list
-        required: false
-        field: { label: 标签, name: tag, widget: string }
-      - { label: 简称 / OJ, name: oj, widget: string, required: false }
-      - { label: 难度 / 备注, name: difficulty, widget: string, default: Notes }
-      - { label: 语言, name: language, widget: string, default: Markdown }
-      - { label: 首页推荐, name: featured, widget: boolean, default: false, required: false }
-      - { label: 草稿, name: draft, widget: boolean, default: false, required: false }
-      - { label: 正文, name: body, widget: markdown }
+    files:
+      - name: authoring_guide
+        label: 后台写作与结构说明
+        file: AUTHORING_GUIDE.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }

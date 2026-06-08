@@ -1,38 +1,220 @@
 ---
+import { getCollection } from "astro:content";
+import TagPill from "../components/TagPill.astro";
 import Layout from "../layouts/Layout.astro";
+import { getCategoryName, getCategorySlug, getContestName, getContestSlug } from "../utils/content";
 import { getSiteSettings } from "../utils/site";
 
 const site = await getSiteSettings();
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const categories = Object.values(
+  posts.reduce<
+    Record<
+      string,
+      {
+        name: string;
+        slug: string;
+        count: number;
+      }
+    >
+  >((acc, post) => {
+    const name = getCategoryName(post);
+    const slug = getCategorySlug(post);
+    const previous = acc[slug];
+
+    acc[slug] = {
+      name,
+      slug,
+      count: (previous?.count ?? 0) + 1
+    };
+
+    return acc;
+  }, {})
+)
+  .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN"))
+  .slice(0, 4);
+
+const contestPosts = posts.filter((post) => post.data.contest || post.data.oj);
+const contests = Object.values(
+  contestPosts.reduce<
+    Record<
+      string,
+      {
+        name: string;
+        slug: string;
+        count: number;
+      }
+    >
+  >((acc, post) => {
+    const name = getContestName(post);
+    const slug = getContestSlug(post);
+    const previous = acc[slug];
+
+    acc[slug] = {
+      name,
+      slug,
+      count: (previous?.count ?? 0) + 1
+    };
+
+    return acc;
+  }, {})
+)
+  .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN"))
+  .slice(0, 3);
+
+const totalCategories = new Set(posts.map((post) => getCategoryName(post))).size;
+const totalContests = new Set(posts.map((post) => post.data.contest || post.data.oj).filter(Boolean)).size;
+const totalTags = new Set(posts.flatMap((post) => post.data.tags)).size;
+const tagHighlights = [...new Set(posts.flatMap((post) => post.data.tags))].slice(0, 10);
+const latestPosts = posts.slice(0, 3).map((post) => ({
+  ...post,
+  dateText: new Intl.DateTimeFormat("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(post.data.pubDate)
+}));
+
+const browseGuides = [
+  {
+    title: "比赛页",
+    description: "适合从一整场比赛的角度回看，集中看同一赛事里的所有题目和复盘。"
+  },
+  {
+    title: "分类页",
+    description: "适合按自己的写作结构来整理，比如学习笔记、赛后复盘、工具记录。"
+  },
+  {
+    title: "标签页",
+    description: "适合快速回看某个知识点，比如原型污染、流量分析、文本隐写这类主题。"
+  }
+];
 ---
 
 <Layout title={`关于 | ${site.siteTitle}`} description={site.siteDescription}>
   <section class="shell intro about-intro">
-    <img class="intro-avatar" src="/avatar.jpg" alt="iYuu 的头像" />
-    <div class="intro-copy">
-      <p class="eyebrow">{site.aboutEyebrow}</p>
-      <h1>{site.aboutTitle}</h1>
-      {site.aboutIntro.map((paragraph) => <p>{paragraph}</p>)}
+    <div class="hero-card about-hero-card">
+      <div class="hero-copy">
+        <div class="hero-topline">
+          <img class="intro-avatar" src="/avatar.jpg" alt="iYuu 的头像" />
+          <div>
+            <p class="eyebrow">{site.aboutEyebrow}</p>
+            <h1>{site.aboutTitle}</h1>
+          </div>
+        </div>
+        {site.aboutIntro.map((paragraph) => <p>{paragraph}</p>)}
+        <dl class="page-stats">
+          <div>
+            <dt>文章</dt>
+            <dd>{posts.length}</dd>
+          </div>
+          <div>
+            <dt>分类</dt>
+            <dd>{totalCategories}</dd>
+          </div>
+          <div>
+            <dt>标签</dt>
+            <dd>{totalTags}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <aside class="hero-aside">
+        <section class="hero-note-card accent-card">
+          <p class="hero-note-label">目前内容地图</p>
+          <div class="hero-chip-stack">
+            {categories.map((category) => (
+              <a class="hero-chip" href={`/categories/${category.slug}/`}>
+                <span>{category.name}</span>
+                <strong>{category.count}</strong>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section class="hero-note-card">
+          <p class="hero-note-label">常见标签</p>
+          <div class="tag-cloud">
+            {tagHighlights.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
+          </div>
+        </section>
+      </aside>
     </div>
   </section>
 
-  <section class="shell simple-stack">
-    <section class="section">
-      <h2>主要内容</h2>
+  <section class="shell guide-grid section-block">
+    <article class="guide-card focus-list-card">
+      <p class="guide-card-label">主要内容</p>
+      <h2>现在主要写这些</h2>
       <ul class="plain-list">
         {site.aboutFocusAreas.map((item) => <li>{item}</li>)}
       </ul>
-    </section>
+    </article>
 
-    <section class="section">
-      <h2>写作方式</h2>
+    <article class="guide-card focus-list-card">
+      <p class="guide-card-label">写作方式</p>
+      <h2>尽量把过程也写出来</h2>
       <ul class="plain-list">
         {site.aboutWritingApproach.map((item) => <li>{item}</li>)}
       </ul>
-    </section>
+    </article>
+  </section>
 
-    <section class="section">
-      <h2>内容说明</h2>
+  <section class="shell about-panel-grid section-block">
+    <article class="guide-card">
+      <p class="guide-card-label">内容说明</p>
+      <h2>这个站会慢慢长大</h2>
       <p>{site.aboutNote}</p>
-    </section>
+    </article>
+
+    <article class="guide-card">
+      <p class="guide-card-label">最近整理得比较多的比赛</p>
+      <div class="mini-link-list">
+        {contests.length > 0 ? (
+          contests.map((contest) => (
+            <a class="mini-link-row" href={`/contests/${contest.slug}/`}>
+              <span>{contest.name}</span>
+              <strong>{contest.count}</strong>
+            </a>
+          ))
+        ) : (
+          <p class="empty-inline">后面比赛文章继续补起来之后，这里会自动出现。</p>
+        )}
+      </div>
+      <p class="guide-card-meta">目前已经整理出 {totalContests} 个比赛入口。</p>
+    </article>
+  </section>
+
+  <section class="shell section-block">
+    <div class="section-head">
+      <h2>最近补充的内容</h2>
+      <span class="section-note">这里会优先出现最近公开更新的文章</span>
+    </div>
+    <div class="signal-grid">
+      {latestPosts.map((post) => (
+        <a class="signal-card" href={`/blog/${post.slug}/`}>
+          <p class="signal-label">{[post.data.category, post.data.contest || post.data.oj].filter(Boolean).join(" / ")}</p>
+          <h3>{post.data.title}</h3>
+          <p>{post.data.description}</p>
+          <div class="signal-card-footer">
+            <span>{post.dateText}</span>
+            <span>{post.data.track || post.data.language}</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell guide-grid section-block">
+    {browseGuides.map((guide) => (
+      <article class="guide-card">
+        <p class="guide-card-label">怎么逛这个站</p>
+        <h2>{guide.title}</h2>
+        <p>{guide.description}</p>
+      </article>
+    ))}
   </section>
 </Layout>

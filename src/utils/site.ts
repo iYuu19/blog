@@ -30,10 +30,30 @@ export const defaultSiteSettings = {
   ],
   aboutNote: "文章会持续补充和修订。如果某篇内容存在疏漏，后续也会根据复盘和新的理解继续更新。",
   footerDescription: "记录 CTF、电子取证与比赛复盘。",
-  copyrightName: "iYuu"
+  copyrightName: "iYuu",
+  navLinks: [
+    { label: "首页", href: "/" },
+    { label: "比赛", href: "/contests" },
+    { label: "分类", href: "/categories" },
+    { label: "归档", href: "/blog" },
+    { label: "标签", href: "/tags" },
+    { label: "关于", href: "/about" }
+  ]
 };
 
 export async function getSiteSettings() {
-  const entry = await getEntry("site", "settings");
-  return entry?.data ?? defaultSiteSettings;
+  const [brandEntry, homeEntry, aboutEntry, navigationEntry] = await Promise.all([
+    getEntry("site-brand", "brand"),
+    getEntry("site-home", "home"),
+    getEntry("site-about", "about"),
+    getEntry("site-navigation", "navigation")
+  ]);
+
+  return {
+    ...defaultSiteSettings,
+    ...(brandEntry?.data ?? {}),
+    ...(homeEntry?.data ?? {}),
+    ...(aboutEntry?.data ?? {}),
+    ...(navigationEntry?.data ?? {})
+  };
 }

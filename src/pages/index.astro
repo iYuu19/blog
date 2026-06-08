@@ -3,7 +3,14 @@ import { getCollection } from "astro:content";
 import ArchiveRow from "../components/ArchiveRow.astro";
 import TagPill from "../components/TagPill.astro";
 import Layout from "../layouts/Layout.astro";
-import { getContestCover, getContestName, getContestSlug } from "../utils/content";
+import {
+  getCategoryName,
+  getCategorySlug,
+  getContestCover,
+  getContestName,
+  getContestSlug,
+  slugifySegment
+} from "../utils/content";
 import { getSiteSettings } from "../utils/site";
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
@@ -14,7 +21,6 @@ const site = await getSiteSettings();
 const wpPosts = posts.filter((post) => post.data.category === "比赛 WP");
 const reviewPosts = posts.filter((post) => post.data.category === "赛后复盘");
 const summaryPosts = posts.filter((post) => post.data.category === "专题总结");
-const wpCount = wpPosts.length;
 const allTags = [...new Set(posts.flatMap((post) => post.data.tags))];
 const tags = allTags.slice(0, 12);
 const latest = posts[0];
@@ -22,6 +28,14 @@ const featuredPost = posts.find((post) => post.data.featured) ?? latest;
 const recentPosts = featuredPost
   ? posts.filter((post) => post.slug !== featuredPost.slug).slice(0, 6)
   : posts.slice(0, 6);
+const recentSignalCards = recentPosts.slice(0, 3).map((post) => ({
+  ...post,
+  dateText: new Intl.DateTimeFormat("zh-CN", {
+    month: "2-digit",
+    day: "2-digit"
+  }).format(post.data.pubDate),
+  metaText: post.data.tags.slice(0, 2).join(" / ") || post.data.track || post.data.language
+}));
 const recentWpPosts = wpPosts.filter((post) => post.slug !== featuredPost?.slug).slice(0, 4);
 const recentReviewPosts = reviewPosts.slice(0, 4);
 const contestCards = Object.values(
@@ -71,6 +85,42 @@ const contestCards = Object.values(
   .map((contest) => ({ ...contest, tracks: [...contest.tracks] }))
   .sort((a, b) => b.latestDate - a.latestDate || b.count - a.count)
   .slice(0, 4);
+const categoryCards = Object.values(
+  posts.reduce<
+    Record<
+      string,
+      {
+        name: string;
+        slug: string;
+        count: number;
+        latestTitle: string;
+        latestDate: number;
+      }
+    >
+  >((acc, post) => {
+    const name = getCategoryName(post);
+    const slug = getCategorySlug(post);
+    const previous = acc[slug];
+    const publishedAt = post.data.pubDate.valueOf();
+
+    if (!previous || publishedAt > previous.latestDate) {
+      acc[slug] = {
+        name,
+        slug,
+        count: (previous?.count ?? 0) + 1,
+        latestTitle: post.data.title,
+        latestDate: publishedAt
+      };
+    } else {
+      previous.count += 1;
+    }
+
+    return acc;
+  }, {})
+)
+  .sort((a, b) => b.count - a.count || b.latestDate - a.latestDate)
+  .slice(0, 4);
+const categoryCount = new Set(posts.map((post) => getCategoryName(post))).size;
 const contestCount = new Set(posts.map((post) => post.data.contest || post.data.oj).filter(Boolean)).size;
 const latestDate = latest
   ? new Intl.DateTimeFormat("zh-CN", {
@@ -86,43 +136,97 @@ const featuredDate = featuredPost
       day: "numeric"
     }).format(featuredPost.data.pubDate)
   : "";
+const heroCategoryLinks = categoryCards.slice(0, 3);
+const routeCards = [
+  {
+    title: "比赛 WP",
+    count: wpPosts.length,
+    href: `/categories/${slugifySegment("比赛 WP")}/`,
+    description: "适合放单题解法、关键 payload、脚本思路和截图记录。",
+    latestTitle: wpPosts[0]?.data.title ?? "后面你新增这类文章后，这里会自动补出来。"
+  },
+  {
+    title: "赛后复盘",
+    count: reviewPosts.length,
+    href: `/categories/${slugifySegment("赛后复盘")}/`,
+    description: "适合整理一整场比赛的失误、节奏、团队分工和回看总结。",
+    latestTitle: reviewPosts[0]?.data.title ?? "目前还不多，后面可以慢慢把整场复盘补上。"
+  },
+  {
+    title: "专题总结",
+    count: summaryPosts.length,
+    href: `/categories/${slugifySegment("专题总结")}/`,
+    description: "适合沉淀反复出现的知识点、工具用法和题型笔记。",
+    latestTitle: summaryPosts[0]?.data.title ?? "等文章积累起来后，这里很适合做长期整理。"
+  }
+];
 ---
 
 <Layout title={site.siteTitle} description={site.siteDescription}>
   <section class="shell intro">
-    <img class="intro-avatar" src="/avatar.jpg" alt="iYuu 的头像" />
-    <div class="intro-copy">
-      <p class="eyebrow">{site.homeEyebrow}</p>
-      <h1>{site.homeTitle}</h1>
-      <p class="intro-lead">{site.homeLead}</p>
-      {site.homeIntro.map((paragraph) => <p>{paragraph}</p>)}
-      <div class="hero-links">
-        <a href="/contests">看比赛分类</a>
-        <a href="/blog">看全部文章</a>
-        <a href="/tags">看标签</a>
-        <a href="/about">看看这个站在写什么</a>
+    <div class="hero-card">
+      <div class="hero-copy">
+        <div class="hero-topline">
+          <img class="intro-avatar" src="/avatar.jpg" alt="iYuu 的头像" />
+          <div>
+            <p class="eyebrow">{site.homeEyebrow}</p>
+            <h1>{site.homeTitle}</h1>
+          </div>
+        </div>
+        <p class="intro-lead">{site.homeLead}</p>
+        {site.homeIntro.map((paragraph) => <p>{paragraph}</p>)}
+        <div class="hero-links hero-links-strong">
+          <a href="/contests">看比赛分类</a>
+          <a href="/categories">看内容分类</a>
+          <a href="/blog">看全部文章</a>
+          <a href="/tags">看标签</a>
+          <a href="/about">看看这个站在写什么</a>
+        </div>
+        {
+          latest && (
+            <p class="meta-line hero-update">
+              最近更新：<a href={`/blog/${latest.slug}/`}>{latest.data.title}</a> · {latestDate}
+            </p>
+          )
+        }
+        <dl class="intro-stats">
+          <div>
+            <dt>文章</dt>
+            <dd>{posts.length}</dd>
+          </div>
+          <div>
+            <dt>比赛</dt>
+            <dd>{contestCount}</dd>
+          </div>
+          <div>
+            <dt>分类</dt>
+            <dd>{categoryCount}</dd>
+          </div>
+        </dl>
       </div>
-      {
-        latest && (
-          <p class="meta-line">
-            最近更新：<a href={`/blog/${latest.slug}/`}>{latest.data.title}</a> · {latestDate}
-          </p>
-        )
-      }
-      <dl class="intro-stats">
-        <div>
-          <dt>文章</dt>
-          <dd>{posts.length}</dd>
-        </div>
-        <div>
-          <dt>比赛</dt>
-          <dd>{contestCount}</dd>
-        </div>
-        <div>
-          <dt>WP</dt>
-          <dd>{wpCount}</dd>
-        </div>
-      </dl>
+
+      <aside class="hero-aside">
+        <section class="hero-note-card">
+          <p class="hero-note-label">现在的结构</p>
+          <ul class="hero-note-list">
+            <li>比赛页适合按赛事整理整场记录</li>
+            <li>分类页适合放学习笔记、题型总结、工具记录</li>
+            <li>标签页适合回看具体技术点</li>
+          </ul>
+        </section>
+
+        <section class="hero-note-card accent-card">
+          <p class="hero-note-label">常用入口</p>
+          <div class="hero-chip-stack">
+            {heroCategoryLinks.map((category) => (
+              <a class="hero-chip" href={`/categories/${category.slug}/`}>
+                <span>{category.name}</span>
+                <strong>{category.count}</strong>
+              </a>
+            ))}
+          </div>
+        </section>
+      </aside>
     </div>
   </section>
 
@@ -132,8 +236,10 @@ const featuredDate = featuredPost
         <p class="index-title">浏览索引</p>
         <ul class="index-list">
           <li><a href="#featured">先看这一篇</a></li>
+          <li><a href="#fresh">最近在补这些</a></li>
           <li><a href="#writeups">最近比赛 WP</a></li>
           <li><a href="#contests">按比赛分类</a></li>
+          <li><a href="#routes">内容路线图</a></li>
           <li><a href="#reviews">赛后复盘</a></li>
           <li><a href="#tags">标签</a></li>
         </ul>
@@ -173,6 +279,26 @@ const featuredDate = featuredPost
           )
         }
 
+        <section class="section" id="fresh">
+          <div class="section-head">
+            <h2>最近在补这些</h2>
+            <span class="section-note">把零散记录慢慢补成一个自己的知识库</span>
+          </div>
+          <div class="signal-grid">
+            {recentSignalCards.map((post) => (
+              <a class="signal-card" href={`/blog/${post.slug}/`}>
+                <p class="signal-label">{[post.data.category, post.data.contest || post.data.oj].filter(Boolean).join(" / ")}</p>
+                <h3>{post.data.title}</h3>
+                <p>{post.data.description}</p>
+                <div class="signal-card-footer">
+                  <span>{post.dateText}</span>
+                  <span>{post.metaText}</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+
         <section class="section" id="writeups">
           <div class="section-head">
             <h2>最近比赛 WP</h2>
@@ -211,12 +337,54 @@ const featuredDate = featuredPost
             ))}
           </div>
         </section>
+
+        <section class="section" id="categories">
+          <div class="section-head">
+            <h2>按内容分类</h2>
+            <a class="section-link" href="/categories">查看全部分类</a>
+          </div>
+          <div class="tag-index-grid compact-grid">
+            {categoryCards.map((category) => (
+              <a class="tag-board" href={`/categories/${category.slug}/`}>
+                <div class="tag-board-head">
+                  <span class="tag-board-name">{category.name}</span>
+                  <strong>{category.count}</strong>
+                </div>
+                <p>最新内容：{category.latestTitle}</p>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section class="section" id="routes">
+          <div class="section-head">
+            <h2>内容路线图</h2>
+            <span class="section-note">以后你新增自己的分类，这里也可以继续按你的节奏扩展</span>
+          </div>
+          <div class="route-grid">
+            {routeCards.map((route) => (
+              <a class="route-card" href={route.count > 0 ? route.href : "/categories"}>
+                <div class="route-card-head">
+                  <span>{route.title}</span>
+                  <strong>{route.count}</strong>
+                </div>
+                <p>{route.description}</p>
+                <p class="route-card-meta">最近内容：{route.latestTitle}</p>
+              </a>
+            ))}
+          </div>
+        </section>
       </div>
 
       <aside class="side-column">
         <section class="section side-note">
           <h2>写作方式</h2>
           <p>每篇文章会尽量把题目背景、分析过程和关键结论写清楚，既方便交流，也方便后续回看。</p>
+        </section>
+
+        <section class="section side-note">
+          <h2>怎么扩展结构</h2>
+          <p>如果你以后想新增自己的栏目，不用先改代码，先在后台发文章时写一个新的分类名，前台分类页会自动长出来。</p>
         </section>
 
         <section class="section" id="reviews">

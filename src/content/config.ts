@@ -20,26 +20,77 @@ const blog = defineCollection({
   })
 });
 
-const site = defineCollection({
+const siteBrand = defineCollection({
   type: "data",
   schema: z.object({
     brandMark: z.string(),
     siteTitle: z.string(),
     headerTagline: z.string(),
     siteDescription: z.string(),
-    homeEyebrow: z.string(),
-    homeTitle: z.string(),
-    homeLead: z.string(),
-    homeIntro: z.array(z.string()).default([]),
-    aboutEyebrow: z.string(),
-    aboutTitle: z.string(),
-    aboutIntro: z.array(z.string()).default([]),
-    aboutFocusAreas: z.array(z.string()).default([]),
-    aboutWritingApproach: z.array(z.string()).default([]),
-    aboutNote: z.string(),
     footerDescription: z.string(),
     copyrightName: z.string()
   })
 });
 
-export const collections = { blog, site };
+const siteHome = defineCollection({
+  type: "data",
+  schema: z.object({
+    homeEyebrow: z.string(),
+    homeTitle: z.string(),
+    homeLead: z.string(),
+    homeIntro: z.array(z.string()).default([])
+  })
+});
+
+const siteAbout = defineCollection({
+  type: "data",
+  schema: z.object({
+    aboutEyebrow: z.string(),
+    aboutTitle: z.string(),
+    aboutIntro: z.array(z.string()).default([]),
+    aboutFocusAreas: z.array(z.string()).default([]),
+    aboutWritingApproach: z.array(z.string()).default([]),
+    aboutNote: z.string()
+  })
+});
+
+const siteNavigation = defineCollection({
+  type: "data",
+  schema: z.object({
+    navLinks: z
+      .array(
+        z.object({
+          label: z.string(),
+          href: z.string()
+        })
+      )
+      .default([])
+  })
+});
+
+const siteCategories = defineCollection({
+  type: "data",
+  schema: z.object({
+    categories: z
+      .array(
+        z.object({
+          name: z.string(),
+          slug: z.string().optional(),
+          description: z.string(),
+          writingFocus: z.string(),
+          exampleTopics: z.array(z.string()).default([]),
+          sortOrder: z.coerce.number().default(100)
+        })
+      )
+      .default([])
+  })
+});
+
+export const collections = {
+  blog,
+  "site-brand": siteBrand,
+  "site-home": siteHome,
+  "site-about": siteAbout,
+  "site-navigation": siteNavigation,
+  "site-categories": siteCategories
+};
