@@ -142,22 +142,22 @@ const routeCards = [
     title: "比赛 WP",
     count: wpPosts.length,
     href: `/categories/${slugifySegment("比赛 WP")}/`,
-    description: "适合放单题解法、关键 payload、脚本思路和截图记录。",
-    latestTitle: wpPosts[0]?.data.title ?? "后面你新增这类文章后，这里会自动补出来。"
+    description: "这里主要收录单题解法、关键 payload、脚本思路和过程记录。",
+    latestTitle: wpPosts[0]?.data.title ?? "这个栏目会随着后续更新慢慢补充起来。"
   },
   {
     title: "赛后复盘",
     count: reviewPosts.length,
     href: `/categories/${slugifySegment("赛后复盘")}/`,
-    description: "适合整理一整场比赛的失误、节奏、团队分工和回看总结。",
-    latestTitle: reviewPosts[0]?.data.title ?? "目前还不多，后面可以慢慢把整场复盘补上。"
+    description: "这里会放整场比赛的节奏、失误点、回看总结和补题记录。",
+    latestTitle: reviewPosts[0]?.data.title ?? "后面会逐步把整场比赛的复盘内容补上。"
   },
   {
     title: "专题总结",
     count: summaryPosts.length,
     href: `/categories/${slugifySegment("专题总结")}/`,
-    description: "适合沉淀反复出现的知识点、工具用法和题型笔记。",
-    latestTitle: summaryPosts[0]?.data.title ?? "等文章积累起来后，这里很适合做长期整理。"
+    description: "这里会整理反复出现的知识点、工具用法和题型笔记。",
+    latestTitle: summaryPosts[0]?.data.title ?? "后续会把常见知识点慢慢整理到这里。"
   }
 ];
 ---
@@ -207,11 +207,11 @@ const routeCards = [
 
       <aside class="hero-aside">
         <section class="hero-note-card">
-          <p class="hero-note-label">现在的结构</p>
+          <p class="hero-note-label">浏览方式</p>
           <ul class="hero-note-list">
-            <li>比赛页适合按赛事整理整场记录</li>
-            <li>分类页适合放学习笔记、题型总结、工具记录</li>
-            <li>标签页适合回看具体技术点</li>
+            <li>比赛页适合按赛事集中查看一整场记录</li>
+            <li>分类页适合按主题浏览不同方向的内容</li>
+            <li>标签页适合快速定位具体知识点</li>
           </ul>
         </section>
 
@@ -246,7 +246,7 @@ const routeCards = [
         <p class="index-meta">目前 {posts.length} 篇，最近更新在 {latestDate || "这几天"}。</p>
         <div class="index-block">
           <p class="index-label">内容方向</p>
-          <p class="index-text">比赛 WP、电子取证题分析、赛后复盘，以及比赛中反复出现的知识点整理。</p>
+          <p class="index-text">这里主要更新比赛 WP、电子取证题分析、赛后复盘，以及比赛中反复出现的知识点整理。</p>
         </div>
       </div>
     </aside>
@@ -359,7 +359,7 @@ const routeCards = [
         <section class="section" id="routes">
           <div class="section-head">
             <h2>内容路线图</h2>
-            <span class="section-note">以后你新增自己的分类，这里也可以继续按你的节奏扩展</span>
+            <span class="section-note">可以从不同内容类型进入，按自己感兴趣的方向浏览</span>
           </div>
           <div class="route-grid">
             {routeCards.map((route) => (
@@ -378,13 +378,13 @@ const routeCards = [
 
       <aside class="side-column">
         <section class="section side-note">
-          <h2>写作方式</h2>
-          <p>每篇文章会尽量把题目背景、分析过程和关键结论写清楚，既方便交流，也方便后续回看。</p>
+          <h2>更新方式</h2>
+          <p>这里会尽量把题目背景、分析过程和关键结论写清楚，让每篇文章都既方便阅读，也方便后续回看。</p>
         </section>
 
         <section class="section side-note">
-          <h2>怎么扩展结构</h2>
-          <p>如果你以后想新增自己的栏目，不用先改代码，先在后台发文章时写一个新的分类名，前台分类页会自动长出来。</p>
+          <h2>持续补充中</h2>
+          <p>除了比赛 WP，这里也会慢慢补充赛后复盘、专题总结和学习过程中的记录，让内容越来越完整。</p>
         </section>
 
         <section class="section" id="reviews">

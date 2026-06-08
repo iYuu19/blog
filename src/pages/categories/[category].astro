@@ -53,9 +53,9 @@ const topTags = [...new Set(posts.flatMap((post) => post.data.tags))].slice(0, 8
 const tracks = [...new Set(posts.map((post) => post.data.track).filter(Boolean))];
 const contestCount = new Set(posts.map((post) => post.data.contest || post.data.oj).filter(Boolean)).size;
 const description =
-  definition?.description ?? "这个分类已经在文章里出现了，但还没有在后台“分类中心”里补充说明。";
+  definition?.description ?? "这个栏目已经创建，后续会持续补充相关内容。";
 const writingFocus =
-  definition?.writingFocus ?? "可以去后台的“分类中心”补一句说明，让这个分类页看起来更完整。";
+  definition?.writingFocus ?? "这里会逐步收录同一主题下的相关文章、记录和笔记。";
 const exampleTopics = definition?.exampleTopics ?? [];
 ---
 
@@ -82,14 +82,14 @@ const exampleTopics = definition?.exampleTopics ?? [];
 
   <section class="shell category-overview section-block">
     <article class="guide-card">
-      <p class="guide-card-label">这个分类更适合放什么</p>
+      <p class="guide-card-label">这个栏目会看到什么</p>
       <h2>{writingFocus}</h2>
-      <p>如果你以后想让这个分类更成体系，后台发文章时继续使用同一个分类名，这里就会自动往下长。</p>
+      <p>这一页会把同一主题下的内容集中放在一起，方便按方向连续阅读，而不是零散地按时间翻找。</p>
     </article>
     <article class="guide-card">
       <p class="guide-card-label">常见标签</p>
       <div class="tag-cloud">
-        {topTags.length > 0 ? topTags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />) : <span class="empty-inline">暂时还没有标签</span>}
+        {topTags.length > 0 ? topTags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />) : <span class="empty-inline">相关标签会随着内容更新逐步补齐</span>}
       </div>
     </article>
   </section>
@@ -101,7 +101,7 @@ const exampleTopics = definition?.exampleTopics ?? [];
         <h2>{tracks.length > 0 ? tracks.join(" / ") : "等文章继续补充之后会更清楚"}</h2>
       </article>
       <article class="guide-card">
-        <p class="guide-card-label">可以写哪些内容</p>
+        <p class="guide-card-label">这个栏目会涉及的话题</p>
         {exampleTopics.length > 0 ? (
           <div class="category-example-row">
             {exampleTopics.map((topic) => (
@@ -109,7 +109,7 @@ const exampleTopics = definition?.exampleTopics ?? [];
             ))}
           </div>
         ) : (
-          <p class="empty-inline">这个分类还没有在后台补示例内容。</p>
+          <p class="empty-inline">相关话题会随着后续文章一起慢慢补充。</p>
         )}
       </article>
     </section>
@@ -121,7 +121,7 @@ const exampleTopics = definition?.exampleTopics ?? [];
         {posts.map((post) => <ArchiveRow post={post} />)}
       </div>
     ) : (
-      <p class="empty-feed">这个分类已经先建好了，但目前还没有公开文章。你可以回到后台 `写文章`，把某篇内容的分类写成“{category}”，这里就会自动出现。</p>
+      <p class="empty-feed">这个栏目已经先建好，相关内容会在后续更新中逐步补充进来。</p>
     )}
   </section>
 </Layout>

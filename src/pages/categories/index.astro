@@ -119,7 +119,7 @@ const newestCategory = categories.find((category) => category.hasPosts);
   <section class="shell page-intro">
     <p class="eyebrow">Category Index</p>
     <h1>分类</h1>
-    <p>这里现在不只是“文章里写了什么分类就显示什么”，还会同时读取后台的“分类中心”说明，所以结构会更清楚。</p>
+    <p>这里按内容主题整理文章，适合从自己感兴趣的方向进入，比如比赛 WP、赛后复盘、专题总结或学习笔记。</p>
     <dl class="page-stats">
       <div>
         <dt>分类数</dt>
@@ -138,14 +138,14 @@ const newestCategory = categories.find((category) => category.hasPosts);
 
   <section class="shell guide-grid section-block">
     <article class="guide-card">
-      <p class="guide-card-label">后台怎么管分类</p>
-      <h2>先看分类中心，再去写文章</h2>
-      <p>你现在可以先在后台左侧的 `分类中心` 里定义分类说明，再回到 `写文章` 里填写同名分类，这样前台结构会更完整。</p>
+      <p class="guide-card-label">怎么浏览这里</p>
+      <h2>按主题进入会更轻松</h2>
+      <p>如果你已经知道自己想看的是题解、复盘、工具记录还是专题总结，从这里进入会比按时间翻文章更直接。</p>
     </article>
     <article class="guide-card">
-      <p class="guide-card-label">怎么理解这里</p>
-      <h2>按写作主题整理，不是按比赛整理</h2>
-      <p>比赛页更像按赛事归档，分类页更像按你自己的写作习惯来整理，比如学习笔记、赛后复盘、工具记录。</p>
+      <p class="guide-card-label">内容会怎么分布</p>
+      <h2>除了比赛记录，也会有长期整理</h2>
+      <p>这里不只会放单题题解，后面也会慢慢整理赛后复盘、知识点专题和学习过程中的长期笔记。</p>
     </article>
   </section>
 
@@ -157,7 +157,7 @@ const newestCategory = categories.find((category) => category.hasPosts);
           <strong>{category.count}</strong>
         </div>
         <p class="category-board-description">{category.description}</p>
-        <p class="category-board-track">更适合写：{category.writingFocus}</p>
+        <p class="category-board-track">你会在这里看到：{category.writingFocus}</p>
         <p>最近内容：{category.latestTitle}</p>
         {category.exampleTopics.length > 0 && (
           <div class="category-example-row">
@@ -167,7 +167,7 @@ const newestCategory = categories.find((category) => category.hasPosts);
           </div>
         )}
         <div class="category-board-footer">
-          <span>{category.hasPosts ? `最近更新：${category.latestDateText}` : "目前还没有公开文章"}</span>
+          <span>{category.hasPosts ? `最近更新：${category.latestDateText}` : "这个栏目正在准备中"}</span>
           <div class="tag-row">
             {category.topTags.map((tag) => (
               <span class="tag-pill">{tag}</span>
