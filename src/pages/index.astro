@@ -4,10 +4,12 @@ import ArchiveRow from "../components/ArchiveRow.astro";
 import TagPill from "../components/TagPill.astro";
 import Layout from "../layouts/Layout.astro";
 import { getContestCover, getContestName, getContestSlug } from "../utils/content";
+import { getSiteSettings } from "../utils/site";
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
+const site = await getSiteSettings();
 
 const wpPosts = posts.filter((post) => post.data.category === "比赛 WP");
 const reviewPosts = posts.filter((post) => post.data.category === "赛后复盘");
@@ -86,19 +88,14 @@ const featuredDate = featuredPost
   : "";
 ---
 
-<Layout title="iYuu Notes" description="iYuu 的比赛 WP、赛后复盘与专题记录。">
+<Layout title={site.siteTitle} description={site.siteDescription}>
   <section class="shell intro">
     <img class="intro-avatar" src="/avatar.jpg" alt="iYuu 的头像" />
     <div class="intro-copy">
-      <p class="eyebrow">iYuu 的 Blog</p>
-      <h1>iYuu 的 blog</h1>
-      <p class="intro-lead">记录 CTF、电子取证与比赛复盘。</p>
-      <p>
-        这里主要整理比赛 WP、赛后复盘和专题总结，内容以 CTF、电子取证等方向为主。
-      </p>
-      <p>
-        希望这些记录既方便自己回顾，也能给后来看到的人一点参考。
-      </p>
+      <p class="eyebrow">{site.homeEyebrow}</p>
+      <h1>{site.homeTitle}</h1>
+      <p class="intro-lead">{site.homeLead}</p>
+      {site.homeIntro.map((paragraph) => <p>{paragraph}</p>)}
       <div class="hero-links">
         <a href="/contests">看比赛分类</a>
         <a href="/blog">看全部文章</a>

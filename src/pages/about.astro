@@ -1,17 +1,17 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { getSiteSettings } from "../utils/site";
+
+const site = await getSiteSettings();
 ---
 
-<Layout title="关于 | iYuu Notes" description="这个站主要记录的内容方向与写作方式。">
+<Layout title={`关于 | ${site.siteTitle}`} description={site.siteDescription}>
   <section class="shell intro about-intro">
     <img class="intro-avatar" src="/avatar.jpg" alt="iYuu 的头像" />
     <div class="intro-copy">
-      <p class="eyebrow">About</p>
-      <h1>关于这个博客</h1>
-      <p>
-        这里主要记录比赛 WP、赛后复盘和专题总结，内容以 CTF、电子取证等方向为主。
-      </p>
-      <p>会尽量把过程写清楚，也欢迎交流和讨论。</p>
+      <p class="eyebrow">{site.aboutEyebrow}</p>
+      <h1>{site.aboutTitle}</h1>
+      {site.aboutIntro.map((paragraph) => <p>{paragraph}</p>)}
     </div>
   </section>
 
@@ -19,26 +19,20 @@ import Layout from "../layouts/Layout.astro";
     <section class="section">
       <h2>主要内容</h2>
       <ul class="plain-list">
-        <li>打完比赛之后整理出来的单题 WP 和整场比赛记录。</li>
-        <li>CTF Web、电子取证、流量分析这些方向里的复盘文章。</li>
-        <li>比赛里反复出现的知识点和工具用法总结。</li>
+        {site.aboutFocusAreas.map((item) => <li>{item}</li>)}
       </ul>
     </section>
 
     <section class="section">
       <h2>写作方式</h2>
       <ul class="plain-list">
-        <li>先记比赛背景、题目入口和当时的判断信号，再展开过程。</li>
-        <li>尽量写出“为什么当时想到这个方向”，而不只是最后的 payload 或脚本。</li>
-        <li>在能说明问题的前提下，尽量把关键步骤、证据链和复盘结论写完整。</li>
+        {site.aboutWritingApproach.map((item) => <li>{item}</li>)}
       </ul>
     </section>
 
     <section class="section">
       <h2>内容说明</h2>
-      <p>
-        文章会持续补充和修订。如果某篇内容存在疏漏，后续也会根据复盘和新的理解继续更新。
-      </p>
+      <p>{site.aboutNote}</p>
     </section>
   </section>
 </Layout>

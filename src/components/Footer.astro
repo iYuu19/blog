@@ -1,13 +1,16 @@
 ---
+import { getSiteSettings } from "../utils/site";
+
 const year = new Date().getFullYear();
+const site = await getSiteSettings();
 ---
 
 <footer class="site-footer">
   <div class="shell footer-shell">
     <div>
-      <strong>iYuu Notes</strong>
-      <p>记录 CTF、电子取证与比赛复盘。</p>
+      <strong>{site.siteTitle}</strong>
+      <p>{site.footerDescription}</p>
     </div>
-    <p>© {year} iYuu</p>
+    <p>© {year} {site.copyrightName}</p>
   </div>
 </footer>

@@ -20,4 +20,26 @@ const blog = defineCollection({
   })
 });
 
-export const collections = { blog };
+const site = defineCollection({
+  type: "data",
+  schema: z.object({
+    brandMark: z.string(),
+    siteTitle: z.string(),
+    headerTagline: z.string(),
+    siteDescription: z.string(),
+    homeEyebrow: z.string(),
+    homeTitle: z.string(),
+    homeLead: z.string(),
+    homeIntro: z.array(z.string()).default([]),
+    aboutEyebrow: z.string(),
+    aboutTitle: z.string(),
+    aboutIntro: z.array(z.string()).default([]),
+    aboutFocusAreas: z.array(z.string()).default([]),
+    aboutWritingApproach: z.array(z.string()).default([]),
+    aboutNote: z.string(),
+    footerDescription: z.string(),
+    copyrightName: z.string()
+  })
+});
+
+export const collections = { blog, site };
