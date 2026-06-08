@@ -31,6 +31,19 @@ export const defaultSiteSettings = {
   aboutNote: "文章会持续补充和修订。如果某篇内容存在疏漏，后续也会根据复盘和新的理解继续更新。",
   footerDescription: "记录 CTF、电子取证与比赛复盘。",
   copyrightName: "iYuu",
+  commentsEnabled: false,
+  commentsTitle: "评论区",
+  commentsDescription: "欢迎交流、补充思路或指出文中的问题。",
+  giscusRepo: "iYuu19/blog",
+  giscusRepoId: "",
+  giscusCategory: "General",
+  giscusCategoryId: "",
+  giscusMapping: "pathname",
+  giscusStrict: false,
+  giscusReactionsEnabled: true,
+  giscusInputPosition: "bottom",
+  giscusTheme: "light",
+  giscusLang: "zh-CN",
   navLinks: [
     { label: "首页", href: "/" },
     { label: "比赛", href: "/contests" },
@@ -42,11 +55,12 @@ export const defaultSiteSettings = {
 };
 
 export async function getSiteSettings() {
-  const [brandEntry, homeEntry, aboutEntry, navigationEntry] = await Promise.all([
+  const [brandEntry, homeEntry, aboutEntry, navigationEntry, commentsEntry] = await Promise.all([
     getEntry("site-brand", "brand"),
     getEntry("site-home", "home"),
     getEntry("site-about", "about"),
-    getEntry("site-navigation", "navigation")
+    getEntry("site-navigation", "navigation"),
+    getEntry("site-comments", "comments")
   ]);
 
   return {
@@ -54,6 +68,7 @@ export async function getSiteSettings() {
     ...(brandEntry?.data ?? {}),
     ...(homeEntry?.data ?? {}),
     ...(aboutEntry?.data ?? {}),
-    ...(navigationEntry?.data ?? {})
+    ...(navigationEntry?.data ?? {}),
+    ...(commentsEntry?.data ?? {})
   };
 }

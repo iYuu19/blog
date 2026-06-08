@@ -1,0 +1,45 @@
+---
+import { getSiteSettings } from "../utils/site";
+
+const site = await getSiteSettings();
+
+const isConfigured = Boolean(
+  site.commentsEnabled &&
+    site.giscusRepo &&
+    site.giscusRepoId &&
+    site.giscusCategory &&
+    site.giscusCategoryId
+);
+---
+
+{
+  isConfigured && (
+    <section class="article-comments">
+      <div class="article-comments-head">
+        <p class="eyebrow">Discussion</p>
+        <h2>{site.commentsTitle}</h2>
+        <p>{site.commentsDescription}</p>
+      </div>
+
+      <div class="article-comments-shell">
+        <script
+          src="https://giscus.app/client.js"
+          data-repo={site.giscusRepo}
+          data-repo-id={site.giscusRepoId}
+          data-category={site.giscusCategory}
+          data-category-id={site.giscusCategoryId}
+          data-mapping={site.giscusMapping}
+          data-strict={site.giscusStrict ? "1" : "0"}
+          data-reactions-enabled={site.giscusReactionsEnabled ? "1" : "0"}
+          data-emit-metadata="0"
+          data-input-position={site.giscusInputPosition}
+          data-theme={site.giscusTheme}
+          data-lang={site.giscusLang}
+          data-loading="lazy"
+          crossorigin="anonymous"
+          async
+        ></script>
+      </div>
+    </section>
+  )
+}

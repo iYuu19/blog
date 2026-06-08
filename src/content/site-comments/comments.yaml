@@ -1,0 +1,13 @@
+commentsEnabled: true
+commentsTitle: 评论区
+commentsDescription: 欢迎交流、补充思路或指出文中的问题。
+giscusRepo: iYuu19/blog
+giscusRepoId: "R_kgDOSzdywA"
+giscusCategory: Announcements
+giscusCategoryId: "DIC_kwDOSzdywM4C-WEr"
+giscusMapping: pathname
+giscusStrict: false
+giscusReactionsEnabled: true
+giscusInputPosition: bottom
+giscusTheme: preferred_color_scheme
+giscusLang: zh-CN

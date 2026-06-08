@@ -1165,6 +1165,36 @@ h3 {
   font-size: 16px;
 }
 
+.article-comments {
+  margin-top: 34px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+}
+
+.article-comments-head {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.article-comments-head h2 {
+  font-size: 26px;
+}
+
+.article-comments-head p:last-child {
+  margin: 0;
+  color: var(--soft-text);
+}
+
+.article-comments-shell {
+  padding: 18px;
+  border: 1px solid rgba(222, 215, 203, 0.92);
+  border-radius: calc(var(--radius) + 2px);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 249, 0.98), rgba(248, 244, 237, 0.92));
+  box-shadow: var(--shadow);
+}
+
 .prose :where(h2, h3, h4) {
   margin-top: 34px;
   margin-bottom: 10px;
@@ -1353,6 +1383,10 @@ h3 {
 
   .archive-date span::before {
     content: " / ";
+  }
+
+  .article-comments-shell {
+    padding: 14px;
   }
 }
 

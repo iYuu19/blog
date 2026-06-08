@@ -86,11 +86,31 @@ const siteCategories = defineCollection({
   })
 });
 
+const siteComments = defineCollection({
+  type: "data",
+  schema: z.object({
+    commentsEnabled: z.boolean().default(false),
+    commentsTitle: z.string().default("评论区"),
+    commentsDescription: z.string().default("欢迎交流、补充思路或指出文中的问题。"),
+    giscusRepo: z.string().default(""),
+    giscusRepoId: z.string().default(""),
+    giscusCategory: z.string().default("General"),
+    giscusCategoryId: z.string().default(""),
+    giscusMapping: z.string().default("pathname"),
+    giscusStrict: z.boolean().default(false),
+    giscusReactionsEnabled: z.boolean().default(true),
+    giscusInputPosition: z.string().default("bottom"),
+    giscusTheme: z.string().default("light"),
+    giscusLang: z.string().default("zh-CN")
+  })
+});
+
 export const collections = {
   blog,
   "site-brand": siteBrand,
   "site-home": siteHome,
   "site-about": siteAbout,
   "site-navigation": siteNavigation,
-  "site-categories": siteCategories
+  "site-categories": siteCategories,
+  "site-comments": siteComments
 };

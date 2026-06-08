@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from "astro:content";
+import GiscusComments from "../../components/GiscusComments.astro";
 import Layout from "../../layouts/Layout.astro";
 import TagPill from "../../components/TagPill.astro";
 import { getContestSlug } from "../../utils/content";
@@ -65,5 +66,7 @@ const contestHref = contestLabel ? `/contests/${getContestSlug(post)}/` : null;
     <div class="article-body prose">
       <Content />
     </div>
+
+    <GiscusComments />
   </article>
 </Layout>
