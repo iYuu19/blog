@@ -1,0 +1,116 @@
+---
+import Layout from "../layouts/Layout.astro";
+import GiscusComments from "../components/GiscusComments.astro";
+import { getSiteSettings } from "../utils/site";
+
+const site = await getSiteSettings();
+
+const messageIdeas = [
+  {
+    eyebrow: "Share",
+    title: "聊聊你刚看完的内容",
+    text: "如果某篇文章对你有帮助，或者你对某个题解过程有不同想法，欢迎直接留在这里。"
+  },
+  {
+    eyebrow: "Suggest",
+    title: "告诉我你更想看到什么",
+    text: "可以是某类题目、某个方向的复盘、页面体验建议，或者你希望我继续补充的栏目。"
+  },
+  {
+    eyebrow: "Hello",
+    title: "单纯打个招呼也很好",
+    text: "就算只是留下一句“我来过这里”，也会让这个博客更像一个有人来往的地方。"
+  }
+];
+
+const quickLinks = [
+  { label: "先看全部文章", href: "/blog" },
+  { label: "按分类浏览", href: "/categories" },
+  { label: "看看关于页", href: "/about" }
+];
+---
+
+<Layout
+  title={`留言板 | ${site.siteTitle}`}
+  description="欢迎在这里留言、交流想法、提出建议，或者告诉我你最近在关注什么。"
+>
+  <section class="shell intro about-intro">
+    <div class="hero-card about-hero-card guestbook-hero-card">
+      <div class="hero-copy">
+        <p class="eyebrow">Guestbook</p>
+        <h1>留言板</h1>
+        <p class="intro-lead">如果你路过这里，欢迎留下你的想法。</p>
+        <p>
+          这里是博客的公共留言区。你可以聊文章感受、提小建议、分享最近在关注的题目，
+          也可以单纯打个招呼，让这块空间更有一点来往和回声。
+        </p>
+        <p>
+          文章页底部的评论更适合围绕单篇内容讨论；这里则更适合聊整个博客本身，
+          比如结构、更新方向、阅读体验，或者你最想看到的后续内容。
+        </p>
+
+        <div class="guestbook-pill-row">
+          <span class="entry-badge">欢迎留言</span>
+          <span class="entry-badge">支持回复讨论</span>
+          <span class="entry-badge">支持表情反应</span>
+        </div>
+
+        <div class="hero-links hero-links-strong">
+          {quickLinks.map((link) => (
+            <a href={link.href}>{link.label}</a>
+          ))}
+        </div>
+      </div>
+
+      <aside class="hero-aside">
+        <section class="hero-note-card accent-card">
+          <p class="hero-note-label">留言前小提醒</p>
+          <ul class="hero-note-list">
+            <li>需要使用 GitHub 账号登录后留言</li>
+            <li>这样可以减少垃圾内容，也方便后续继续回复</li>
+            <li>如果评论区刚加载失败，刷新一次通常就能恢复</li>
+          </ul>
+        </section>
+
+        <section class="hero-note-card">
+          <p class="hero-note-label">更适合去哪儿聊</p>
+          <ul class="hero-note-list">
+            <li>想讨论具体某篇文章：去文章页底部评论</li>
+            <li>想提整体建议或闲聊：就在这个留言板</li>
+            <li>想快速看最近更新：可以先去归档页浏览</li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+  </section>
+
+  <section class="shell guestbook-grid section-block">
+    {messageIdeas.map((idea) => (
+      <article class="guestbook-card">
+        <p class="guestbook-card-label">{idea.eyebrow}</p>
+        <h2>{idea.title}</h2>
+        <p>{idea.text}</p>
+      </article>
+    ))}
+  </section>
+
+  <section class="shell guestbook-note-wrap section-block">
+    <div class="guestbook-note-panel">
+      <p class="guestbook-note-label">Why GitHub Login</p>
+      <h2>为什么这里要登录后才能留言</h2>
+      <p>
+        目前这块留言板基于 GitHub Discussions。
+        这样做的好处是更稳定、免费、能持续保留讨论记录，也能减少匿名垃圾留言。
+        对访客来说，多一步登录会稍微麻烦一点，但整体互动体验会更干净。
+      </p>
+    </div>
+  </section>
+
+  <section class="shell article-shell">
+    <GiscusComments
+      eyebrow="Guestbook"
+      title="给我留言"
+      description="欢迎在这里留言、交流、提建议，也欢迎告诉我你最想看到哪类内容。"
+    />
+  </section>
+</Layout>

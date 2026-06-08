@@ -48,6 +48,7 @@ export const defaultSiteSettings = {
     { label: "首页", href: "/" },
     { label: "比赛", href: "/contests" },
     { label: "分类", href: "/categories" },
+    { label: "留言板", href: "/guestbook" },
     { label: "归档", href: "/blog" },
     { label: "标签", href: "/tags" },
     { label: "关于", href: "/about" }

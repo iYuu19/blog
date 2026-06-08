@@ -1195,6 +1195,77 @@ h3 {
   box-shadow: var(--shadow);
 }
 
+.guestbook-hero-card {
+  background:
+    radial-gradient(circle at top right, rgba(31, 92, 87, 0.12), transparent 24%),
+    linear-gradient(150deg, rgba(255, 253, 249, 0.96), rgba(246, 241, 232, 0.94)),
+    var(--surface-strong);
+}
+
+.guestbook-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.guestbook-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.guestbook-card,
+.guestbook-note-panel {
+  padding: 22px;
+  border: 1px solid rgba(222, 215, 203, 0.92);
+  border-radius: calc(var(--radius) + 2px);
+  background: rgba(255, 253, 249, 0.88);
+  box-shadow: var(--shadow);
+}
+
+.guestbook-card {
+  display: grid;
+  gap: 10px;
+  min-height: 188px;
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+
+.guestbook-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-strong);
+}
+
+.guestbook-card-label,
+.guestbook-note-label {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.guestbook-card h2,
+.guestbook-note-panel h2 {
+  font-size: 24px;
+}
+
+.guestbook-card p:last-child,
+.guestbook-note-panel p:last-child {
+  margin: 0;
+  color: var(--soft-text);
+}
+
+.guestbook-note-wrap {
+  padding-top: 6px;
+}
+
+.guestbook-note-panel {
+  background:
+    linear-gradient(180deg, rgba(233, 243, 241, 0.86), rgba(255, 253, 249, 0.96));
+}
+
 .prose :where(h2, h3, h4) {
   margin-top: 34px;
   margin-bottom: 10px;
@@ -1336,6 +1407,7 @@ h3 {
   .tag-index-grid,
   .route-grid,
   .guide-grid,
+  .guestbook-grid,
   .category-overview,
   .about-panel-grid,
   .signal-grid,

@@ -5,6 +5,8 @@ navLinks:
     href: /contests
   - label: 分类
     href: /categories
+  - label: 留言板
+    href: /guestbook
   - label: 归档
     href: /blog
   - label: 标签

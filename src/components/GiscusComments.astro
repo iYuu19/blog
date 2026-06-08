@@ -1,7 +1,18 @@
 ---
 import { getSiteSettings } from "../utils/site";
 
+interface Props {
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+}
+
 const site = await getSiteSettings();
+const {
+  eyebrow = "Discussion",
+  title = site.commentsTitle,
+  description = site.commentsDescription
+} = Astro.props;
 
 const isConfigured = Boolean(
   site.commentsEnabled &&
@@ -16,9 +27,9 @@ const isConfigured = Boolean(
   isConfigured && (
     <section class="article-comments">
       <div class="article-comments-head">
-        <p class="eyebrow">Discussion</p>
-        <h2>{site.commentsTitle}</h2>
-        <p>{site.commentsDescription}</p>
+        <p class="eyebrow">{eyebrow}</p>
+        <h2>{title}</h2>
+        <p>{description}</p>
       </div>
 
       <div class="article-comments-shell">
