@@ -8,33 +8,71 @@
   </head>
   <body>
     <aside class="admin-welcome" id="admin-welcome">
-      <p class="admin-welcome__eyebrow">iYuu Notes 后台</p>
-      <h1>这里主要就做四件事</h1>
+      <p class="admin-welcome__eyebrow">iYuu Notes Workspace</p>
+      <h1>今天准备先从哪一步开始？</h1>
+      <p class="admin-welcome__lead">
+        写文章、整理分类、改导航、调互动设置都在这里。右下角的快捷工作台可以帮你少绕几步。
+      </p>
       <ul class="admin-welcome__list">
-        <li><strong>看模板：</strong>左侧点“模板中心”</li>
-        <li><strong>管分类：</strong>左侧点“分类中心”</li>
-        <li><strong>写文章：</strong>左侧点“写文章”</li>
-        <li><strong>改结构：</strong>左侧点“改博客结构”</li>
+        <li><strong>写文章：</strong>新建、编辑、草稿、首页推荐</li>
+        <li><strong>分类中心：</strong>新增分类、改说明、调整顺序</li>
+        <li><strong>改博客结构：</strong>首页、导航、关于页、评论区</li>
       </ul>
       <p class="admin-welcome__tip">最顺手的节奏是：先看模板，再选分类，最后回到“写文章”开始填。</p>
       <div class="admin-welcome__actions">
         <a href="/" target="_blank" rel="noreferrer">查看前台</a>
-        <button type="button" id="admin-welcome-close">我知道了</button>
+        <button type="button" id="admin-welcome-close">收起提示</button>
+      </div>
+    </aside>
+
+    <aside class="admin-shortcuts" id="admin-shortcuts" aria-label="后台快捷工作台">
+      <button class="admin-shortcuts__toggle" type="button" id="admin-shortcuts-toggle" aria-expanded="true">
+        快捷工作台
+      </button>
+      <div class="admin-shortcuts__panel" id="admin-shortcuts-panel">
+        <p class="admin-shortcuts__eyebrow">Quick Access</p>
+        <h2>常用入口</h2>
+        <nav class="admin-shortcuts__grid">
+          <a href="/admin/#/collections/blog">写文章</a>
+          <a href="/admin/#/collections/category_center">分类中心</a>
+          <a href="/admin/#/collections/template_center">模板中心</a>
+          <a href="/admin/#/collections/site">改博客结构</a>
+          <a href="/admin/#/collections/help">使用说明</a>
+          <a href="/" target="_blank" rel="noreferrer">查看前台</a>
+        </nav>
+        <div class="admin-shortcuts__status">
+          <span>建议流程</span>
+          <strong>模板 → 分类 → 文章 → 发布</strong>
+        </div>
       </div>
     </aside>
 
     <script>
       const welcome = document.getElementById("admin-welcome");
       const closeButton = document.getElementById("admin-welcome-close");
-      const storageKey = "iyuu-admin-welcome-dismissed";
+      const shortcuts = document.getElementById("admin-shortcuts");
+      const shortcutsToggle = document.getElementById("admin-shortcuts-toggle");
+      const welcomeStorageKey = "iyuu-admin-welcome-dismissed";
+      const shortcutsStorageKey = "iyuu-admin-shortcuts-collapsed";
 
-      if (window.localStorage.getItem(storageKey) === "true") {
+      if (window.localStorage.getItem(welcomeStorageKey) === "true") {
         welcome?.setAttribute("hidden", "hidden");
       }
 
+      if (window.localStorage.getItem(shortcutsStorageKey) === "true") {
+        shortcuts?.classList.add("is-collapsed");
+        shortcutsToggle?.setAttribute("aria-expanded", "false");
+      }
+
       closeButton?.addEventListener("click", () => {
-        window.localStorage.setItem(storageKey, "true");
+        window.localStorage.setItem(welcomeStorageKey, "true");
         welcome?.setAttribute("hidden", "hidden");
+      });
+
+      shortcutsToggle?.addEventListener("click", () => {
+        const isCollapsed = shortcuts?.classList.toggle("is-collapsed");
+        window.localStorage.setItem(shortcutsStorageKey, String(Boolean(isCollapsed)));
+        shortcutsToggle.setAttribute("aria-expanded", String(!isCollapsed));
       });
     </script>
 
