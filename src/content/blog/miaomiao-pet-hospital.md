@@ -2,9 +2,14 @@
 title: "喵喵宠物医院"
 description: "从前端接口枚举到 PyYAML 反序列化利用，再到 Unicode 转义绕过黑名单拿到 flag。"
 pubDate: 2026-06-07
+category: "比赛 WP"
+contest: "黄河流域公安院校网络安全技能挑战赛"
+contestSlug: "yellow-river-police-2026"
+coverImage: "/contest-covers/yellow-river-police-2026.svg"
+track: "Web"
 tags: ["CTF", "Web", "PyYAML", "反序列化"]
 oj: "黄河流域"
-difficulty: "Easy"
+difficulty: "medium"
 language: "Python"
 featured: true
 draft: false

@@ -1,0 +1,105 @@
+---
+import { getCollection } from "astro:content";
+import ArchiveRow from "../../components/ArchiveRow.astro";
+import Layout from "../../layouts/Layout.astro";
+import { getContestCover, getContestName, getContestSlug } from "../../utils/content";
+
+export async function getStaticPaths() {
+  const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+  );
+
+  const grouped = Object.values(
+    posts.reduce<
+      Record<
+        string,
+        {
+          contest: string;
+          slug: string;
+          posts: typeof posts;
+          tracks: Set<string>;
+          categories: Set<string>;
+          coverImage: string;
+        }
+      >
+    >((acc, post) => {
+      const slug = getContestSlug(post);
+      const contest = getContestName(post);
+      const coverImage = getContestCover(post);
+      const previous = acc[slug];
+
+      if (!previous) {
+        acc[slug] = {
+          contest,
+          slug,
+          posts: [post],
+          tracks: new Set([post.data.track].filter(Boolean)),
+          categories: new Set([post.data.category].filter(Boolean)),
+          coverImage
+        };
+      } else {
+        previous.posts.push(post);
+        if (post.data.track) {
+          previous.tracks.add(post.data.track);
+        }
+        if (post.data.category) {
+          previous.categories.add(post.data.category);
+        }
+        if (!previous.coverImage && coverImage) {
+          previous.coverImage = coverImage;
+        }
+      }
+
+      return acc;
+    }, {})
+  );
+
+  return grouped.map((group) => ({
+    params: { contest: group.slug },
+    props: {
+      contest: group.contest,
+      posts: group.posts,
+      tracks: [...group.tracks],
+      categories: [...group.categories],
+      coverImage: group.coverImage
+    }
+  }));
+}
+
+const { contest, posts, tracks, categories, coverImage } = Astro.props;
+const latest = posts[0];
+const latestDate = latest
+  ? new Intl.DateTimeFormat("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).format(latest.data.pubDate)
+  : "";
+---
+
+<Layout title={`${contest} | iYuu Notes`} description={`${contest} 相关的 WP、复盘与题目记录。`}>
+  <section
+    class:list={["shell", "page-intro", "contest-hero", coverImage ? "has-cover" : ""]}
+    style={coverImage ? `--contest-cover: url('${coverImage}')` : undefined}
+  >
+    <div class="contest-hero-inner">
+      <p class="eyebrow">Contest</p>
+      <h1>{contest}</h1>
+      <p>这里汇总这场比赛相关的文章，包括单题 WP、赛后复盘和后续补充。</p>
+      <p class="meta-line">
+        目前共 {posts.length} 篇。
+        {latest && <> 最近更新：<a href={`/blog/${latest.slug}/`}>{latest.data.title}</a> · {latestDate}</>}
+      </p>
+      <div class="tag-cloud contest-meta-cloud">
+        {tracks.map((track: string) => <span class="tag-pill">#{track}</span>)}
+        {categories.map((category: string) => <span class="tag-pill">#{category}</span>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="shell section-block">
+    <div class="archive-list">
+      {posts.map((post: (typeof posts)[number]) => <ArchiveRow post={post} />)}
+    </div>
+  </section>
+</Layout>

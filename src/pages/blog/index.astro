@@ -10,9 +10,8 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
 
 const allTags = [...new Set(posts.flatMap((post) => post.data.tags))];
 const tags = allTags.slice(0, 12);
-const noteCount = posts.filter(
-  (post) => post.data.difficulty === "Notes" || post.data.oj === "总结" || post.data.oj === "经验"
-).length;
+const wpCount = posts.filter((post) => post.data.category === "比赛 WP").length;
+const reviewCount = posts.filter((post) => post.data.category === "赛后复盘").length;
 const latest = posts[0];
 const latestDate = latest
   ? new Intl.DateTimeFormat("zh-CN", {
@@ -30,11 +29,11 @@ const groupedPosts = Object.entries(
 ).sort((a, b) => Number(b[0]) - Number(a[0]));
 ---
 
-<Layout title="归档 | iYuu Notes" description="按时间整理 iYuu 的题解、总结和复盘。">
+<Layout title="归档 | iYuu Notes" description="按时间整理 iYuu 的比赛 WP、赛后复盘和专题记录。">
   <section class="shell page-intro">
     <p class="eyebrow">Archive</p>
     <h1>归档</h1>
-    <p>这里按时间放所有文章。以后更新题解、总结或者复盘，都会先记到这里，再慢慢长成自己的资料库。</p>
+    <p>这里按时间放所有文章。以后更新比赛 WP、赛后复盘或者专题整理，都会先记到这里。</p>
     <p class="meta-line">
       目前一共 {posts.length} 篇。
       {latest && <> 最近一篇是 <a href={`/blog/${latest.slug}/`}>{latest.data.title}</a> · {latestDate}</>}
@@ -45,12 +44,12 @@ const groupedPosts = Object.entries(
         <dd>{posts.length}</dd>
       </div>
       <div>
-        <dt>标签</dt>
-        <dd>{allTags.length}</dd>
+        <dt>比赛 WP</dt>
+        <dd>{wpCount}</dd>
       </div>
       <div>
         <dt>复盘</dt>
-        <dd>{noteCount}</dd>
+        <dd>{reviewCount}</dd>
       </div>
     </dl>
   </section>
@@ -67,7 +66,7 @@ const groupedPosts = Object.entries(
         <p class="index-meta">这里会按时间一直往下记。</p>
         <div class="index-block">
           <p class="index-label">浏览建议</p>
-          <p class="index-text">想看最近更新就从上往下读；想按专题翻，可以去标签页。</p>
+          <p class="index-text">想按比赛时间看就从上往下翻；想按技术方向回看，可以去标签页。</p>
         </div>
       </div>
     </aside>

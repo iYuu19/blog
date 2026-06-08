@@ -4,12 +4,19 @@
 
 - `src/content/blog`
 
-你现在看到的几篇文章，是先用来搭结构的示例内容。后面你可以自己替换成真实文章，也可以直接把 Word 文档发给我，我来帮你整理成博客文章。
+这个站现在更适合写：
+
+- 比赛 WP
+- 赛后复盘
+- 专题总结
+- 工具记录
+
+后面你可以自己写真实文章，也可以直接把 Word 文档发给我，我来帮你整理成博客文章。
 
 ## 自己写一篇新文章
 
 1. 复制 `src/content/blog/_template.md`
-2. 改文件名，比如 `luogu-p1002.md`
+2. 改文件名，比如 `2026-huanghe-web-wp.md`
 3. 把 `draft: true` 改成 `draft: false`
 4. 改标题、摘要、日期、标签这些信息
 5. 执行：
@@ -18,13 +25,21 @@
 npm run dev
 ```
 
-预览没问题后执行：
+预览没问题后可以执行：
 
 ```bash
 npm run build
 ```
 
-然后把新的 `dist` 上传到 Cloudflare Pages。
+确认无误后提交：
+
+```bash
+git add .
+git commit -m "新增比赛 WP"
+git push
+```
+
+Cloudflare Pages 会自动更新，不需要手动上传 `dist`。
 
 ## 如果你有 Word 文档
 
@@ -38,10 +53,10 @@ npm run build
 
 你最好提前告诉我这篇内容是什么类型：
 
-- 题解
+- 比赛 WP
+- 赛后复盘
 - 专题总结
-- 周总结 / 复盘
-- 随笔 / 个人记录
+- 工具记录
 
 ## 你自己最常改的地方
 
@@ -52,10 +67,13 @@ npm run build
 title: "文章标题"
 description: "一句摘要"
 pubDate: 2026-06-07
-tags: ["标签1", "标签2"]
-oj: "LeetCode"
-difficulty: "Medium"
-language: "C++"
+category: "比赛 WP"
+contest: "比赛名"
+track: "Web"
+tags: ["CTF", "Web", "标签1"]
+oj: "简称，可留空"
+difficulty: "Notes"
+language: "Markdown"
 featured: false
 draft: false
 ---
@@ -65,8 +83,13 @@ draft: false
 
 - `title` 是标题
 - `description` 是列表页显示的摘要
-- `tags` 是标签
-- `oj` 可以写平台名，也可以写“总结”“经验”
+- `category` 建议写 `比赛 WP / 赛后复盘 / 专题总结 / 工具记录`
+- `contest` 写比赛全名
+- `contestSlug` 控制比赛分类页链接，建议用英文或拼音短名
+- `coverImage` 是比赛海报或封面图，放在 `public/contest-covers` 里最方便
+- `track` 写方向，比如 `Web`、`电子取证`、`Misc`
+- `tags` 写具体技术点
+- `oj` 现在更适合写简称，或者不写
 - `difficulty` 不一定非要 Easy / Medium / Hard，也可以写 `Notes`
 - `draft: true` 表示先不公开显示
 

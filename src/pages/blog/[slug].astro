@@ -2,6 +2,7 @@
 import { getCollection, render } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import TagPill from "../../components/TagPill.astro";
+import { getContestSlug } from "../../utils/content";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -33,6 +34,8 @@ const difficultyClassMap: Record<string, string> = {
 };
 
 const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-notes";
+const contestLabel = post.data.contest || post.data.oj || null;
+const contestHref = contestLabel ? `/contests/${getContestSlug(post)}/` : null;
 ---
 
 <Layout title={`${post.data.title} | iYuu Notes`} description={post.data.description}>
@@ -41,9 +44,13 @@ const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-
       <p class="article-back">
         <a href="/blog">返回归档</a>
       </p>
-      <p class="eyebrow">{post.data.oj}</p>
+      <p class="eyebrow">{post.data.category}</p>
       <h1>{post.data.title}</h1>
       <p class="article-description">{post.data.description}</p>
+      <div class="article-context">
+        {contestLabel && (contestHref ? <a href={contestHref}>{contestLabel}</a> : <span>{contestLabel}</span>)}
+        {post.data.track && <span>{post.data.track}</span>}
+      </div>
       <div class="article-meta">
         <span>发布于 {dateText}</span>
         {updatedDateText && <span>更新于 {updatedDateText}</span>}

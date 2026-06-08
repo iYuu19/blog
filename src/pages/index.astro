@@ -3,16 +3,16 @@ import { getCollection } from "astro:content";
 import ArchiveRow from "../components/ArchiveRow.astro";
 import TagPill from "../components/TagPill.astro";
 import Layout from "../layouts/Layout.astro";
+import { getContestCover, getContestName, getContestSlug } from "../utils/content";
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
 
-const noteCandidates = posts.filter(
-  (post) => post.data.difficulty === "Notes" || post.data.oj === "总结" || post.data.oj === "经验"
-);
-const noteCount = noteCandidates.length;
-const notePosts = (noteCandidates.length > 0 ? noteCandidates : posts).slice(0, 4);
+const wpPosts = posts.filter((post) => post.data.category === "比赛 WP");
+const reviewPosts = posts.filter((post) => post.data.category === "赛后复盘");
+const summaryPosts = posts.filter((post) => post.data.category === "专题总结");
+const wpCount = wpPosts.length;
 const allTags = [...new Set(posts.flatMap((post) => post.data.tags))];
 const tags = allTags.slice(0, 12);
 const latest = posts[0];
@@ -20,6 +20,56 @@ const featuredPost = posts.find((post) => post.data.featured) ?? latest;
 const recentPosts = featuredPost
   ? posts.filter((post) => post.slug !== featuredPost.slug).slice(0, 6)
   : posts.slice(0, 6);
+const recentWpPosts = wpPosts.filter((post) => post.slug !== featuredPost?.slug).slice(0, 4);
+const recentReviewPosts = reviewPosts.slice(0, 4);
+const contestCards = Object.values(
+  posts.reduce<
+    Record<
+      string,
+      {
+        name: string;
+        slug: string;
+        count: number;
+        latestTitle: string;
+        latestDate: number;
+        tracks: Set<string>;
+        coverImage: string;
+      }
+    >
+  >((acc, post) => {
+    const contestName = getContestName(post);
+    const contestSlug = getContestSlug(post);
+    const coverImage = getContestCover(post);
+    const publishedAt = post.data.pubDate.valueOf();
+    const previous = acc[contestSlug];
+
+    if (!previous || publishedAt > previous.latestDate) {
+      acc[contestSlug] = {
+        name: contestName,
+        slug: contestSlug,
+        count: (previous?.count ?? 0) + 1,
+        latestTitle: post.data.title,
+        latestDate: publishedAt,
+        tracks: new Set([post.data.track].filter(Boolean)),
+        coverImage: coverImage || previous?.coverImage || ""
+      };
+    } else {
+      previous.count += 1;
+      if (post.data.track) {
+        previous.tracks.add(post.data.track);
+      }
+      if (!previous.coverImage && coverImage) {
+        previous.coverImage = coverImage;
+      }
+    }
+
+    return acc;
+  }, {})
+)
+  .map((contest) => ({ ...contest, tracks: [...contest.tracks] }))
+  .sort((a, b) => b.latestDate - a.latestDate || b.count - a.count)
+  .slice(0, 4);
+const contestCount = new Set(posts.map((post) => post.data.contest || post.data.oj).filter(Boolean)).size;
 const latestDate = latest
   ? new Intl.DateTimeFormat("zh-CN", {
       year: "numeric",
@@ -36,21 +86,21 @@ const featuredDate = featuredPost
   : "";
 ---
 
-<Layout title="iYuu Notes" description="iYuu 的个人刷题笔记站。">
+<Layout title="iYuu Notes" description="iYuu 的比赛 WP、赛后复盘与专题记录。">
   <section class="shell intro">
     <img class="intro-avatar" src="/avatar.jpg" alt="iYuu 的头像" />
     <div class="intro-copy">
-      <p class="eyebrow">Personal Blog</p>
-      <h1>iYuu 的刷题笔记</h1>
-      <p class="intro-lead">先把题做明白，再把过程写明白。</p>
+      <p class="eyebrow">iYuu 的 Blog</p>
+      <h1>iYuu 的 blog</h1>
+      <p class="intro-lead">记录 CTF、电子取证与比赛复盘。</p>
       <p>
-        这里会放题解、专题、小结，也会记下第一次卡住的地方。写出来主要是给以后的自己看，
-        顺便也公开留个痕迹。
+        这里主要整理比赛 WP、赛后复盘和专题总结，内容以 CTF、电子取证等方向为主。
       </p>
       <p>
-        不追求像教程站，也不想装成作品集。它更像一个会慢慢长大的公开笔记本。
+        希望这些记录既方便自己回顾，也能给后来看到的人一点参考。
       </p>
       <div class="hero-links">
+        <a href="/contests">看比赛分类</a>
         <a href="/blog">看全部文章</a>
         <a href="/tags">看标签</a>
         <a href="/about">看看这个站在写什么</a>
@@ -68,12 +118,12 @@ const featuredDate = featuredPost
           <dd>{posts.length}</dd>
         </div>
         <div>
-          <dt>标签</dt>
-          <dd>{allTags.length}</dd>
+          <dt>比赛</dt>
+          <dd>{contestCount}</dd>
         </div>
         <div>
-          <dt>复盘</dt>
-          <dd>{noteCount}</dd>
+          <dt>WP</dt>
+          <dd>{wpCount}</dd>
         </div>
       </dl>
     </div>
@@ -85,19 +135,15 @@ const featuredDate = featuredPost
         <p class="index-title">浏览索引</p>
         <ul class="index-list">
           <li><a href="#featured">先看这一篇</a></li>
-          <li><a href="#recent">最近更新</a></li>
-          <li><a href="#notes">写作习惯</a></li>
+          <li><a href="#writeups">最近比赛 WP</a></li>
+          <li><a href="#contests">按比赛分类</a></li>
+          <li><a href="#reviews">赛后复盘</a></li>
           <li><a href="#tags">标签</a></li>
-          <li><a href="#reviews">总结 / 复盘</a></li>
         </ul>
         <p class="index-meta">目前 {posts.length} 篇，最近更新在 {latestDate || "这几天"}。</p>
         <div class="index-block">
-          <p class="index-label">现在主要写</p>
-          <p class="index-text">刷题题解、CTF 复盘、专题小结，先把自己真的会回头翻的内容留下来。</p>
-        </div>
-        <div class="index-block">
-          <p class="index-label">更新方式</p>
-          <p class="index-text">本地写 Markdown，push 到 GitHub 之后，Cloudflare Pages 会自动部署。</p>
+          <p class="index-label">内容方向</p>
+          <p class="index-text">比赛 WP、电子取证题分析、赛后复盘，以及比赛中反复出现的知识点整理。</p>
         </div>
       </div>
     </aside>
@@ -113,7 +159,9 @@ const featuredDate = featuredPost
               </div>
               <article class="featured-card">
                 <p class="featured-kicker">
-                  {featuredPost.data.oj} / {featuredPost.data.difficulty}
+                  {[featuredPost.data.category, featuredPost.data.contest || featuredPost.data.oj, featuredPost.data.track]
+                    .filter(Boolean)
+                    .join(" / ")}
                 </p>
                 <h3>
                   <a href={`/blog/${featuredPost.slug}/`}>{featuredPost.data.title}</a>
@@ -128,27 +176,68 @@ const featuredDate = featuredPost
           )
         }
 
-        <section class="section" id="recent">
+        <section class="section" id="writeups">
           <div class="section-head">
-            <h2>最近更新</h2>
+            <h2>最近比赛 WP</h2>
             <a class="section-link" href="/blog">查看归档</a>
           </div>
           {
-            recentPosts.length > 0 ? (
+            recentWpPosts.length > 0 ? (
               <div class="archive-list">
-                {recentPosts.map((post) => <ArchiveRow post={post} />)}
+                {recentWpPosts.map((post) => <ArchiveRow post={post} />)}
               </div>
             ) : (
-              <p class="empty-feed">现在文章还不多，先从上面那篇开始，后面会慢慢把目录补起来。</p>
+              <p class="empty-feed">目前公开的比赛 WP 还不多，先从上面那篇开始，后面会慢慢把每场比赛的过程补起来。</p>
             )
           }
+        </section>
+
+        <section class="section" id="contests">
+          <div class="section-head">
+            <h2>按比赛分类</h2>
+            <a class="section-link" href="/contests">查看全部比赛</a>
+          </div>
+          <div class="track-grid">
+            {contestCards.map((contest) => (
+              <a
+                class:list={["track-board", contest.coverImage ? "has-cover" : ""]}
+                href={`/contests/${contest.slug}/`}
+                style={contest.coverImage ? `--contest-cover: url('${contest.coverImage}')` : undefined}
+              >
+                <div class="track-board-content">
+                  <p class="track-name">比赛</p>
+                  <strong>{contest.name}</strong>
+                  <p>{contest.count} 篇文章 · {contest.tracks.join(" / ") || "待补充方向"}</p>
+                  <p>最近一篇：{contest.latestTitle}</p>
+                </div>
+              </a>
+            ))}
+          </div>
         </section>
       </div>
 
       <aside class="side-column">
-        <section class="section side-note" id="notes">
-          <h2>写的时候我想保留什么</h2>
-          <p>先讲题意和判断信号，再讲代码。能把“为什么会想到这条思路”写清楚，就尽量不只贴答案。</p>
+        <section class="section side-note">
+          <h2>写作方式</h2>
+          <p>每篇文章会尽量把题目背景、分析过程和关键结论写清楚，既方便交流，也方便后续回看。</p>
+        </section>
+
+        <section class="section" id="reviews">
+          <h2>赛后复盘</h2>
+          {
+            recentReviewPosts.length > 0 ? (
+              <ul class="link-list note-list">
+                {recentReviewPosts.map((post) => (
+                  <li>
+                    <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+                    <span>{post.data.contest || post.data.oj || post.data.track}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="empty-feed">这里以后会放一场比赛打完后的整体复盘，而不只是单题 WP。</p>
+            )
+          }
         </section>
 
         <section class="section" id="tags">
@@ -158,16 +247,22 @@ const featuredDate = featuredPost
           </div>
         </section>
 
-        <section class="section" id="reviews">
-          <h2>总结 / 复盘</h2>
-          <ul class="link-list note-list">
-            {notePosts.map((post) => (
-              <li>
-                <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
-                <span>{post.data.oj}</span>
-              </li>
-            ))}
-          </ul>
+        <section class="section">
+          <h2>专题总结</h2>
+          {
+            summaryPosts.length > 0 ? (
+              <ul class="link-list note-list">
+                {summaryPosts.slice(0, 4).map((post) => (
+                  <li>
+                    <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+                    <span>{post.data.track || post.data.category}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="empty-feed">等比赛文章积累起来之后，再把常出现的知识点单独整理成专题。</p>
+            )
+          }
         </section>
       </aside>
     </div>

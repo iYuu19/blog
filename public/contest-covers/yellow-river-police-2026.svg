@@ -1,0 +1,63 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="240" y1="48" x2="1360" y2="852" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#071845"/>
+      <stop offset="0.56" stop-color="#0A2867"/>
+      <stop offset="1" stop-color="#040E24"/>
+    </linearGradient>
+    <radialGradient id="goldGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1118 646) rotate(176.314) scale(686 304)">
+      <stop stop-color="#FFCB64" stop-opacity="0.48"/>
+      <stop offset="1" stop-color="#FFCB64" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="river" x1="158" y1="742" x2="1452" y2="386" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF2B8"/>
+      <stop offset="0.34" stop-color="#F1C96C"/>
+      <stop offset="0.76" stop-color="#D89E45"/>
+      <stop offset="1" stop-color="#FFF2BE"/>
+    </linearGradient>
+    <filter id="blurRiver" x="86" y="296" width="1412" height="432" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="15" result="effect1_foregroundBlur_0_1"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" rx="36" fill="url(#bg)"/>
+  <rect width="1600" height="900" rx="36" fill="url(#goldGlow)"/>
+  <g opacity="0.18" stroke="#2C60D8" stroke-width="2">
+    <path d="M1090 68V244"/><path d="M1126 68V244"/><path d="M1162 68V244"/><path d="M1198 68V244"/><path d="M1234 68V244"/>
+  </g>
+  <g opacity="0.18" fill="#7AA7FF" font-family="monospace" font-size="18">
+    <text x="1076" y="112">101001 001111 110010 001101</text>
+    <text x="1128" y="146">010101 111000 001101 101101</text>
+    <text x="1164" y="180">101110 001001 111000 010110</text>
+  </g>
+  <g opacity="0.2" stroke="#265BCB" stroke-width="2">
+    <path d="M0 760C182 726 332 716 500 744C704 779 898 846 1090 812C1282 778 1416 722 1600 740"/>
+    <path d="M0 806C182 772 332 762 500 790C704 825 898 892 1090 858C1282 824 1416 768 1600 786"/>
+  </g>
+  <g filter="url(#blurRiver)">
+    <path d="M138 702C302 664 410 624 496 554C570 493 620 404 704 404C796 404 846 498 936 500C1044 502 1088 430 1188 430C1298 430 1380 486 1446 540" stroke="url(#river)" stroke-width="18" stroke-linecap="round"/>
+  </g>
+  <path d="M138 702C302 664 410 624 496 554C570 493 620 404 704 404C796 404 846 498 936 500C1044 502 1088 430 1188 430C1298 430 1380 486 1446 540" stroke="#FFF1BC" stroke-width="4" stroke-linecap="round"/>
+  <g fill="#E5B45C" opacity="0.86">
+    <path d="M186 650H234V658H186V650ZM210 602L231 650H189L210 602Z"/>
+    <path d="M384 642H474V650H384V642ZM429 556L458 642H400L429 556Z"/>
+    <path d="M980 620H1070V628H980V620ZM1025 540L1054 620H996L1025 540Z"/>
+    <path d="M1298 602H1386V610H1298V602ZM1342 518L1368 602H1316L1342 518Z"/>
+  </g>
+  <g fill="#F0C96D">
+    <circle cx="158" cy="158" r="42"/>
+    <circle cx="262" cy="158" r="42" opacity="0.44"/>
+  </g>
+  <g fill="#FFE8AA" font-family="'Noto Serif SC', serif">
+    <text x="726" y="224" font-size="54" font-weight="700">第四届黄河流域公安院校</text>
+    <text x="726" y="294" font-size="58" font-weight="700">网络安全技能挑战赛</text>
+    <text x="726" y="350" font-size="29" opacity="0.88">THE 4TH YELLOW RIVER BASIN PUBLIC SECURITY COLLEGES</text>
+    <text x="726" y="388" font-size="29" opacity="0.88">CYBERSPACE SECURITY SKILLS CHALLENGE</text>
+  </g>
+  <g fill="#F5D58A" font-family="'Noto Sans SC', sans-serif" font-size="24">
+    <text x="726" y="468">比赛时间 2026 年 6 月 6 日</text>
+    <text x="1016" y="468">赛制 CTF 个人夺旗赛</text>
+    <text x="1244" y="468">方向 Web / Misc / Forensics</text>
+  </g>
+</svg>

@@ -1,0 +1,83 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import { getContestCover, getContestName, getContestSlug } from "../../utils/content";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const contests = Object.values(
+  posts.reduce<
+    Record<
+      string,
+      {
+        name: string;
+        slug: string;
+        count: number;
+        latestTitle: string;
+        latestDate: number;
+        tracks: Set<string>;
+        coverImage: string;
+      }
+    >
+  >((acc, post) => {
+    const name = getContestName(post);
+    const slug = getContestSlug(post);
+    const coverImage = getContestCover(post);
+    const publishedAt = post.data.pubDate.valueOf();
+    const previous = acc[slug];
+
+    if (!previous || publishedAt > previous.latestDate) {
+      acc[slug] = {
+        name,
+        slug,
+        count: (previous?.count ?? 0) + 1,
+        latestTitle: post.data.title,
+        latestDate: publishedAt,
+        tracks: new Set([post.data.track].filter(Boolean)),
+        coverImage: coverImage || previous?.coverImage || ""
+      };
+    } else {
+      previous.count += 1;
+      if (post.data.track) {
+        previous.tracks.add(post.data.track);
+      }
+      if (!previous.coverImage && coverImage) {
+        previous.coverImage = coverImage;
+      }
+    }
+
+    return acc;
+  }, {})
+)
+  .map((contest) => ({ ...contest, tracks: [...contest.tracks] }))
+  .sort((a, b) => b.latestDate - a.latestDate || b.count - a.count);
+---
+
+<Layout title="比赛 | iYuu Notes" description="按比赛查看 iYuu 的 WP、复盘与题目记录。">
+  <section class="shell page-intro">
+    <p class="eyebrow">Contest Index</p>
+    <h1>比赛</h1>
+    <p>这里按比赛整理文章。以后一场比赛里的不同题目和复盘，都可以放到同一个比赛分类下面。</p>
+  </section>
+
+  <section class="shell contest-index-grid section-block">
+    {contests.map((contest) => (
+      <a
+        class:list={["contest-board", contest.coverImage ? "has-cover" : ""]}
+        href={`/contests/${contest.slug}/`}
+        style={contest.coverImage ? `--contest-cover: url('${contest.coverImage}')` : undefined}
+      >
+        <div class="contest-board-content">
+          <div class="contest-board-head">
+            <strong>{contest.name}</strong>
+            <span>{contest.count} 篇</span>
+          </div>
+          <p>方向：{contest.tracks.join(" / ") || "待补充"}</p>
+          <p>最新内容：{contest.latestTitle}</p>
+        </div>
+      </a>
+    ))}
+  </section>
+</Layout>

@@ -23,6 +23,8 @@ const difficultyClassMap: Record<string, string> = {
 };
 
 const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-notes";
+const contestLabel = post.data.contest || post.data.oj || "未命名比赛";
+const kickerParts = [post.data.category, contestLabel, post.data.track].filter(Boolean);
 ---
 
 <article class="archive-row">
@@ -32,7 +34,7 @@ const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-
   </div>
 
   <div class="archive-body">
-    <p class="archive-kicker">{post.data.oj}</p>
+    <p class="archive-kicker">{kickerParts.join(" / ")}</p>
     <div class="archive-title-line">
       <h3>
         <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
@@ -41,6 +43,7 @@ const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-
     </div>
     <p class="archive-summary">{post.data.description}</p>
     <div class="archive-meta">
+      {post.data.track && <span>{post.data.track}</span>}
       <span class:list={["difficulty-pill", difficultyClass]}>{post.data.difficulty}</span>
       <span>{post.data.language}</span>
       <span>{post.data.tags.length} 个标签</span>
