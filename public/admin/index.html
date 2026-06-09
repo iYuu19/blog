@@ -11,7 +11,7 @@
       <p class="admin-eyebrow">iYuu Notes</p>
       <h1>后台入口不用太多，顺手最重要。</h1>
       <p class="admin-welcome__lead">
-        这里沿用前台博客的气质，只保留最常用的入口。平时写文章、整理分类、改页面文案，都从右上和右下这两块进。
+        这里沿用前台博客的气质，只保留最常用的入口。平时写文章、整理分类、改页面文案，都从右上和右下这两块进，不过要先用 GitHub 登录。
       </p>
       <div class="admin-welcome__chips">
         <span>写作发布</span>
@@ -20,7 +20,7 @@
         <span>站点设置</span>
       </div>
       <div class="admin-welcome__actions">
-        <a href="/admin/#/collections/blog">开始写文章</a>
+        <a href="/admin/#/collections/blog" data-admin-requires-auth="true">登录后开始写文章</a>
         <button type="button" id="admin-welcome-close">收起这块</button>
       </div>
     </aside>
@@ -35,25 +35,26 @@
           <h2 id="admin-current-label">先从这里走</h2>
           <p id="admin-current-text">模板、分类、文章、页面文案四个入口最常用。</p>
         </div>
+        <p class="admin-shortcuts__hint" id="admin-auth-hint">后台核心加载中，马上就好。</p>
 
         <nav class="admin-shortcuts__grid">
-          <a href="/admin/#/collections/blog" data-admin-hash="#/collections/blog">
+          <a href="/admin/#/collections/blog" data-admin-hash="#/collections/blog" data-admin-requires-auth="true">
             <strong>文章发布</strong>
             <span>新建、编辑、草稿</span>
           </a>
-          <a href="/admin/#/collections/template_center" data-admin-hash="#/collections/template_center">
+          <a href="/admin/#/collections/template_center" data-admin-hash="#/collections/template_center" data-admin-requires-auth="true">
             <strong>写作模板</strong>
             <span>先找结构再开写</span>
           </a>
-          <a href="/admin/#/collections/category_center" data-admin-hash="#/collections/category_center">
+          <a href="/admin/#/collections/category_center" data-admin-hash="#/collections/category_center" data-admin-requires-auth="true">
             <strong>分类体系</strong>
             <span>说明、排序、结构</span>
           </a>
-          <a href="/admin/#/collections/page_center" data-admin-hash="#/collections/page_center">
+          <a href="/admin/#/collections/page_center" data-admin-hash="#/collections/page_center" data-admin-requires-auth="true">
             <strong>页面文案</strong>
             <span>首页、关于、详情页</span>
           </a>
-          <a href="/admin/#/collections/site" data-admin-hash="#/collections/site">
+          <a href="/admin/#/collections/site" data-admin-hash="#/collections/site" data-admin-requires-auth="true">
             <strong>站点设置</strong>
             <span>品牌、导航、评论</span>
           </a>
@@ -79,11 +80,119 @@
       const currentText = document.getElementById("admin-current-text");
       const lastRouteWrap = document.getElementById("admin-last-route");
       const lastRouteLink = document.getElementById("admin-last-route-link");
+      const authHint = document.getElementById("admin-auth-hint");
 
       const welcomeStorageKey = "iyuu-admin-welcome-dismissed-v4";
       const shortcutsStorageKey = "iyuu-admin-shortcuts-collapsed-v4";
       const lastRouteStorageKey = "iyuu-admin-last-route-v4";
       const authenticatedCollapseStorageKey = "iyuu-admin-auth-collapsed-v1";
+      const cmsScriptSources = [
+        "https://unpkg.com/decap-cms@3.13.0/dist/decap-cms.js",
+        "https://cdn.jsdelivr.net/npm/decap-cms@3.13.0/dist/decap-cms.js"
+      ];
+
+      function setAuthHintState(state) {
+        if (!authHint) {
+          return;
+        }
+
+        const content = {
+          loading: "后台核心加载中，马上就好。",
+          login: "先点击页面中间的“使用 GitHub 登录”，登录后右侧这些入口才会真正打开。",
+          error: "后台核心没加载出来。通常是 CDN 资源加载失败，刷新后重试，或换个网络再打开。",
+          ready: ""
+        };
+
+        authHint.hidden = state === "ready";
+        authHint.dataset.state = state;
+        authHint.textContent = content[state] ?? content.loading;
+      }
+
+      function findLoginButton() {
+        const root = document.getElementById("nc-root");
+        if (!root) {
+          return null;
+        }
+
+        return (
+          Array.from(root.querySelectorAll("button")).find((button) => /github/i.test(button.textContent || "")) ?? null
+        );
+      }
+
+      function pulseLoginButton() {
+        const loginButton = findLoginButton();
+        if (!loginButton) {
+          return;
+        }
+
+        loginButton.scrollIntoView({ behavior: "smooth", block: "center" });
+        loginButton.focus({ preventScroll: true });
+        loginButton.classList.add("iyuu-login-pulse");
+        window.setTimeout(() => {
+          loginButton.classList.remove("iyuu-login-pulse");
+        }, 1600);
+      }
+
+      function isAuthenticated() {
+        return document.body.classList.contains("iyuu-admin-authenticated");
+      }
+
+      function bindAuthRequiredLinks() {
+        document.querySelectorAll("[data-admin-requires-auth]").forEach((link) => {
+          if (link.dataset.adminBound === "true") {
+            return;
+          }
+
+          link.dataset.adminBound = "true";
+          link.addEventListener("click", (event) => {
+            if (isAuthenticated()) {
+              return;
+            }
+
+            event.preventDefault();
+            setAuthHintState(document.getElementById("nc-root") ? "login" : "loading");
+            pulseLoginButton();
+          });
+        });
+      }
+
+      function loadCmsScript(index = 0) {
+        if (document.getElementById("nc-root")) {
+          setAuthHintState("login");
+          return;
+        }
+
+        const source = cmsScriptSources[index];
+        if (!source) {
+          setAuthHintState("error");
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src = source;
+        script.async = true;
+        script.onload = () => {
+          window.setTimeout(() => {
+            if (document.getElementById("nc-root")) {
+              setAuthHintState("login");
+              updateCurrentState();
+              decorateDecapUi();
+              bindAuthRequiredLinks();
+              return;
+            }
+
+            if (index === cmsScriptSources.length - 1) {
+              setAuthHintState("error");
+            } else {
+              loadCmsScript(index + 1);
+            }
+          }, 1200);
+        };
+        script.onerror = () => {
+          loadCmsScript(index + 1);
+        };
+        document.body.appendChild(script);
+      }
 
       const routeMeta = [
         {
@@ -138,9 +247,13 @@
       function updateCurrentState() {
         const hash = window.location.hash || "#/";
         const meta = getMeta(hash);
+        const loggedIn = isAuthenticated();
 
         currentLabel.textContent = meta.label;
-        currentText.textContent = meta.text;
+        currentText.textContent =
+          !loggedIn && hash.startsWith("#/collections/")
+            ? "这些入口要在 GitHub 登录后才会真正打开，先点中间的登录按钮。"
+            : meta.text;
 
         document.querySelectorAll("[data-admin-hash]").forEach((link) => {
           const targetHash = link.getAttribute("data-admin-hash");
@@ -216,6 +329,7 @@
         document.body.classList.toggle("iyuu-admin-authenticated", authenticated);
         document.body.dataset.adminScreen = screen;
         clearDecapDecorations(root);
+        setAuthHintState(authenticated ? "ready" : "login");
 
         if (screen === "editor") {
           if (authenticated) {
@@ -289,6 +403,8 @@
       window.addEventListener("hashchange", decorateDecapUi);
       updateCurrentState();
       decorateDecapUi();
+      bindAuthRequiredLinks();
+      setAuthHintState("loading");
 
       const adminObserver = new MutationObserver(() => {
         window.requestAnimationFrame(() => {
@@ -301,8 +417,8 @@
         childList: true,
         subtree: true
       });
-    </script>
 
-    <script src="https://unpkg.com/decap-cms@3.13.0/dist/decap-cms.js"></script>
+      loadCmsScript();
+    </script>
   </body>
 </html>
