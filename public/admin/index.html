@@ -83,6 +83,7 @@
       const welcomeStorageKey = "iyuu-admin-welcome-dismissed-v4";
       const shortcutsStorageKey = "iyuu-admin-shortcuts-collapsed-v4";
       const lastRouteStorageKey = "iyuu-admin-last-route-v4";
+      const authenticatedCollapseStorageKey = "iyuu-admin-auth-collapsed-v1";
 
       const routeMeta = [
         {
@@ -159,6 +160,115 @@
         }
       }
 
+      function getAdminScreen(hash) {
+        if (!hash || hash === "#/" || hash === "#") {
+          return "home";
+        }
+
+        if (hash.includes("/entries/") || hash.includes("/new")) {
+          return "editor";
+        }
+
+        if (hash.startsWith("#/workflow")) {
+          return "workflow";
+        }
+
+        if (hash.startsWith("#/collections/")) {
+          return "collection";
+        }
+
+        return "home";
+      }
+
+      function getEditorToolbar(root) {
+        const splitPane = root.querySelector(".Resizer.vertical")?.parentElement;
+        const toolbarAnchor = root.querySelector('a[href^="/collections/"]');
+
+        if (!splitPane || !toolbarAnchor) {
+          return null;
+        }
+
+        let candidate = toolbarAnchor.closest("div");
+        while (candidate && candidate !== root) {
+          if (candidate !== splitPane && candidate.querySelector("button")) {
+            return candidate;
+          }
+
+          candidate = candidate.parentElement;
+        }
+
+        return null;
+      }
+
+      function decorateDecapUi() {
+        const root = document.getElementById("nc-root");
+        if (!root) {
+          return;
+        }
+
+        const hash = window.location.hash || "#/";
+        const screen = getAdminScreen(hash);
+        const header = root.querySelector("header");
+        const sidebar = root.querySelector("aside");
+        const main = root.querySelector("main");
+        const authenticated = Boolean(screen !== "home" || header || main);
+
+        document.body.classList.toggle("iyuu-admin-authenticated", authenticated);
+        document.body.dataset.adminScreen = screen;
+
+        if (header) {
+          header.setAttribute("data-iyuu-header", "true");
+        }
+
+        if (sidebar) {
+          sidebar.setAttribute("data-iyuu-sidebar", "true");
+        }
+
+        if (main) {
+          main.setAttribute("data-iyuu-main", "true");
+
+          const mainBlocks = Array.from(main.children).filter((node) => node.nodeType === 1);
+          mainBlocks[0]?.setAttribute("data-iyuu-main-top", "true");
+          mainBlocks[1]?.setAttribute("data-iyuu-main-controls", "true");
+          mainBlocks.slice(2).forEach((node) => {
+            node.setAttribute("data-iyuu-main-content", "true");
+          });
+        }
+
+        root.querySelectorAll('aside a[href^="/collections/"]').forEach((link) => {
+          link.setAttribute("data-iyuu-sidebar-link", "true");
+        });
+
+        root.querySelectorAll('a[href*="/entries/"]').forEach((link) => {
+          link.setAttribute("data-iyuu-entry-link", "true");
+          link.closest("li")?.setAttribute("data-iyuu-entry-card", "true");
+        });
+
+        const editorToolbar = getEditorToolbar(root);
+        if (editorToolbar) {
+          editorToolbar.setAttribute("data-iyuu-editor-toolbar", "true");
+        }
+
+        const splitPaneResizer = root.querySelector(".Resizer.vertical");
+        if (splitPaneResizer) {
+          const splitPane = splitPaneResizer.parentElement;
+          splitPane?.setAttribute("data-iyuu-editor-split", "true");
+          splitPaneResizer.previousElementSibling?.setAttribute("data-iyuu-editor-controls", "true");
+          splitPaneResizer.nextElementSibling?.setAttribute("data-iyuu-editor-preview", "true");
+        }
+
+        if (authenticated) {
+          welcome?.setAttribute("hidden", "hidden");
+
+          if (window.localStorage.getItem(authenticatedCollapseStorageKey) !== "true") {
+            shortcuts?.classList.add("is-collapsed");
+            shortcutsToggle?.setAttribute("aria-expanded", "false");
+            window.localStorage.setItem(shortcutsStorageKey, "true");
+            window.localStorage.setItem(authenticatedCollapseStorageKey, "true");
+          }
+        }
+      }
+
       if (window.localStorage.getItem(welcomeStorageKey) === "true") {
         welcome?.setAttribute("hidden", "hidden");
       }
@@ -180,7 +290,21 @@
       });
 
       window.addEventListener("hashchange", updateCurrentState);
+      window.addEventListener("hashchange", decorateDecapUi);
       updateCurrentState();
+      decorateDecapUi();
+
+      const adminObserver = new MutationObserver(() => {
+        window.requestAnimationFrame(() => {
+          updateCurrentState();
+          decorateDecapUi();
+        });
+      });
+
+      adminObserver.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
     </script>
 
     <script src="https://unpkg.com/decap-cms@3.13.0/dist/decap-cms.js"></script>
