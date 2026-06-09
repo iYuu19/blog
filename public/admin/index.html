@@ -180,6 +180,26 @@
         return "home";
       }
 
+      function clearDecapDecorations(root) {
+        const decoratedAttributes = [
+          "data-iyuu-header",
+          "data-iyuu-sidebar",
+          "data-iyuu-main",
+          "data-iyuu-main-top",
+          "data-iyuu-main-controls",
+          "data-iyuu-main-content",
+          "data-iyuu-sidebar-link",
+          "data-iyuu-entry-link",
+          "data-iyuu-entry-card"
+        ];
+
+        decoratedAttributes.forEach((attribute) => {
+          root.querySelectorAll(`[${attribute}]`).forEach((node) => {
+            node.removeAttribute(attribute);
+          });
+        });
+      }
+
       function decorateDecapUi() {
         const root = document.getElementById("nc-root");
         if (!root) {
@@ -195,6 +215,15 @@
 
         document.body.classList.toggle("iyuu-admin-authenticated", authenticated);
         document.body.dataset.adminScreen = screen;
+        clearDecapDecorations(root);
+
+        if (screen === "editor") {
+          if (authenticated) {
+            welcome?.setAttribute("hidden", "hidden");
+          }
+
+          return;
+        }
 
         if (header) {
           header.setAttribute("data-iyuu-header", "true");
