@@ -247,12 +247,6 @@
         const editorToolbar = getEditorToolbar(root);
         if (editorToolbar) {
           editorToolbar.setAttribute("data-iyuu-editor-toolbar", "true");
-
-          const editorShell = editorToolbar.parentElement;
-          editorShell?.setAttribute("data-iyuu-editor-shell", "true");
-
-          const viewControls = editorShell?.querySelector('button[title]')?.parentElement;
-          viewControls?.setAttribute("data-iyuu-view-controls", "true");
         }
 
         const splitPaneResizer = root.querySelector(".Resizer.vertical");
@@ -262,24 +256,6 @@
           const editorControls = splitPaneResizer.previousElementSibling;
           editorControls?.setAttribute("data-iyuu-editor-controls", "true");
           splitPaneResizer.nextElementSibling?.setAttribute("data-iyuu-editor-preview", "true");
-
-          const editorForm = editorControls?.querySelector("div");
-          editorForm?.setAttribute("data-iyuu-editor-form", "true");
-
-          editorControls?.querySelectorAll('label[for]').forEach((label) => {
-            const topbar = label.closest("div");
-            const fieldBlock = topbar?.parentElement;
-            const fieldName = label.textContent?.trim().replace(/\s+/g, " ");
-
-            if (!fieldBlock || !fieldName) {
-              return;
-            }
-
-            if (fieldBlock.querySelector("input, textarea, select, [contenteditable='true']")) {
-              fieldBlock.setAttribute("data-iyuu-editor-field", "true");
-              fieldBlock.setAttribute("data-field-name", fieldName);
-            }
-          });
         }
 
         if (authenticated) {
