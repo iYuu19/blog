@@ -7,268 +7,176 @@
     <link rel="stylesheet" href="/admin/admin.css" />
   </head>
   <body>
-    <div class="admin-commandbar">
-      <div class="admin-commandbar__intro">
-        <p class="admin-eyebrow">iYuu Workspace</p>
-        <div>
-          <h1>后台工作台</h1>
-          <p id="admin-current-description">把常用操作按工作流收在一起，减少来回找入口。</p>
-        </div>
+    <aside class="admin-welcome" id="admin-welcome">
+      <p class="admin-eyebrow">iYuu Notes</p>
+      <h1>后台入口不用太多，顺手最重要。</h1>
+      <p class="admin-welcome__lead">
+        这里沿用前台博客的气质，只保留最常用的入口。平时写文章、整理分类、改页面文案，都从右上和右下这两块进。
+      </p>
+      <div class="admin-welcome__chips">
+        <span>写作发布</span>
+        <span>分类体系</span>
+        <span>页面文案</span>
+        <span>站点设置</span>
       </div>
-      <div class="admin-commandbar__meta">
-        <span class="admin-commandbar__label">当前位置</span>
-        <strong id="admin-current-label">后台首页</strong>
-      </div>
-      <div class="admin-commandbar__actions">
-        <a href="/admin/#/" id="admin-home-link">回到后台首页</a>
-        <a href="/" target="_blank" rel="noreferrer">查看前台</a>
-      </div>
-    </div>
-
-    <aside class="admin-dock" id="admin-dock" aria-label="后台工作台">
-      <button class="admin-dock__toggle" type="button" id="admin-dock-toggle" aria-expanded="true">
-        工作台
-      </button>
-
-      <div class="admin-dock__panel">
-        <section class="admin-dock__hero">
-          <p class="admin-eyebrow">Dashboard</p>
-          <h2>先做什么，一眼就能决定</h2>
-          <p>
-            这里把写作发布、站点维护和辅助入口分开整理。平时可以从这里进，编辑正文时也能随时收起。
-          </p>
-          <div class="admin-dock__hero-actions">
-            <a href="/admin/#/collections/blog" data-admin-hash="#/collections/blog">开始写文章</a>
-            <a href="/admin/#/collections/page_center" data-admin-hash="#/collections/page_center">改页面文案</a>
-          </div>
-        </section>
-
-        <section class="admin-section">
-          <div class="admin-section__head">
-            <p class="admin-eyebrow">Workflow</p>
-            <h3>写作发布</h3>
-          </div>
-          <div class="admin-card-grid">
-            <a class="admin-card" href="/admin/#/collections/template_center" data-admin-hash="#/collections/template_center">
-              <span class="admin-card__kicker">第 1 步</span>
-              <strong>写作模板</strong>
-              <p>先选一份最像的模板，减少漏结构和漏复盘。</p>
-            </a>
-            <a class="admin-card" href="/admin/#/collections/category_center" data-admin-hash="#/collections/category_center">
-              <span class="admin-card__kicker">第 2 步</span>
-              <strong>分类体系</strong>
-              <p>先决定这篇内容该放哪类，顺手检查分类说明和排序。</p>
-            </a>
-            <a class="admin-card admin-card--accent" href="/admin/#/collections/blog" data-admin-hash="#/collections/blog">
-              <span class="admin-card__kicker">第 3 步</span>
-              <strong>文章发布</strong>
-              <p>新建、编辑、草稿、首页推荐都在这里，是真正开始写正文的入口。</p>
-            </a>
-          </div>
-        </section>
-
-        <section class="admin-section">
-          <div class="admin-section__head">
-            <p class="admin-eyebrow">Structure</p>
-            <h3>站点维护</h3>
-          </div>
-          <div class="admin-card-grid">
-            <a class="admin-card" href="/admin/#/collections/site" data-admin-hash="#/collections/site">
-              <span class="admin-card__kicker">品牌与导航</span>
-              <strong>站点设置</strong>
-              <p>博客标题、品牌简称、导航、关于页和评论设置。</p>
-            </a>
-            <a class="admin-card" href="/admin/#/collections/page_center" data-admin-hash="#/collections/page_center">
-              <span class="admin-card__kicker">固定文案</span>
-              <strong>页面文案</strong>
-              <p>首页、留言板、归档、404 和详情页文案都集中在这里。</p>
-            </a>
-            <a class="admin-card" href="/admin/#/collections/site/entries/site_navigation" data-admin-hash="#/collections/site/entries/site_navigation">
-              <span class="admin-card__kicker">快捷直达</span>
-              <strong>导航菜单</strong>
-              <p>需要改顶栏入口时，直接跳到导航配置，不用再多点一层。</p>
-            </a>
-          </div>
-        </section>
-
-        <section class="admin-section">
-          <div class="admin-section__head">
-            <p class="admin-eyebrow">Support</p>
-            <h3>辅助入口</h3>
-          </div>
-          <div class="admin-card-grid admin-card-grid--compact">
-            <a class="admin-card admin-card--soft" href="/admin/#/collections/help" data-admin-hash="#/collections/help">
-              <span class="admin-card__kicker">说明</span>
-              <strong>使用帮助</strong>
-              <p>忘了去哪里改、字段怎么填，就先看这里。</p>
-            </a>
-            <a class="admin-card admin-card--soft" href="/admin/#/collections/page_center/entries/home_page_copy" data-admin-hash="#/collections/page_center/entries/home_page_copy">
-              <span class="admin-card__kicker">常改入口</span>
-              <strong>首页文案</strong>
-              <p>直接跳到最常改的首页固定文案，适合快速调风格。</p>
-            </a>
-            <a class="admin-card admin-card--soft" href="/" target="_blank" rel="noreferrer">
-              <span class="admin-card__kicker">检查</span>
-              <strong>前台预览</strong>
-              <p>改完后直接打开站点，确认文案、导航和结构表现。</p>
-            </a>
-          </div>
-        </section>
-
-        <section class="admin-last-route" id="admin-last-route" hidden>
-          <p class="admin-eyebrow">Resume</p>
-          <div class="admin-last-route__body">
-            <div>
-              <h3>继续上次位置</h3>
-              <p id="admin-last-route-text">上次停在后台某个页面，可以直接接着做。</p>
-            </div>
-            <a href="/admin/#/" id="admin-last-route-link">继续</a>
-          </div>
-        </section>
+      <div class="admin-welcome__actions">
+        <a href="/admin/#/collections/blog">开始写文章</a>
+        <button type="button" id="admin-welcome-close">收起这块</button>
       </div>
     </aside>
 
-    <div id="nc-root"></div>
+    <aside class="admin-shortcuts" id="admin-shortcuts" aria-label="后台快捷入口">
+      <button class="admin-shortcuts__toggle" type="button" id="admin-shortcuts-toggle" aria-expanded="true">
+        常用入口
+      </button>
+      <div class="admin-shortcuts__panel">
+        <div class="admin-shortcuts__head">
+          <p class="admin-eyebrow">Quick Access</p>
+          <h2 id="admin-current-label">先从这里走</h2>
+          <p id="admin-current-text">模板、分类、文章、页面文案四个入口最常用。</p>
+        </div>
+
+        <nav class="admin-shortcuts__grid">
+          <a href="/admin/#/collections/blog" data-admin-hash="#/collections/blog">
+            <strong>文章发布</strong>
+            <span>新建、编辑、草稿</span>
+          </a>
+          <a href="/admin/#/collections/template_center" data-admin-hash="#/collections/template_center">
+            <strong>写作模板</strong>
+            <span>先找结构再开写</span>
+          </a>
+          <a href="/admin/#/collections/category_center" data-admin-hash="#/collections/category_center">
+            <strong>分类体系</strong>
+            <span>说明、排序、结构</span>
+          </a>
+          <a href="/admin/#/collections/page_center" data-admin-hash="#/collections/page_center">
+            <strong>页面文案</strong>
+            <span>首页、关于、详情页</span>
+          </a>
+          <a href="/admin/#/collections/site" data-admin-hash="#/collections/site">
+            <strong>站点设置</strong>
+            <span>品牌、导航、评论</span>
+          </a>
+          <a href="/" target="_blank" rel="noreferrer">
+            <strong>查看前台</strong>
+            <span>改完直接检查效果</span>
+          </a>
+        </nav>
+
+        <div class="admin-shortcuts__meta" id="admin-last-route" hidden>
+          <span>上次位置</span>
+          <a href="/admin/#/" id="admin-last-route-link">继续刚才编辑的内容</a>
+        </div>
+      </div>
+    </aside>
 
     <script>
-      const body = document.body;
-      const dock = document.getElementById("admin-dock");
-      const dockToggle = document.getElementById("admin-dock-toggle");
+      const welcome = document.getElementById("admin-welcome");
+      const closeButton = document.getElementById("admin-welcome-close");
+      const shortcuts = document.getElementById("admin-shortcuts");
+      const shortcutsToggle = document.getElementById("admin-shortcuts-toggle");
       const currentLabel = document.getElementById("admin-current-label");
-      const currentDescription = document.getElementById("admin-current-description");
+      const currentText = document.getElementById("admin-current-text");
       const lastRouteWrap = document.getElementById("admin-last-route");
-      const lastRouteText = document.getElementById("admin-last-route-text");
       const lastRouteLink = document.getElementById("admin-last-route-link");
 
-      const dockStorageKey = "iyuu-admin-dock-collapsed-v3";
-      const lastRouteStorageKey = "iyuu-admin-last-route-v3";
+      const welcomeStorageKey = "iyuu-admin-welcome-dismissed-v4";
+      const shortcutsStorageKey = "iyuu-admin-shortcuts-collapsed-v4";
+      const lastRouteStorageKey = "iyuu-admin-last-route-v4";
 
       const routeMeta = [
         {
           match: "#/collections/blog",
           label: "文章发布",
-          description: "这里负责新建、编辑、草稿和首页推荐，是内容生产主入口。",
-          view: "collection"
+          text: "现在在文章区，适合直接新建、改草稿或补正文。"
         },
         {
           match: "#/collections/template_center",
           label: "写作模板",
-          description: "先确定结构，再开始写，最适合比赛 WP 和复盘内容。",
-          view: "collection"
+          text: "先看结构，再开始写，最接近前台博客目前的内容节奏。"
         },
         {
           match: "#/collections/category_center",
           label: "分类体系",
-          description: "先理结构，再写文章。分类名、说明和排序都从这里维护。",
-          view: "collection"
+          text: "先理结构再发文，分类名、说明和排序都在这里维护。"
         },
         {
           match: "#/collections/page_center",
           label: "页面文案",
-          description: "集中管理首页、归档、留言板和详情页的固定文案。",
-          view: "collection"
+          text: "首页、关于页、归档页和详情页固定文案都在这里。"
         },
         {
           match: "#/collections/site",
           label: "站点设置",
-          description: "博客品牌、导航、关于页和评论配置都在这里。",
-          view: "collection"
+          text: "品牌、导航和评论配置属于这一层。"
         },
         {
           match: "#/collections/help",
           label: "使用帮助",
-          description: "忘了怎么改、该去哪里改时，先回这里看说明。",
-          view: "collection"
+          text: "一时忘了去哪里改，可以先看说明。"
         }
       ];
 
-      function getRouteMeta(hash) {
-        if (!hash || hash === "#" || hash === "#/") {
+      function getMeta(hash) {
+        if (!hash || hash === "#/" || hash === "#") {
           return {
-            label: "后台首页",
-            description: "把常用操作按工作流收在一起，减少来回找入口。",
-            view: "home"
+            label: "先从这里走",
+            text: "模板、分类、文章、页面文案四个入口最常用。"
           };
         }
 
         const matched = routeMeta.find((item) => hash.startsWith(item.match));
-        const base = matched ?? {
-          label: "后台页面",
-          description: "当前正在浏览后台里的某个具体页面。",
-          view: "collection"
-        };
-
-        if (hash.includes("/entries/")) {
-          return {
-            ...base,
-            view: "entry",
-            description: `${base.description} 现在已经进入具体条目，适合专注编辑。`
-          };
-        }
-
-        if (hash.includes("/new")) {
-          return {
-            ...base,
-            view: "new",
-            description: `${base.description} 当前是新建流程，可以按字段顺序一路填完。`
-          };
-        }
-
-        return base;
-      }
-
-      function normalizeAdminHref(hash) {
-        return hash && hash.startsWith("#") ? `/admin/${hash}` : "/admin/#/";
-      }
-
-      function syncLastRoute(hash) {
-        if (!hash || hash === "#/" || hash === "#") {
-          return;
-        }
-
-        window.localStorage.setItem(lastRouteStorageKey, hash);
-      }
-
-      function updateLastRoute() {
-        const savedHash = window.localStorage.getItem(lastRouteStorageKey);
-
-        if (!savedHash || savedHash === "#/" || savedHash === "#") {
-          lastRouteWrap?.setAttribute("hidden", "hidden");
-          return;
-        }
-
-        const meta = getRouteMeta(savedHash);
-        lastRouteLink.href = normalizeAdminHref(savedHash);
-        lastRouteText.textContent = `上次停在「${meta.label}」，可以直接继续。`;
-        lastRouteWrap?.removeAttribute("hidden");
+        return (
+          matched ?? {
+            label: "后台编辑中",
+            text: "你现在已经进入具体后台页面，可以继续专注改内容。"
+          }
+        );
       }
 
       function updateCurrentState() {
         const hash = window.location.hash || "#/";
-        const meta = getRouteMeta(hash);
+        const meta = getMeta(hash);
 
-        body.dataset.adminView = meta.view;
         currentLabel.textContent = meta.label;
-        currentDescription.textContent = meta.description;
+        currentText.textContent = meta.text;
 
         document.querySelectorAll("[data-admin-hash]").forEach((link) => {
           const targetHash = link.getAttribute("data-admin-hash");
           link.classList.toggle("is-active", Boolean(targetHash && hash.startsWith(targetHash)));
         });
 
-        syncLastRoute(hash);
-        updateLastRoute();
+        if (hash !== "#/" && hash !== "#") {
+          window.localStorage.setItem(lastRouteStorageKey, hash);
+        }
+
+        const saved = window.localStorage.getItem(lastRouteStorageKey);
+        if (saved) {
+          lastRouteWrap?.removeAttribute("hidden");
+          lastRouteLink.href = `/admin/${saved}`;
+        } else {
+          lastRouteWrap?.setAttribute("hidden", "hidden");
+        }
       }
 
-      if (window.localStorage.getItem(dockStorageKey) === "true") {
-        dock?.classList.add("is-collapsed");
-        dockToggle?.setAttribute("aria-expanded", "false");
+      if (window.localStorage.getItem(welcomeStorageKey) === "true") {
+        welcome?.setAttribute("hidden", "hidden");
       }
 
-      dockToggle?.addEventListener("click", () => {
-        const isCollapsed = dock?.classList.toggle("is-collapsed");
-        dockToggle.setAttribute("aria-expanded", String(!isCollapsed));
-        window.localStorage.setItem(dockStorageKey, String(Boolean(isCollapsed)));
+      if (window.localStorage.getItem(shortcutsStorageKey) === "true") {
+        shortcuts?.classList.add("is-collapsed");
+        shortcutsToggle?.setAttribute("aria-expanded", "false");
+      }
+
+      closeButton?.addEventListener("click", () => {
+        window.localStorage.setItem(welcomeStorageKey, "true");
+        welcome?.setAttribute("hidden", "hidden");
+      });
+
+      shortcutsToggle?.addEventListener("click", () => {
+        const isCollapsed = shortcuts?.classList.toggle("is-collapsed");
+        shortcutsToggle.setAttribute("aria-expanded", String(!isCollapsed));
+        window.localStorage.setItem(shortcutsStorageKey, String(Boolean(isCollapsed)));
       });
 
       window.addEventListener("hashchange", updateCurrentState);
