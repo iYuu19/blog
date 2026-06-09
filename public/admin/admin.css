@@ -1,26 +1,20 @@
 :root {
-  --bg: #f4f1eb;
-  --surface: rgba(255, 253, 249, 0.82);
-  --surface-strong: rgba(255, 253, 249, 0.96);
-  --text: #1d2228;
-  --soft-text: #46505a;
-  --muted: #6b756f;
-  --line: #ded7cb;
-  --line-strong: #cec5b6;
-  --accent: #1f5c57;
-  --accent-strong: #184844;
-  --accent-soft: #ebf3f1;
-  --shadow: 0 16px 36px rgba(20, 24, 28, 0.05);
-  --shadow-strong: 0 22px 52px rgba(20, 24, 28, 0.08);
-  --radius: 18px;
-  --admin-shell: min(1320px, calc(100vw - 32px));
-  --admin-tint: linear-gradient(150deg, rgba(255, 253, 249, 0.96), rgba(247, 241, 231, 0.94));
-  --admin-tint-strong: linear-gradient(160deg, rgba(255, 253, 249, 0.98), rgba(242, 235, 224, 0.96));
-  --admin-grid: rgba(24, 72, 68, 0.06);
-  --admin-gold: #b78b4f;
-  --font-sans: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", serif;
-  --font-mono: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  --admin-bg: #f4f1eb;
+  --admin-surface: rgba(255, 253, 249, 0.9);
+  --admin-surface-strong: rgba(255, 253, 249, 0.96);
+  --admin-text: #1d2228;
+  --admin-soft-text: #46505a;
+  --admin-muted: #6b756f;
+  --admin-line: rgba(206, 197, 182, 0.9);
+  --admin-line-soft: rgba(222, 215, 203, 0.86);
+  --admin-accent: #1f5c57;
+  --admin-accent-strong: #184844;
+  --admin-shadow: 0 14px 34px rgba(20, 24, 28, 0.06);
+  --admin-shadow-strong: 0 18px 40px rgba(20, 24, 28, 0.08);
+  --admin-radius: 20px;
+  --admin-radius-sm: 14px;
+  --admin-font-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --admin-font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
 }
 
 *,
@@ -37,802 +31,166 @@ body {
 body {
   margin: 0;
   background:
-    radial-gradient(circle at top left, rgba(230, 216, 186, 0.75), transparent 24%),
-    radial-gradient(circle at top right, rgba(214, 236, 231, 0.72), transparent 20%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 220px),
-    var(--bg);
-  color: var(--text);
-  font-family: var(--font-sans);
-  line-height: 1.8;
+    radial-gradient(circle at top left, rgba(230, 216, 186, 0.72), transparent 24%),
+    radial-gradient(circle at top right, rgba(214, 236, 231, 0.7), transparent 20%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.56), rgba(255, 255, 255, 0) 220px),
+    var(--admin-bg);
+  color: var(--admin-text);
+  font-family: var(--admin-font-sans);
+  line-height: 1.75;
 }
 
 a {
   color: inherit;
-  text-decoration: none;
 }
 
-#nc-root,
-#nc-root * {
-  font-family: var(--font-sans);
+.admin-loading {
+  max-width: 720px;
+  margin: 32px auto 0;
+  padding: 0 20px;
 }
 
-#nc-root h1,
-#nc-root h2,
-#nc-root h3,
-#nc-root h4 {
-  font-family: var(--font-serif);
+.admin-loading__card {
+  border: 1px solid var(--admin-line-soft);
+  border-radius: 18px;
+  background: var(--admin-surface-strong);
+  box-shadow: var(--admin-shadow);
+  padding: 20px 22px;
 }
 
-#nc-root input,
-#nc-root textarea,
-#nc-root select {
-  border: 1px solid var(--line-strong);
-  border-radius: 14px;
-  background: rgba(255, 253, 249, 0.92);
-  color: var(--text);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
-}
-
-#nc-root button {
-  border-radius: 999px;
-}
-
-body.iyuu-admin-authenticated {
-  overflow-y: auto;
-}
-
-body.iyuu-admin-authenticated::before,
-body.iyuu-admin-authenticated::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-
-body.iyuu-admin-authenticated::before {
-  background:
-    radial-gradient(circle at 12% 10%, rgba(183, 139, 79, 0.16), transparent 0 24%),
-    radial-gradient(circle at 86% 14%, rgba(31, 92, 87, 0.18), transparent 0 22%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0) 260px);
-}
-
-body.iyuu-admin-authenticated::after {
-  opacity: 0.44;
-  background:
-    linear-gradient(var(--admin-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--admin-grid) 1px, transparent 1px);
-  background-size: 52px 52px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.08));
-}
-
-body.iyuu-admin-authenticated #nc-root {
-  position: relative;
-  z-index: 1;
-}
-
-body.iyuu-admin-authenticated .admin-welcome {
-  display: none !important;
-}
-
-body.iyuu-admin-authenticated .admin-shortcuts {
-  right: 18px;
-  bottom: 18px;
-  width: auto;
-}
-
-body.iyuu-admin-authenticated .admin-shortcuts__toggle {
-  width: auto;
-  min-height: 42px;
-  padding: 0 18px;
-  backdrop-filter: blur(18px);
-}
-
-body.iyuu-admin-authenticated .admin-shortcuts__panel {
-  width: min(320px, calc(100vw - 36px));
-  max-height: calc(100vh - 110px);
-  overflow: auto;
-}
-
-body.iyuu-admin-authenticated #nc-root {
-  color: var(--text);
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-header="true"] {
-  position: sticky !important;
-  top: 16px !important;
-  z-index: 60 !important;
-  width: var(--admin-shell) !important;
-  margin: 16px auto 0 !important;
-  border: 1px solid rgba(222, 215, 203, 0.92) !important;
-  border-radius: 28px !important;
-  background: var(--admin-tint) !important;
-  box-shadow: var(--shadow-strong) !important;
-  backdrop-filter: blur(18px) !important;
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-header="true"] > div {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 16px !important;
-  padding: 12px 16px !important;
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-header="true"] nav ul {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-  gap: 10px !important;
-  margin: 0 !important;
-  padding: 6px !important;
-  border: 1px solid rgba(222, 215, 203, 0.88) !important;
-  border-radius: 999px !important;
-  background: rgba(255, 253, 249, 0.84) !important;
-  box-shadow: 0 10px 22px rgba(20, 24, 28, 0.04) !important;
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-header="true"] li {
-  list-style: none !important;
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-header="true"] img {
-  padding: 0 !important;
-  max-width: 176px !important;
-  max-height: 42px !important;
-  object-fit: contain !important;
-  filter: saturate(0.88) contrast(1.02) !important;
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-header="true"] a,
-body.iyuu-admin-authenticated #nc-root [data-iyuu-header="true"] button {
-  min-height: 42px !important;
-  padding: 0 16px !important;
-  border: 1px solid transparent !important;
-  border-radius: 999px !important;
-  background: transparent !important;
-  color: var(--muted) !important;
-  font-size: 14px !important;
-  font-weight: 700 !important;
-  box-shadow: none !important;
-  transition:
-    transform 160ms ease,
-    background-color 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease,
-    box-shadow 160ms ease !important;
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-header="true"] a:hover,
-body.iyuu-admin-authenticated #nc-root [data-iyuu-header="true"] button:hover,
-body.iyuu-admin-authenticated #nc-root [data-iyuu-header="true"] a.header-link-active,
-body.iyuu-admin-authenticated #nc-root [data-iyuu-header="true"] a:focus-visible,
-body.iyuu-admin-authenticated #nc-root [data-iyuu-header="true"] button:focus-visible {
-  border-color: rgba(31, 92, 87, 0.14) !important;
-  background: #ffffff !important;
-  color: var(--text) !important;
-  box-shadow: 0 10px 18px rgba(20, 24, 28, 0.06) !important;
-  transform: translateY(-1px) !important;
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-header="true"] > div > div:last-child {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  gap: 10px !important;
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-sidebar="true"] {
-  border: 1px solid rgba(222, 215, 203, 0.92) !important;
-  border-radius: 28px !important;
-  background: var(--admin-tint) !important;
-  box-shadow: var(--shadow) !important;
-  backdrop-filter: blur(18px) !important;
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-sidebar="true"] h2 {
-  margin: 12px 20px 16px !important;
-  color: var(--text) !important;
-  font-family: var(--font-serif) !important;
-  font-size: 28px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.01em !important;
-  line-height: 1.3 !important;
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-sidebar="true"] ul {
-  margin: 0 !important;
-  padding: 0 12px 10px !important;
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-sidebar="true"] li {
-  list-style: none !important;
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-sidebar-link="true"] {
-  min-height: 48px !important;
-  margin-bottom: 8px !important;
-  padding: 0 16px !important;
-  border: 1px solid transparent !important;
-  border-left: 0 !important;
-  border-radius: 18px !important;
-  background: transparent !important;
-  color: var(--soft-text) !important;
-  font-weight: 700 !important;
-  box-shadow: none !important;
-  transition:
-    transform 160ms ease,
-    border-color 160ms ease,
-    background-color 160ms ease,
-    color 160ms ease,
-    box-shadow 160ms ease !important;
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-sidebar-link="true"]:hover,
-body.iyuu-admin-authenticated #nc-root [data-iyuu-sidebar-link="true"]:focus-visible,
-body.iyuu-admin-authenticated #nc-root [data-iyuu-sidebar-link="true"].sidebar-active {
-  border-color: rgba(31, 92, 87, 0.16) !important;
-  background: rgba(255, 255, 255, 0.92) !important;
-  color: var(--text) !important;
-  box-shadow: 0 10px 18px rgba(20, 24, 28, 0.05) !important;
-  transform: translateY(-1px) !important;
-}
-
-body.iyuu-admin-authenticated #nc-root [data-iyuu-main="true"] {
-  width: auto !important;
-  min-width: 0 !important;
-  color: var(--text) !important;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-main-top="true"],
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-main-top="true"] {
-  position: relative !important;
-  margin-bottom: 20px !important;
-  padding: 28px !important;
-  border: 1px solid rgba(222, 215, 203, 0.92) !important;
-  border-radius: 30px !important;
-  background: var(--admin-tint-strong) !important;
-  box-shadow: var(--shadow-strong) !important;
-  overflow: hidden !important;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-main-top="true"]::before,
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-main-top="true"]::before {
-  content: "";
-  position: absolute;
-  top: -70px;
-  right: -44px;
-  width: 180px;
-  height: 180px;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(31, 92, 87, 0.14), transparent 70%);
-  pointer-events: none;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-main-top="true"] > div:first-child,
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-main-top="true"] > div:first-child {
-  display: flex !important;
-  align-items: flex-start !important;
-  justify-content: space-between !important;
-  gap: 18px !important;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-main-top="true"] h1,
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-main-top="true"] h1 {
-  color: var(--text) !important;
-  font-family: var(--font-serif) !important;
-  font-size: clamp(30px, 3vw, 40px) !important;
-  font-weight: 600 !important;
-  line-height: 1.2 !important;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-main-top="true"] p,
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-main-top="true"] p {
-  color: var(--soft-text) !important;
-  font-size: 15px !important;
-  line-height: 1.8 !important;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-main-top="true"] a,
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-main-top="true"] a {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-height: 44px !important;
-  padding: 0 18px !important;
-  border: 1px solid rgba(31, 92, 87, 0.14) !important;
-  border-radius: 999px !important;
-  background: linear-gradient(135deg, rgba(31, 92, 87, 0.12), rgba(255, 253, 249, 0.96)) !important;
-  color: var(--accent-strong) !important;
-  font-weight: 700 !important;
-  box-shadow: 0 10px 18px rgba(20, 24, 28, 0.05) !important;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-main-controls="true"],
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-main-controls="true"] {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  flex-direction: row !important;
-  justify-content: flex-start !important;
-  gap: 10px !important;
-  width: 100% !important;
-  margin: 0 0 18px !important;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-main-controls="true"] > div,
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-main-controls="true"] > div {
-  margin: 0 !important;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-main-controls="true"] button,
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-main-controls="true"] button,
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-main-controls="true"] [role="button"],
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-main-controls="true"] [role="button"] {
-  min-height: 40px !important;
-  padding: 0 16px !important;
-  border: 1px solid rgba(222, 215, 203, 0.92) !important;
-  border-radius: 999px !important;
-  background: rgba(255, 253, 249, 0.88) !important;
-  color: var(--soft-text) !important;
-  font-weight: 700 !important;
-  box-shadow: var(--shadow) !important;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-main="true"] h2,
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-main="true"] h2 {
-  color: var(--text) !important;
-  font-family: var(--font-serif) !important;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-entry-card="true"],
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-entry-card="true"] {
-  border: 1px solid rgba(222, 215, 203, 0.92) !important;
-  border-radius: 24px !important;
-  background: rgba(255, 253, 249, 0.88) !important;
-  box-shadow: var(--shadow) !important;
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease !important;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-entry-card="true"]:hover,
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-entry-card="true"]:hover {
-  border-color: rgba(31, 92, 87, 0.18) !important;
-  box-shadow: 0 16px 32px rgba(20, 24, 28, 0.07) !important;
-  transform: translateY(-3px) !important;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-entry-link="true"],
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-entry-link="true"] {
-  display: block !important;
-  min-height: 100% !important;
-  padding: 18px 20px !important;
-  background: linear-gradient(180deg, rgba(255, 253, 249, 0.98), rgba(247, 242, 234, 0.92)) !important;
-  color: var(--text) !important;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-entry-link="true"]:hover,
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-entry-link="true"]:hover {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(248, 244, 237, 0.95)) !important;
-}
-
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-entry-link="true"] h2,
-body.iyuu-admin-authenticated[data-admin-screen="collection"] #nc-root [data-iyuu-entry-link="true"] h3,
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-entry-link="true"] h2,
-body.iyuu-admin-authenticated[data-admin-screen="workflow"] #nc-root [data-iyuu-entry-link="true"] h3 {
-  color: var(--text) !important;
-  font-family: var(--font-serif) !important;
-  font-size: 24px !important;
-  line-height: 1.3 !important;
-}
-
-body.iyuu-admin-authenticated #nc-root input,
-body.iyuu-admin-authenticated #nc-root textarea,
-body.iyuu-admin-authenticated #nc-root select {
-  min-height: 46px !important;
-  border-color: rgba(206, 197, 182, 0.96) !important;
-  border-radius: 16px !important;
-  background: rgba(255, 253, 249, 0.94) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.86),
-    0 8px 20px rgba(20, 24, 28, 0.03) !important;
-}
-
-body.iyuu-admin-authenticated #nc-root textarea {
-  min-height: 120px !important;
-}
-
-body.iyuu-admin-authenticated #nc-root input:focus,
-body.iyuu-admin-authenticated #nc-root textarea:focus,
-body.iyuu-admin-authenticated #nc-root select:focus {
-  border-color: rgba(31, 92, 87, 0.26) !important;
-  outline: 0 !important;
-  box-shadow:
-    0 0 0 3px rgba(31, 92, 87, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
-}
-
-body.iyuu-admin-authenticated #nc-root button,
-body.iyuu-admin-authenticated #nc-root [role="button"] {
-  transition:
-    transform 160ms ease,
-    border-color 160ms ease,
-    background-color 160ms ease,
-    color 160ms ease,
-    box-shadow 160ms ease !important;
-}
-
-body.iyuu-admin-authenticated #nc-root button:hover,
-body.iyuu-admin-authenticated #nc-root [role="button"]:hover {
-  transform: translateY(-1px) !important;
-}
-
-.admin-welcome,
-.admin-shortcuts,
-.admin-welcome *,
-.admin-shortcuts * {
-  font-family: var(--font-sans);
-}
-
-.admin-eyebrow {
-  margin: 0 0 10px;
-  color: var(--muted);
+.admin-loading__eyebrow {
+  margin: 0 0 8px;
+  color: var(--admin-muted);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.admin-welcome,
-.admin-shortcuts__panel {
-  position: relative;
-  border: 1px solid rgba(222, 215, 203, 0.92);
-  border-radius: 28px;
-  background:
-    linear-gradient(150deg, rgba(255, 253, 249, 0.94), rgba(248, 243, 233, 0.92)),
-    var(--surface-strong);
-  box-shadow: var(--shadow-strong);
-  overflow: hidden;
-}
-
-.admin-welcome::before,
-.admin-shortcuts__panel::before {
-  content: "";
-  position: absolute;
-  width: 160px;
-  height: 160px;
-  right: -48px;
-  top: -64px;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(31, 92, 87, 0.16), transparent 68%);
-  pointer-events: none;
-}
-
-.admin-welcome::after,
-.admin-shortcuts__panel::after {
-  content: "";
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  left: -34px;
-  bottom: -48px;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(203, 174, 112, 0.2), transparent 72%);
-  pointer-events: none;
-}
-
-.admin-welcome {
-  position: fixed;
-  top: 22px;
-  right: 22px;
-  z-index: 2147483000;
-  width: min(430px, calc(100vw - 28px));
-  padding: 24px;
-}
-
-.admin-welcome[hidden] {
-  display: none;
-}
-
-.admin-welcome h1,
-.admin-shortcuts h2 {
-  position: relative;
-  z-index: 1;
+.admin-loading h1 {
   margin: 0;
-  font-family: var(--font-serif);
-  font-size: 30px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  font-family: var(--admin-font-serif);
+  font-size: 28px;
   line-height: 1.25;
 }
 
-.admin-welcome__lead,
-.admin-shortcuts__head p,
-.admin-shortcuts__grid span {
-  position: relative;
-  z-index: 1;
-  color: var(--soft-text);
+.admin-loading p {
+  margin: 10px 0 0;
+  color: var(--admin-soft-text);
   font-size: 14px;
   line-height: 1.8;
 }
 
-.admin-welcome__lead {
-  margin: 12px 0 0;
+.admin-loading[hidden] {
+  display: none;
 }
 
-.admin-welcome__chips {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
+#nc-root,
+#nc-root * {
+  font-family: var(--admin-font-sans);
 }
 
-.admin-welcome__chips span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 38px;
-  padding: 0 14px;
-  border: 1px solid rgba(31, 92, 87, 0.12);
-  border-radius: 999px;
-  background: rgba(255, 253, 249, 0.92);
-  color: var(--soft-text);
-  box-shadow: 0 8px 18px rgba(20, 24, 28, 0.04);
+#nc-root {
+  color: var(--admin-text);
 }
 
-.admin-welcome__actions {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  gap: 12px;
-  margin-top: 18px;
+#nc-root h1,
+#nc-root h2,
+#nc-root h3,
+#nc-root h4 {
+  color: var(--admin-text);
+  font-family: var(--admin-font-serif);
 }
 
-.admin-welcome__actions a,
-.admin-welcome__actions button,
-.admin-shortcuts__toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 0 18px;
-  border-radius: 999px;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  text-decoration: none;
+#nc-root a {
+  color: var(--admin-accent-strong);
+}
+
+#nc-root img {
+  max-width: 100%;
+}
+
+#nc-root header {
+  background: rgba(255, 253, 249, 0.86) !important;
+  border-bottom: 1px solid var(--admin-line-soft) !important;
+  box-shadow: 0 8px 24px rgba(20, 24, 28, 0.04) !important;
+  backdrop-filter: blur(14px);
+}
+
+#nc-root aside {
+  background: linear-gradient(180deg, rgba(255, 253, 249, 0.96), rgba(246, 241, 232, 0.9)) !important;
+  border-right: 1px solid var(--admin-line-soft) !important;
+}
+
+#nc-root main {
+  color: var(--admin-text);
+}
+
+#nc-root article,
+#nc-root fieldset,
+#nc-root form section,
+#nc-root main section {
+  border: 1px solid var(--admin-line-soft) !important;
+  border-radius: var(--admin-radius) !important;
+  background: var(--admin-surface) !important;
+  box-shadow: var(--admin-shadow) !important;
+}
+
+#nc-root input,
+#nc-root textarea,
+#nc-root select {
+  border: 1px solid var(--admin-line) !important;
+  border-radius: var(--admin-radius-sm) !important;
+  background: rgba(255, 253, 249, 0.94) !important;
+  color: var(--admin-text) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 6px 16px rgba(20, 24, 28, 0.03) !important;
+}
+
+#nc-root textarea {
+  min-height: 120px !important;
+}
+
+#nc-root input:focus,
+#nc-root textarea:focus,
+#nc-root select:focus {
+  border-color: rgba(31, 92, 87, 0.3) !important;
+  outline: 0 !important;
+  box-shadow:
+    0 0 0 3px rgba(31, 92, 87, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+#nc-root button,
+#nc-root [role="button"] {
+  border-radius: 999px !important;
   transition:
     transform 160ms ease,
     box-shadow 160ms ease,
     background-color 160ms ease,
-    color 160ms ease;
-}
-
-.admin-welcome__actions a,
-.admin-shortcuts__toggle {
-  border: 1px solid rgba(31, 92, 87, 0.14);
-  background: linear-gradient(135deg, rgba(31, 92, 87, 0.12), rgba(255, 253, 249, 0.96));
-  color: var(--accent-strong);
-  box-shadow: 0 8px 18px rgba(20, 24, 28, 0.04);
-}
-
-.admin-welcome__actions button {
-  border: 1px solid rgba(222, 215, 203, 0.92);
-  background: rgba(255, 253, 249, 0.88);
-  color: var(--text);
-  box-shadow: var(--shadow);
-  cursor: pointer;
-}
-
-.admin-welcome__actions a,
-.admin-welcome__actions button {
-  flex: 1;
-}
-
-.admin-shortcuts {
-  position: fixed;
-  right: 22px;
-  bottom: 22px;
-  z-index: 2147483000;
-  width: min(430px, calc(100vw - 28px));
-}
-
-.admin-shortcuts__toggle {
-  width: 100%;
-  margin-bottom: 10px;
-  cursor: pointer;
-}
-
-.admin-shortcuts__panel {
-  padding: 22px;
-}
-
-.admin-shortcuts.is-collapsed .admin-shortcuts__panel {
-  display: none;
-}
-
-.admin-shortcuts.is-collapsed .admin-shortcuts__toggle {
-  background: rgba(255, 253, 249, 0.92);
-}
-
-.admin-shortcuts__head {
-  position: relative;
-  z-index: 1;
-}
-
-.admin-shortcuts__head p {
-  margin: 10px 0 0;
-}
-
-.admin-shortcuts__hint {
-  position: relative;
-  z-index: 1;
-  margin: 16px 0 0;
-  padding: 12px 14px;
-  border: 1px solid rgba(31, 92, 87, 0.14);
-  border-radius: 18px;
-  background: rgba(235, 243, 241, 0.88);
-  color: var(--accent-strong);
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.7;
-}
-
-.admin-shortcuts__hint[data-state="loading"] {
-  border-color: rgba(222, 215, 203, 0.92);
-  background: rgba(255, 253, 249, 0.84);
-  color: var(--soft-text);
-}
-
-.admin-shortcuts__hint[data-state="error"] {
-  border-color: rgba(183, 69, 69, 0.18);
-  background: rgba(255, 243, 243, 0.92);
-  color: #8f2f2f;
-}
-
-.admin-shortcuts__grid {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.admin-shortcuts__grid a {
-  display: grid;
-  gap: 4px;
-  padding: 14px 16px;
-  border: 1px solid rgba(222, 215, 203, 0.92);
-  border-radius: 22px;
-  background: rgba(255, 253, 249, 0.82);
-  box-shadow: var(--shadow);
-  transition:
-    transform 160ms ease,
     border-color 160ms ease,
-    box-shadow 160ms ease,
-    background-color 160ms ease;
+    color 160ms ease !important;
 }
 
-.admin-shortcuts__grid a strong {
-  font-family: var(--font-serif);
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.admin-shortcuts__grid a span {
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.admin-shortcuts__grid a:hover,
-.admin-shortcuts__grid a.is-active,
-.admin-welcome__actions a:hover,
-.admin-welcome__actions button:hover,
-.admin-shortcuts__toggle:hover {
+#nc-root button:hover,
+#nc-root [role="button"]:hover {
   transform: translateY(-1px);
 }
 
-.admin-shortcuts__grid a.is-active,
-.admin-shortcuts__grid a:hover {
-  border-color: rgba(31, 92, 87, 0.22);
-  background: linear-gradient(135deg, rgba(235, 243, 241, 0.92), rgba(255, 253, 249, 0.96));
-  box-shadow: 0 12px 24px rgba(20, 24, 28, 0.06);
+#nc-root a[href*="/collections/"],
+#nc-root a[href*="/entries/"] {
+  text-decoration: none;
 }
 
-.admin-shortcuts__meta {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  gap: 8px;
-  margin-top: 16px;
-  padding: 14px 16px;
-  border: 1px solid rgba(222, 215, 203, 0.9);
-  border-radius: 18px;
-  background: rgba(255, 253, 249, 0.78);
+#nc-root a[href*="/collections/"]:hover,
+#nc-root a[href*="/entries/"]:hover {
+  color: var(--admin-accent);
 }
 
-.admin-shortcuts__meta span {
-  color: var(--muted);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.admin-shortcuts__meta a {
-  color: var(--accent-strong);
-  font-size: 15px;
-  font-weight: 700;
-}
-
-#nc-root .iyuu-login-pulse {
-  animation: iyuu-login-pulse 1.2s ease;
-  box-shadow:
-    0 0 0 0 rgba(31, 92, 87, 0.34),
-    0 16px 32px rgba(20, 24, 28, 0.12) !important;
-}
-
-@keyframes iyuu-login-pulse {
-  0% {
-    transform: scale(1);
-    box-shadow:
-      0 0 0 0 rgba(31, 92, 87, 0.34),
-      0 14px 28px rgba(20, 24, 28, 0.12);
-  }
-
-  50% {
-    transform: scale(1.03);
-    box-shadow:
-      0 0 0 14px rgba(31, 92, 87, 0),
-      0 18px 34px rgba(20, 24, 28, 0.16);
-  }
-
-  100% {
-    transform: scale(1);
-    box-shadow:
-      0 0 0 0 rgba(31, 92, 87, 0),
-      0 14px 28px rgba(20, 24, 28, 0.12);
-  }
-}
-
-@media (max-width: 920px) {
-  .admin-welcome,
-  .admin-shortcuts {
-    right: 12px;
-    width: min(360px, calc(100vw - 24px));
-  }
-
-  .admin-welcome {
-    top: 12px;
-  }
-
-  .admin-shortcuts {
-    bottom: 12px;
-  }
-}
-
-@media (max-width: 640px) {
-  .admin-welcome {
-    position: static;
-    width: auto;
-    margin: 12px;
-  }
-
-  .admin-shortcuts {
-    left: 12px;
-    width: auto;
-  }
-
-  .admin-shortcuts__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-welcome__actions {
-    flex-direction: column;
+@media (max-width: 720px) {
+  .admin-loading {
+    margin-top: 16px;
+    padding: 0 12px;
   }
 }
