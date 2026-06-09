@@ -2,12 +2,12 @@ backend:
   name: github
   repo: iYuu19/blog
   branch: main
-  base_url: https://blog-cx8.pages.dev
+  base_url: https://0xiyuu.top
   auth_endpoint: api/auth
 
 locale: zh_Hans
-site_url: https://blog-cx8.pages.dev
-display_url: https://blog-cx8.pages.dev
+site_url: https://0xiyuu.top
+display_url: https://0xiyuu.top
 logo_url: /avatar.jpg
 publish_mode: simple
 

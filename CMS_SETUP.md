@@ -18,8 +18,8 @@
 建议这样填：
 
 - `Application name`: `iYuu Notes CMS`
-- `Homepage URL`: `https://blog-cx8.pages.dev`
-- `Authorization callback URL`: `https://blog-cx8.pages.dev/api/callback`
+- `Homepage URL`: `https://0xiyuu.top`
+- `Authorization callback URL`: `https://0xiyuu.top/api/callback`
 
 创建后你会拿到：
 
@@ -48,7 +48,7 @@
 
 部署完成后，打开：
 
-- `https://blog-cx8.pages.dev/admin`
+- `https://0xiyuu.top/admin`
 
 你会看到两个主要入口：
 
