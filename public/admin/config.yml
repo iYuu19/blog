@@ -30,25 +30,20 @@ collections:
             name: categories
             widget: list
             summary: "{{fields.name}}"
-            hint: 这里相当于你的分类总表。前台分类页会读取这里的说明。
             fields:
               - label: 分类名
                 name: name
                 widget: string
-                hint: 比如“比赛 WP”“赛后复盘”“学习笔记”。
               - label: 链接标识
                 name: slug
                 widget: string
                 required: false
-                hint: 可选。不填也可以，系统会根据分类名自动生成链接。
               - label: 分类说明
                 name: description
                 widget: text
-                hint: 这段会显示给访客，告诉别人这个分类主要收录什么内容。
               - label: 适合写什么
                 name: writingFocus
                 widget: text
-                hint: 用一句话说明这个分类更适合放哪些文章。
               - label: 示例内容
                 name: exampleTopics
                 widget: list
@@ -63,7 +58,6 @@ collections:
                 value_type: int
                 default: 100
                 required: false
-                hint: 数字越小越靠前。
 
   - name: template_center
     label: 模板中心
@@ -116,7 +110,7 @@ collections:
             widget: markdown
 
   - name: blog
-    label: 写文章
+    label: 文章
     label_singular: 文章
     description: 新建文章、改正文、改分类、加标签，都在这里。
     folder: src/content/blog
@@ -158,11 +152,9 @@ collections:
       - label: 标题
         name: title
         widget: string
-        hint: 让访客一眼就知道这篇文章在讲什么。
       - label: 摘要
         name: description
         widget: text
-        hint: 这段会显示在首页、归档页和文章卡片里，适合写成一句清楚的介绍。
       - label: 发布时间
         name: pubDate
         widget: datetime
@@ -181,7 +173,6 @@ collections:
         widget: select
         default: 比赛 WP
         create: true
-        hint: 想新增分类时，建议先去左侧“分类中心”补上说明。
         options:
           - 比赛 WP
           - 赛后复盘
@@ -192,12 +183,10 @@ collections:
         name: contest
         widget: string
         required: false
-        hint: 同一场比赛的文章填同一个比赛名，系统会自动聚合到比赛页。
       - label: 比赛标识
         name: contestSlug
         widget: string
         required: false
-        hint: 用英文或拼音，例如 yellow-river-police-2026。
       - label: 封面图
         name: coverImage
         widget: image
@@ -209,7 +198,6 @@ collections:
         widget: select
         required: false
         create: true
-        hint: 不确定怎么分时，可以先去“模板中心”找最像的模板。
         options:
           - Web
           - Misc
@@ -249,22 +237,19 @@ collections:
         widget: boolean
         default: false
         required: false
-        hint: 打开后，这篇文章更容易出现在首页重点位置。
       - label: 草稿
         name: draft
         widget: boolean
         default: false
         required: false
-        hint: 草稿不会显示在前台公开页面。
       - label: 正文
         name: body
         widget: markdown
-        hint: 不知道怎么起手时，先去左侧“模板中心”打开最接近的模板，再回来写。
 
   - name: site
-    label: 改博客结构
+    label: 站点基础设置
     delete: false
-    description: 改博客名字、导航、首页文案、关于页和互动区，都在这里。
+    description: 改博客名字、导航、首页主信息、关于页和评论设置。
     editor:
       preview: false
     files:
@@ -272,24 +257,12 @@ collections:
         label: 品牌和基础信息
         file: src/content/site-brand/brand.yaml
         fields:
-          - label: 品牌简称
-            name: brandMark
-            widget: string
-          - label: 网站标题
-            name: siteTitle
-            widget: string
-          - label: 顶部副标题
-            name: headerTagline
-            widget: string
-          - label: 网站描述
-            name: siteDescription
-            widget: text
-          - label: 页脚描述
-            name: footerDescription
-            widget: text
-          - label: 版权名称
-            name: copyrightName
-            widget: string
+          - { label: 品牌简称, name: brandMark, widget: string }
+          - { label: 网站标题, name: siteTitle, widget: string }
+          - { label: 顶部副标题, name: headerTagline, widget: string }
+          - { label: 网站描述, name: siteDescription, widget: text }
+          - { label: 页脚描述, name: footerDescription, widget: text }
+          - { label: 版权名称, name: copyrightName, widget: string }
       - name: site_navigation
         label: 导航菜单
         file: src/content/site-navigation/navigation.yaml
@@ -297,154 +270,69 @@ collections:
           - label: 导航链接
             name: navLinks
             widget: list
-            hint: 这里控制顶部导航，可以新增入口，比如 /categories 或 /about。
             fields:
-              - label: 名称
-                name: label
-                widget: string
-              - label: 路径
-                name: href
-                widget: string
-                hint: 例如 / /contests /categories /blog /tags /about
-      - name: site_home
-        label: 首页内容
-        file: src/content/site-home/home.yaml
-        fields:
-          - label: 首页眉题
-            name: homeEyebrow
-            widget: string
-          - label: 首页主标题
-            name: homeTitle
-            widget: string
-          - label: 首页导语
-            name: homeLead
-            widget: text
-          - label: 首页介绍段落
-            name: homeIntro
-            widget: list
-            field:
-              label: 段落
-              name: paragraph
-              widget: text
+              - { label: 名称, name: label, widget: string }
+              - { label: 路径, name: href, widget: string }
       - name: site_about
         label: 关于页内容
         file: src/content/site-about/about.yaml
         fields:
-          - label: 关于页眉题
-            name: aboutEyebrow
-            widget: string
-          - label: 关于页标题
-            name: aboutTitle
-            widget: string
+          - { label: 关于页眉题, name: aboutEyebrow, widget: string }
+          - { label: 关于页标题, name: aboutTitle, widget: string }
           - label: 关于页开场
             name: aboutIntro
             widget: list
-            field:
-              label: 段落
-              name: paragraph
-              widget: text
+            field: { label: 段落, name: paragraph, widget: text }
           - label: 主要内容列表
             name: aboutFocusAreas
             widget: list
-            field:
-              label: 条目
-              name: item
-              widget: string
+            field: { label: 条目, name: item, widget: string }
           - label: 写作方式列表
             name: aboutWritingApproach
             widget: list
-            field:
-              label: 条目
-              name: item
-              widget: string
-          - label: 关于页说明
-            name: aboutNote
-            widget: text
+            field: { label: 条目, name: item, widget: string }
+          - { label: 关于页说明, name: aboutNote, widget: text }
       - name: site_comments
-        label: 互动设置
+        label: 评论区设置
         file: src/content/site-comments/comments.yaml
         fields:
-          - label: 启用评论区
-            name: commentsEnabled
-            widget: boolean
-            default: false
-            hint: 把下面参数填好以后再打开，文章页才会显示评论区。
-          - label: 评论区标题
-            name: commentsTitle
-            widget: string
-            default: 评论区
-          - label: 评论区说明
-            name: commentsDescription
-            widget: text
-            default: 欢迎交流、补充思路或指出文中的问题。
-          - label: GitHub 仓库
-            name: giscusRepo
-            widget: string
-            default: iYuu19/blog
-            hint: 格式是 用户名/仓库名，例如 iYuu19/blog。
-          - label: Repo ID
-            name: giscusRepoId
-            widget: string
-            hint: 这个值去 giscus 官网生成配置时复制过来。
-          - label: Discussions 分类名
-            name: giscusCategory
-            widget: string
-            default: General
-            hint: 一般填你在 GitHub Discussions 里准备放评论的分类名。
-          - label: Category ID
-            name: giscusCategoryId
-            widget: string
-            hint: 这个值也从 giscus 官网复制。
+          - { label: 启用评论区, name: commentsEnabled, widget: boolean, default: false }
+          - { label: 评论区标题, name: commentsTitle, widget: string, default: 评论区 }
+          - { label: 评论区说明, name: commentsDescription, widget: text }
+          - { label: GitHub 仓库, name: giscusRepo, widget: string, default: iYuu19/blog }
+          - { label: Repo ID, name: giscusRepoId, widget: string }
+          - { label: Discussions 分类名, name: giscusCategory, widget: string, default: General }
+          - { label: Category ID, name: giscusCategoryId, widget: string }
           - label: 绑定方式
             name: giscusMapping
             widget: select
             default: pathname
-            hint: 推荐保持“按文章链接匹配”，最省心。
             options:
-              - label: 按文章链接匹配
-                value: pathname
-              - label: 按文章标题匹配
-                value: title
-          - label: 严格匹配
-            name: giscusStrict
-            widget: boolean
-            default: false
-            hint: 一般保持关闭即可。
-          - label: 开启点赞反应
-            name: giscusReactionsEnabled
-            widget: boolean
-            default: true
-            hint: 打开后，访客可以在评论区点表情反应。
+              - { label: 按文章链接匹配, value: pathname }
+              - { label: 按文章标题匹配, value: title }
+          - { label: 严格匹配, name: giscusStrict, widget: boolean, default: false }
+          - { label: 开启点赞反应, name: giscusReactionsEnabled, widget: boolean, default: true }
           - label: 输入框位置
             name: giscusInputPosition
             widget: select
             default: bottom
             options:
-              - label: 底部
-                value: bottom
-              - label: 顶部
-                value: top
+              - { label: 底部, value: bottom }
+              - { label: 顶部, value: top }
           - label: 评论区主题
             name: giscusTheme
             widget: select
             default: light
             options:
-              - label: 浅色
-                value: light
-              - label: 深色
-                value: dark
-              - label: 跟随系统
-                value: preferred_color_scheme
-          - label: 评论区语言
-            name: giscusLang
-            widget: string
-            default: zh-CN
-            hint: 中文一般填 zh-CN。
+              - { label: 浅色, value: light }
+              - { label: 深色, value: dark }
+              - { label: 跟随系统, value: preferred_color_scheme }
+          - { label: 评论区语言, name: giscusLang, widget: string, default: zh-CN }
 
   - name: help
     label: 使用说明
     delete: false
-    description: 不确定去哪里改时，先看这里。这是专门写给后台使用时参考的说明页。
+    description: 不确定去哪里改时，先看这里。
     editor:
       preview: false
     files:
@@ -452,6 +340,186 @@ collections:
         label: 后台写作与结构说明
         file: AUTHORING_GUIDE.md
         fields:
-          - label: 内容
-            name: body
-            widget: markdown
+          - { label: 内容, name: body, widget: markdown }
+
+  - name: page_center
+    label: 页面文案中心
+    delete: false
+    description: 这里集中管理首页、留言板和各类索引页的固定文案。
+    editor:
+      preview: false
+    files:
+      - name: home_page_copy
+        label: 首页文案
+        file: src/content/site-home/home.yaml
+        fields:
+          - { label: 首页眉题, name: homeEyebrow, widget: string }
+          - { label: 首页标题, name: homeTitle, widget: string }
+          - { label: 首页导语, name: homeLead, widget: text }
+          - label: 首页介绍段落
+            name: homeIntro
+            widget: list
+            field: { label: 段落, name: item, widget: text }
+          - label: Hero 快捷链接
+            name: heroLinks
+            widget: list
+            fields:
+              - { label: 文案, name: label, widget: string }
+              - { label: 链接, name: href, widget: string }
+          - { label: 浏览方式标题, name: browseTitle, widget: string }
+          - label: 浏览方式提示
+            name: browseTips
+            widget: list
+            field: { label: 提示, name: item, widget: string }
+          - { label: 常用入口标题, name: commonEntryTitle, widget: string }
+          - { label: 焦点文章标题, name: featuredHeading, widget: string }
+          - { label: 最近更新标题, name: freshHeading, widget: string }
+          - { label: 最近更新说明, name: freshNote, widget: string }
+          - { label: 比赛 WP 标题, name: writeupsHeading, widget: string }
+          - { label: 比赛 WP 空状态, name: writeupsEmpty, widget: text }
+          - { label: 比赛区标题, name: contestsHeading, widget: string }
+          - { label: 分类区标题, name: categoriesHeading, widget: string }
+          - { label: 路线图区标题, name: routesHeading, widget: string }
+          - { label: 路线图区说明, name: routesNote, widget: text }
+          - label: 路线图卡片
+            name: routeCards
+            widget: list
+            fields:
+              - { label: 标题, name: title, widget: string }
+              - { label: 描述, name: description, widget: text }
+              - { label: 空状态默认最新内容, name: emptyLatestTitle, widget: string }
+          - { label: 更新方式标题, name: updateMethodHeading, widget: string }
+          - { label: 更新方式说明, name: updateMethodText, widget: text }
+          - { label: 持续补充标题, name: fillingHeading, widget: string }
+          - { label: 持续补充说明, name: fillingText, widget: text }
+          - { label: 赛后复盘标题, name: reviewsHeading, widget: string }
+          - { label: 赛后复盘空状态, name: reviewsEmpty, widget: text }
+          - { label: 标签区标题, name: tagsHeading, widget: string }
+          - { label: 专题总结标题, name: summariesHeading, widget: string }
+          - { label: 专题总结空状态, name: summariesEmpty, widget: text }
+
+      - name: guestbook_page_copy
+        label: 留言板文案
+        file: src/content/site-guestbook/guestbook.yaml
+        fields:
+          - { label: 页面描述, name: pageDescription, widget: text }
+          - { label: 眉题, name: heroEyebrow, widget: string }
+          - { label: 标题, name: heroTitle, widget: string }
+          - { label: 导语, name: heroLead, widget: text }
+          - label: 介绍段落
+            name: heroIntro
+            widget: list
+            field: { label: 段落, name: item, widget: text }
+          - label: 标签胶囊
+            name: pillBadges
+            widget: list
+            field: { label: 文案, name: item, widget: string }
+          - label: 快捷链接
+            name: quickLinks
+            widget: list
+            fields:
+              - { label: 文案, name: label, widget: string }
+              - { label: 链接, name: href, widget: string }
+          - { label: 提醒标题, name: reminderTitle, widget: string }
+          - label: 提醒列表
+            name: reminders
+            widget: list
+            field: { label: 提醒, name: item, widget: string }
+          - { label: 聊天引导标题, name: chatGuideTitle, widget: string }
+          - label: 聊天引导列表
+            name: chatGuides
+            widget: list
+            field: { label: 引导, name: item, widget: string }
+          - label: 中部卡片
+            name: messageIdeas
+            widget: list
+            fields:
+              - { label: 眉题, name: eyebrow, widget: string }
+              - { label: 标题, name: title, widget: string }
+              - { label: 内容, name: text, widget: text }
+          - { label: 登录说明眉题, name: loginPanelEyebrow, widget: string }
+          - { label: 登录说明标题, name: loginPanelTitle, widget: string }
+          - { label: 登录说明内容, name: loginPanelText, widget: text }
+          - { label: 评论区眉题, name: commentsEyebrow, widget: string }
+          - { label: 评论区标题, name: commentsTitle, widget: string }
+          - { label: 评论区说明, name: commentsDescription, widget: text }
+
+      - name: archive_page_copy
+        label: 归档页文案
+        file: src/content/site-archive/archive.yaml
+        fields:
+          - { label: 页面标题, name: pageTitle, widget: string }
+          - { label: 页面描述, name: pageDescription, widget: text }
+          - { label: 眉题, name: heroEyebrow, widget: string }
+          - { label: 主标题, name: heroTitle, widget: string }
+          - { label: 介绍, name: heroIntro, widget: text }
+          - { label: 文章数标签, name: postsLabel, widget: string }
+          - { label: 比赛 WP 标签, name: writeupsLabel, widget: string }
+          - { label: 复盘标签, name: reviewsLabel, widget: string }
+          - { label: 索引标题, name: indexTitle, widget: string }
+          - { label: 索引说明, name: indexMeta, widget: string }
+          - { label: 建议标签, name: indexBlockLabel, widget: string }
+          - { label: 建议内容, name: indexBlockText, widget: text }
+          - { label: 全部文章区标题, name: allPostsHeading, widget: string }
+          - { label: 全部文章区说明, name: allPostsNote, widget: string }
+          - { label: 常看标签区标题, name: commonTagsHeading, widget: string }
+
+      - name: categories_page_copy
+        label: 分类页文案
+        file: src/content/site-categories-page/categories-page.yaml
+        fields:
+          - { label: 页面标题, name: pageTitle, widget: string }
+          - { label: 页面描述, name: pageDescription, widget: text }
+          - { label: 眉题, name: heroEyebrow, widget: string }
+          - { label: 主标题, name: heroTitle, widget: string }
+          - { label: 介绍, name: heroIntro, widget: text }
+          - { label: 分类数标签, name: categoriesLabel, widget: string }
+          - { label: 文章数标签, name: postsLabel, widget: string }
+          - { label: 活跃标签, name: activeLabel, widget: string }
+          - { label: 最近内容前缀, name: latestPrefix, widget: string }
+          - { label: 准备中提示, name: preparingText, widget: string }
+          - label: 引导卡片
+            name: guideCards
+            widget: list
+            fields:
+              - { label: 眉题, name: eyebrow, widget: string }
+              - { label: 标题, name: title, widget: string }
+              - { label: 内容, name: text, widget: text }
+
+      - name: contests_page_copy
+        label: 比赛页文案
+        file: src/content/site-contests-page/contests-page.yaml
+        fields:
+          - { label: 页面标题, name: pageTitle, widget: string }
+          - { label: 页面描述, name: pageDescription, widget: text }
+          - { label: 眉题, name: heroEyebrow, widget: string }
+          - { label: 主标题, name: heroTitle, widget: string }
+          - { label: 介绍, name: heroIntro, widget: text }
+          - { label: 比赛标签, name: contestLabel, widget: string }
+          - { label: 篇数后缀, name: countSuffix, widget: string }
+          - { label: 方向前缀, name: tracksPrefix, widget: string }
+          - { label: 最新内容前缀, name: latestPrefix, widget: string }
+          - { label: 空方向提示, name: emptyTracksText, widget: string }
+
+      - name: tags_page_copy
+        label: 标签页文案
+        file: src/content/site-tags-page/tags-page.yaml
+        fields:
+          - { label: 页面标题, name: pageTitle, widget: string }
+          - { label: 页面描述, name: pageDescription, widget: text }
+          - { label: 眉题, name: heroEyebrow, widget: string }
+          - { label: 主标题, name: heroTitle, widget: string }
+          - { label: 介绍, name: heroIntro, widget: text }
+          - { label: 最新内容前缀, name: latestPrefix, widget: string }
+
+      - name: not_found_page_copy
+        label: 404 页文案
+        file: src/content/site-not-found/not-found.yaml
+        fields:
+          - { label: 页面标题, name: pageTitle, widget: string }
+          - { label: 页面描述, name: pageDescription, widget: text }
+          - { label: 眉题, name: heroEyebrow, widget: string }
+          - { label: 主标题, name: heroTitle, widget: string }
+          - { label: 介绍, name: heroIntro, widget: text }
+          - { label: 主按钮文案, name: primaryLinkLabel, widget: string }
+          - { label: 次按钮文案, name: secondaryLinkLabel, widget: string }

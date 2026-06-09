@@ -1,6 +1,18 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
+
+const tagsPage =
+  (
+    await getEntry("site-tags-page", "tags-page")
+  )?.data ?? {
+    pageTitle: "标签",
+    pageDescription: "按标签浏览题解与总结。",
+    heroEyebrow: "Tag Index",
+    heroTitle: "标签",
+    heroIntro: "按标签翻会比只看日期更方便，尤其是回顾某一类题的时候。",
+    latestPrefix: "最新内容："
+  };
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
 
@@ -31,11 +43,11 @@ const tags = Object.entries(tagMap)
   .sort((a, b) => b.count - a.count || b.latestDate - a.latestDate);
 ---
 
-<Layout title="标签 | iYuu Notes" description="按标签浏览题解与总结。">
+<Layout title={`${tagsPage.pageTitle} | iYuu Notes`} description={tagsPage.pageDescription}>
   <section class="shell page-intro fade-up">
-    <p class="eyebrow">Tag Index</p>
-    <h1>标签</h1>
-    <p>按标签翻会比只看日期更方便，尤其是回顾某一类题的时候。</p>
+    <p class="eyebrow">{tagsPage.heroEyebrow}</p>
+    <h1>{tagsPage.heroTitle}</h1>
+    <p>{tagsPage.heroIntro}</p>
   </section>
 
   <section class="shell tag-index-grid section-block">
@@ -45,7 +57,7 @@ const tags = Object.entries(tagMap)
           <span class="tag-board-name">#{tag.name}</span>
           <strong>{tag.count}</strong>
         </div>
-        <p>最新内容：{tag.latestTitle}</p>
+        <p>{tagsPage.latestPrefix}{tag.latestTitle}</p>
       </a>
     ))}
   </section>

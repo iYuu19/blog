@@ -1,15 +1,29 @@
 ---
+import { getEntry } from "astro:content";
 import Layout from "../layouts/Layout.astro";
+
+const notFound =
+  (
+    await getEntry("site-not-found", "not-found")
+  )?.data ?? {
+    pageTitle: "页面不存在",
+    pageDescription: "你访问的页面不存在。",
+    heroEyebrow: "404",
+    heroTitle: "这页还没被整理出来。",
+    heroIntro: "可以先回到首页，或者去题解归档继续逛逛。",
+    primaryLinkLabel: "返回首页",
+    secondaryLinkLabel: "前往归档"
+  };
 ---
 
-<Layout title="页面不存在 | River Notes" description="你访问的页面不存在。">
+<Layout title={`${notFound.pageTitle} | River Notes`} description={notFound.pageDescription}>
   <section class="shell listing-hero fade-up">
-    <p class="eyebrow">404</p>
-    <h1>这页还没被整理出来。</h1>
-    <p>可以先回到首页，或者去题解归档继续逛逛。</p>
+    <p class="eyebrow">{notFound.heroEyebrow}</p>
+    <h1>{notFound.heroTitle}</h1>
+    <p>{notFound.heroIntro}</p>
     <div class="hero-actions">
-      <a class="button button-primary" href="/">返回首页</a>
-      <a class="button button-secondary" href="/blog">前往归档</a>
+      <a class="button button-primary" href="/">{notFound.primaryLinkLabel}</a>
+      <a class="button button-secondary" href="/blog">{notFound.secondaryLinkLabel}</a>
     </div>
   </section>
 </Layout>

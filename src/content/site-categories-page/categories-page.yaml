@@ -1,0 +1,17 @@
+pageTitle: 分类
+pageDescription: 按内容分类浏览文章。
+heroEyebrow: Category Index
+heroTitle: 分类
+heroIntro: 这里按内容主题整理文章，适合从自己感兴趣的方向进入，比如比赛 WP、赛后复盘、专题总结或学习笔记。
+categoriesLabel: 分类数
+postsLabel: 文章数
+activeLabel: 最近活跃
+latestPrefix: 最近内容：
+preparingText: 这个栏目正在准备中
+guideCards:
+  - eyebrow: 怎么浏览这里
+    title: 按主题进入会更轻松
+    text: 如果你已经知道自己想看的是题解、复盘、工具记录还是专题总结，从这里进入会比按时间翻文章更直接。
+  - eyebrow: 内容会怎么分布
+    title: 除了比赛记录，也会有长期整理
+    text: 这里不只会放单题题解，后面也会慢慢整理赛后复盘、知识点专题和学习过程中的长期笔记。

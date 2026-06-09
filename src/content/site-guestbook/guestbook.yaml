@@ -1,0 +1,44 @@
+pageDescription: 欢迎在这里留言、交流想法、提出建议，或者告诉我你最近在关注什么。
+heroEyebrow: Guestbook
+heroTitle: 留言板
+heroLead: 如果你路过这里，欢迎留下你的想法。
+heroIntro:
+  - 这里是博客的公共留言区。你可以聊文章感受、提小建议、分享最近在关注的题目，也可以单纯打个招呼，让这块空间更有一点来往和回声。
+  - 文章页底部的评论更适合围绕单篇内容讨论；这里则更适合聊整个博客本身，比如结构、更新方向、阅读体验，或者你最想看到的后续内容。
+pillBadges:
+  - 欢迎留言
+  - 支持回复讨论
+  - 支持表情反应
+quickLinks:
+  - label: 先看全部文章
+    href: /blog
+  - label: 按分类浏览
+    href: /categories
+  - label: 看看关于页
+    href: /about
+reminderTitle: 留言前小提醒
+reminders:
+  - 需要使用 GitHub 账号登录后留言
+  - 这样可以减少垃圾内容，也方便后续继续回复
+  - 如果评论区刚加载失败，刷新一次通常就能恢复
+chatGuideTitle: 更适合去哪儿聊
+chatGuides:
+  - 想讨论具体某篇文章：去文章页底部评论
+  - 想提整体建议或闲聊：就在这个留言板
+  - 想快速看最近更新：可以先去归档页浏览
+messageIdeas:
+  - eyebrow: Share
+    title: 聊聊你刚看完的内容
+    text: 如果某篇文章对你有帮助，或者你对某个题解过程有不同想法，欢迎直接留在这里。
+  - eyebrow: Suggest
+    title: 告诉我你更想看到什么
+    text: 可以是某类题目、某个方向的复盘、页面体验建议，或者你希望我继续补充的栏目。
+  - eyebrow: Hello
+    title: 单纯打个招呼也很好
+    text: 就算只是留下一句“我来过这里”，也会让这个博客更像一个有人来往的地方。
+loginPanelEyebrow: Why GitHub Login
+loginPanelTitle: 为什么这里要登录后才能留言
+loginPanelText: 目前这块留言板基于 GitHub Discussions。这样做的好处是更稳定、免费、能持续保留讨论记录，也能减少匿名垃圾留言。对访客来说，多一步登录会稍微麻烦一点，但整体互动体验会更干净。
+commentsEyebrow: Guestbook
+commentsTitle: 给我留言
+commentsDescription: 欢迎在这里留言、交流、提建议，也欢迎告诉我你最想看到哪类内容。

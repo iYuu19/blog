@@ -1,7 +1,35 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import { getCategoryDefinitions, getCategoryName, getCategorySlug } from "../../utils/content";
+
+const categoriesPage =
+  (
+    await getEntry("site-categories-page", "categories-page")
+  )?.data ?? {
+    pageTitle: "分类",
+    pageDescription: "按内容分类浏览文章。",
+    heroEyebrow: "Category Index",
+    heroTitle: "分类",
+    heroIntro: "这里按内容主题整理文章，适合从自己感兴趣的方向进入，比如比赛 WP、赛后复盘、专题总结或学习笔记。",
+    categoriesLabel: "分类数",
+    postsLabel: "文章数",
+    activeLabel: "最近活跃",
+    latestPrefix: "最近内容：",
+    preparingText: "这个栏目正在准备中",
+    guideCards: [
+      {
+        eyebrow: "怎么浏览这里",
+        title: "按主题进入会更轻松",
+        text: "如果你已经知道自己想看的是题解、复盘、工具记录还是专题总结，从这里进入会比按时间翻文章更直接。"
+      },
+      {
+        eyebrow: "内容会怎么分布",
+        title: "除了比赛记录，也会有长期整理",
+        text: "这里不只会放单题题解，后面也会慢慢整理赛后复盘、知识点专题和学习过程中的长期笔记。"
+      }
+    ]
+  };
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
@@ -43,7 +71,6 @@ const categoryStats = Object.values(
     }
 
     const current = acc[slug];
-
     post.data.tags.forEach((tag) => {
       current.tags.set(tag, (current.tags.get(tag) ?? 0) + 1);
     });
@@ -115,38 +142,35 @@ const totalCategories = categories.length;
 const newestCategory = categories.find((category) => category.hasPosts);
 ---
 
-<Layout title="分类 | iYuu Notes" description="按内容分类浏览文章。">
+<Layout title={`${categoriesPage.pageTitle} | iYuu Notes`} description={categoriesPage.pageDescription}>
   <section class="shell page-intro">
-    <p class="eyebrow">Category Index</p>
-    <h1>分类</h1>
-    <p>这里按内容主题整理文章，适合从自己感兴趣的方向进入，比如比赛 WP、赛后复盘、专题总结或学习笔记。</p>
+    <p class="eyebrow">{categoriesPage.heroEyebrow}</p>
+    <h1>{categoriesPage.heroTitle}</h1>
+    <p>{categoriesPage.heroIntro}</p>
     <dl class="page-stats">
       <div>
-        <dt>分类数</dt>
+        <dt>{categoriesPage.categoriesLabel}</dt>
         <dd>{totalCategories}</dd>
       </div>
       <div>
-        <dt>文章数</dt>
+        <dt>{categoriesPage.postsLabel}</dt>
         <dd>{totalPosts}</dd>
       </div>
       <div>
-        <dt>最近活跃</dt>
+        <dt>{categoriesPage.activeLabel}</dt>
         <dd>{newestCategory?.name ?? "待补充"}</dd>
       </div>
     </dl>
   </section>
 
   <section class="shell guide-grid section-block">
-    <article class="guide-card">
-      <p class="guide-card-label">怎么浏览这里</p>
-      <h2>按主题进入会更轻松</h2>
-      <p>如果你已经知道自己想看的是题解、复盘、工具记录还是专题总结，从这里进入会比按时间翻文章更直接。</p>
-    </article>
-    <article class="guide-card">
-      <p class="guide-card-label">内容会怎么分布</p>
-      <h2>除了比赛记录，也会有长期整理</h2>
-      <p>这里不只会放单题题解，后面也会慢慢整理赛后复盘、知识点专题和学习过程中的长期笔记。</p>
-    </article>
+    {categoriesPage.guideCards.map((card) => (
+      <article class="guide-card">
+        <p class="guide-card-label">{card.eyebrow}</p>
+        <h2>{card.title}</h2>
+        <p>{card.text}</p>
+      </article>
+    ))}
   </section>
 
   <section class="shell tag-index-grid section-block">
@@ -158,7 +182,7 @@ const newestCategory = categories.find((category) => category.hasPosts);
         </div>
         <p class="category-board-description">{category.description}</p>
         <p class="category-board-track">你会在这里看到：{category.writingFocus}</p>
-        <p>最近内容：{category.latestTitle}</p>
+        <p>{categoriesPage.latestPrefix}{category.latestTitle}</p>
         {category.exampleTopics.length > 0 && (
           <div class="category-example-row">
             {category.exampleTopics.slice(0, 3).map((topic) => (
@@ -167,7 +191,7 @@ const newestCategory = categories.find((category) => category.hasPosts);
           </div>
         )}
         <div class="category-board-footer">
-          <span>{category.hasPosts ? `最近更新：${category.latestDateText}` : "这个栏目正在准备中"}</span>
+          <span>{category.hasPosts ? `最近更新：${category.latestDateText}` : categoriesPage.preparingText}</span>
           <div class="tag-row">
             {category.topTags.map((tag) => (
               <span class="tag-pill">{tag}</span>

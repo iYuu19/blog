@@ -137,29 +137,21 @@ const featuredDate = featuredPost
     }).format(featuredPost.data.pubDate)
   : "";
 const heroCategoryLinks = categoryCards.slice(0, 3);
-const routeCards = [
-  {
-    title: "比赛 WP",
-    count: wpPosts.length,
-    href: `/categories/${slugifySegment("比赛 WP")}/`,
-    description: "这里主要收录单题解法、关键 payload、脚本思路和过程记录。",
-    latestTitle: wpPosts[0]?.data.title ?? "这个栏目会随着后续更新慢慢补充起来。"
-  },
-  {
-    title: "赛后复盘",
-    count: reviewPosts.length,
-    href: `/categories/${slugifySegment("赛后复盘")}/`,
-    description: "这里会放整场比赛的节奏、失误点、回看总结和补题记录。",
-    latestTitle: reviewPosts[0]?.data.title ?? "后面会逐步把整场比赛的复盘内容补上。"
-  },
-  {
-    title: "专题总结",
-    count: summaryPosts.length,
-    href: `/categories/${slugifySegment("专题总结")}/`,
-    description: "这里会整理反复出现的知识点、工具用法和题型笔记。",
-    latestTitle: summaryPosts[0]?.data.title ?? "后续会把常见知识点慢慢整理到这里。"
-  }
-];
+const routeSourceMap = new Map([
+  ["比赛 WP", wpPosts],
+  ["赛后复盘", reviewPosts],
+  ["专题总结", summaryPosts]
+]);
+const routeCards = site.routeCards.map((route) => {
+  const routePosts = routeSourceMap.get(route.title) ?? [];
+
+  return {
+    ...route,
+    count: routePosts.length,
+    href: `/categories/${slugifySegment(route.title)}/`,
+    latestTitle: routePosts[0]?.data.title ?? route.emptyLatestTitle
+  };
+});
 ---
 
 <Layout title={site.siteTitle} description={site.siteDescription}>
@@ -176,11 +168,9 @@ const routeCards = [
         <p class="intro-lead">{site.homeLead}</p>
         {site.homeIntro.map((paragraph) => <p>{paragraph}</p>)}
         <div class="hero-links hero-links-strong">
-          <a href="/contests">看比赛分类</a>
-          <a href="/categories">看内容分类</a>
-          <a href="/blog">看全部文章</a>
-          <a href="/tags">看标签</a>
-          <a href="/about">看看这个站在写什么</a>
+          {site.heroLinks.map((link) => (
+            <a href={link.href}>{link.label}</a>
+          ))}
         </div>
         {
           latest && (
@@ -207,16 +197,14 @@ const routeCards = [
 
       <aside class="hero-aside">
         <section class="hero-note-card">
-          <p class="hero-note-label">浏览方式</p>
+          <p class="hero-note-label">{site.browseTitle}</p>
           <ul class="hero-note-list">
-            <li>比赛页适合按赛事集中查看一整场记录</li>
-            <li>分类页适合按主题浏览不同方向的内容</li>
-            <li>标签页适合快速定位具体知识点</li>
+            {site.browseTips.map((tip) => <li>{tip}</li>)}
           </ul>
         </section>
 
         <section class="hero-note-card accent-card">
-          <p class="hero-note-label">常用入口</p>
+          <p class="hero-note-label">{site.commonEntryTitle}</p>
           <div class="hero-chip-stack">
             {heroCategoryLinks.map((category) => (
               <a class="hero-chip" href={`/categories/${category.slug}/`}>
@@ -235,13 +223,13 @@ const routeCards = [
       <div class="site-index">
         <p class="index-title">浏览索引</p>
         <ul class="index-list">
-          <li><a href="#featured">先看这一篇</a></li>
-          <li><a href="#fresh">最近在补这些</a></li>
-          <li><a href="#writeups">最近比赛 WP</a></li>
-          <li><a href="#contests">按比赛分类</a></li>
-          <li><a href="#routes">内容路线图</a></li>
-          <li><a href="#reviews">赛后复盘</a></li>
-          <li><a href="#tags">标签</a></li>
+          <li><a href="#featured">{site.featuredHeading}</a></li>
+          <li><a href="#fresh">{site.freshHeading}</a></li>
+          <li><a href="#writeups">{site.writeupsHeading}</a></li>
+          <li><a href="#contests">{site.contestsHeading}</a></li>
+          <li><a href="#routes">{site.routesHeading}</a></li>
+          <li><a href="#reviews">{site.reviewsHeading}</a></li>
+          <li><a href="#tags">{site.tagsHeading}</a></li>
         </ul>
         <p class="index-meta">目前 {posts.length} 篇，最近更新在 {latestDate || "这几天"}。</p>
         <div class="index-block">
@@ -257,7 +245,7 @@ const routeCards = [
           featuredPost && (
             <section class="section" id="featured">
               <div class="section-head">
-                <h2>先看这一篇</h2>
+                <h2>{site.featuredHeading}</h2>
                 <span class="section-note">{featuredDate}</span>
               </div>
               <article class="featured-card">
@@ -281,8 +269,8 @@ const routeCards = [
 
         <section class="section" id="fresh">
           <div class="section-head">
-            <h2>最近在补这些</h2>
-            <span class="section-note">把零散记录慢慢补成一个自己的知识库</span>
+            <h2>{site.freshHeading}</h2>
+            <span class="section-note">{site.freshNote}</span>
           </div>
           <div class="signal-grid">
             {recentSignalCards.map((post) => (
@@ -301,7 +289,7 @@ const routeCards = [
 
         <section class="section" id="writeups">
           <div class="section-head">
-            <h2>最近比赛 WP</h2>
+            <h2>{site.writeupsHeading}</h2>
             <a class="section-link" href="/blog">查看归档</a>
           </div>
           {
@@ -310,14 +298,14 @@ const routeCards = [
                 {recentWpPosts.map((post) => <ArchiveRow post={post} />)}
               </div>
             ) : (
-              <p class="empty-feed">目前公开的比赛 WP 还不多，先从上面那篇开始，后面会慢慢把每场比赛的过程补起来。</p>
+              <p class="empty-feed">{site.writeupsEmpty}</p>
             )
           }
         </section>
 
         <section class="section" id="contests">
           <div class="section-head">
-            <h2>按比赛分类</h2>
+            <h2>{site.contestsHeading}</h2>
             <a class="section-link" href="/contests">查看全部比赛</a>
           </div>
           <div class="track-grid">
@@ -340,7 +328,7 @@ const routeCards = [
 
         <section class="section" id="categories">
           <div class="section-head">
-            <h2>按内容分类</h2>
+            <h2>{site.categoriesHeading}</h2>
             <a class="section-link" href="/categories">查看全部分类</a>
           </div>
           <div class="tag-index-grid compact-grid">
@@ -358,8 +346,8 @@ const routeCards = [
 
         <section class="section" id="routes">
           <div class="section-head">
-            <h2>内容路线图</h2>
-            <span class="section-note">可以从不同内容类型进入，按自己感兴趣的方向浏览</span>
+            <h2>{site.routesHeading}</h2>
+            <span class="section-note">{site.routesNote}</span>
           </div>
           <div class="route-grid">
             {routeCards.map((route) => (
@@ -378,17 +366,17 @@ const routeCards = [
 
       <aside class="side-column">
         <section class="section side-note">
-          <h2>更新方式</h2>
-          <p>这里会尽量把题目背景、分析过程和关键结论写清楚，让每篇文章都既方便阅读，也方便后续回看。</p>
+          <h2>{site.updateMethodHeading}</h2>
+          <p>{site.updateMethodText}</p>
         </section>
 
         <section class="section side-note">
-          <h2>持续补充中</h2>
-          <p>除了比赛 WP，这里也会慢慢补充赛后复盘、专题总结和学习过程中的记录，让内容越来越完整。</p>
+          <h2>{site.fillingHeading}</h2>
+          <p>{site.fillingText}</p>
         </section>
 
         <section class="section" id="reviews">
-          <h2>赛后复盘</h2>
+          <h2>{site.reviewsHeading}</h2>
           {
             recentReviewPosts.length > 0 ? (
               <ul class="link-list note-list">
@@ -400,20 +388,20 @@ const routeCards = [
                 ))}
               </ul>
             ) : (
-              <p class="empty-feed">这里以后会放一场比赛打完后的整体复盘，而不只是单题 WP。</p>
+              <p class="empty-feed">{site.reviewsEmpty}</p>
             )
           }
         </section>
 
         <section class="section" id="tags">
-          <h2>标签</h2>
+          <h2>{site.tagsHeading}</h2>
           <div class="tag-cloud">
             {tags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
           </div>
         </section>
 
         <section class="section">
-          <h2>专题总结</h2>
+          <h2>{site.summariesHeading}</h2>
           {
             summaryPosts.length > 0 ? (
               <ul class="link-list note-list">
@@ -425,7 +413,7 @@ const routeCards = [
                 ))}
               </ul>
             ) : (
-              <p class="empty-feed">等比赛文章积累起来之后，再把常出现的知识点单独整理成专题。</p>
+              <p class="empty-feed">{site.summariesEmpty}</p>
             )
           }
         </section>

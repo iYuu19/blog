@@ -1,7 +1,23 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import { getContestCover, getContestName, getContestSlug } from "../../utils/content";
+
+const contestsPage =
+  (
+    await getEntry("site-contests-page", "contests-page")
+  )?.data ?? {
+    pageTitle: "比赛",
+    pageDescription: "按比赛查看 iYuu 的 WP、复盘与题目记录。",
+    heroEyebrow: "Contest Index",
+    heroTitle: "比赛",
+    heroIntro: "这里按比赛整理文章。以后一场比赛里的不同题目和复盘，都可以放到同一个比赛分类下面。",
+    contestLabel: "比赛",
+    countSuffix: "篇",
+    tracksPrefix: "方向：",
+    latestPrefix: "最新内容：",
+    emptyTracksText: "待补充"
+  };
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
@@ -55,11 +71,11 @@ const contests = Object.values(
   .sort((a, b) => b.latestDate - a.latestDate || b.count - a.count);
 ---
 
-<Layout title="比赛 | iYuu Notes" description="按比赛查看 iYuu 的 WP、复盘与题目记录。">
+<Layout title={`${contestsPage.pageTitle} | iYuu Notes`} description={contestsPage.pageDescription}>
   <section class="shell page-intro">
-    <p class="eyebrow">Contest Index</p>
-    <h1>比赛</h1>
-    <p>这里按比赛整理文章。以后一场比赛里的不同题目和复盘，都可以放到同一个比赛分类下面。</p>
+    <p class="eyebrow">{contestsPage.heroEyebrow}</p>
+    <h1>{contestsPage.heroTitle}</h1>
+    <p>{contestsPage.heroIntro}</p>
   </section>
 
   <section class="shell contest-index-grid section-block">
@@ -72,10 +88,10 @@ const contests = Object.values(
         <div class="contest-board-content">
           <div class="contest-board-head">
             <strong>{contest.name}</strong>
-            <span>{contest.count} 篇</span>
+            <span>{contest.count} {contestsPage.countSuffix}</span>
           </div>
-          <p>方向：{contest.tracks.join(" / ") || "待补充"}</p>
-          <p>最新内容：{contest.latestTitle}</p>
+          <p>{contestsPage.tracksPrefix}{contest.tracks.join(" / ") || contestsPage.emptyTracksText}</p>
+          <p>{contestsPage.latestPrefix}{contest.latestTitle}</p>
         </div>
       </a>
     ))}
