@@ -16,9 +16,9 @@ public_folder: /uploads
 
 collections:
   - name: category_center
-    label: 分类中心
+    label: 分类体系
     delete: false
-    description: 先整理分类，再去写文章，博客结构会清楚很多。
+    description: 先定结构，再写内容。这里负责分类名字、说明和排序。
     editor:
       preview: false
     files:
@@ -60,9 +60,9 @@ collections:
                 required: false
 
   - name: template_center
-    label: 模板中心
+    label: 写作模板
     delete: false
-    description: 发文章前先看模板，能更快进入状态，也不容易漏结构。
+    description: 发文前先选模板，减少漏项，也更容易统一写作节奏。
     editor:
       preview: false
     files:
@@ -110,9 +110,9 @@ collections:
             widget: markdown
 
   - name: blog
-    label: 文章
+    label: 文章发布
     label_singular: 文章
-    description: 新建文章、改正文、改分类、加标签，都在这里。
+    description: 新建、编辑、草稿、首页推荐都在这里，是内容生产主入口。
     folder: src/content/blog
     create: true
     delete: true
@@ -247,9 +247,9 @@ collections:
         widget: markdown
 
   - name: site
-    label: 站点基础设置
+    label: 站点设置
     delete: false
-    description: 改博客名字、导航、首页主信息、关于页和评论设置。
+    description: 品牌、导航、关于页和评论配置，属于站点级设置。
     editor:
       preview: false
     files:
@@ -354,9 +354,9 @@ collections:
           - { label: 评论区语言, name: giscusLang, widget: string, default: zh-CN }
 
   - name: help
-    label: 使用说明
+    label: 使用帮助
     delete: false
-    description: 不确定去哪里改时，先看这里。
+    description: 忘了去哪里改、字段怎么填时，先看这里。
     editor:
       preview: false
     files:
@@ -367,9 +367,9 @@ collections:
           - { label: 内容, name: body, widget: markdown }
 
   - name: page_center
-    label: 页面文案中心
+    label: 页面文案
     delete: false
-    description: 这里集中管理首页、留言板和各类索引页的固定文案。
+    description: 集中管理首页、留言板、归档和详情页的固定文案。
     editor:
       preview: false
     files:

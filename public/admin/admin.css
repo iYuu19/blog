@@ -1,254 +1,422 @@
 :root {
-  --admin-ink: #152029;
-  --admin-muted: #66737f;
-  --admin-line: rgba(34, 48, 59, 0.14);
-  --admin-panel: rgba(255, 255, 255, 0.96);
-  --admin-teal: #0f766e;
-  --admin-teal-dark: #0b5f59;
-  --admin-shadow: 0 16px 42px rgba(21, 32, 41, 0.14);
-  --admin-soft-shadow: 0 8px 22px rgba(21, 32, 41, 0.1);
+  --admin-ink: #14212b;
+  --admin-muted: #62707b;
+  --admin-line: rgba(20, 33, 43, 0.12);
+  --admin-line-strong: rgba(20, 33, 43, 0.2);
+  --admin-panel: rgba(255, 255, 255, 0.9);
+  --admin-panel-strong: rgba(255, 255, 255, 0.96);
+  --admin-accent: #0f766e;
+  --admin-accent-deep: #0a5b55;
+  --admin-highlight: #f4b860;
+  --admin-shadow: 0 18px 42px rgba(20, 33, 43, 0.14);
+  --admin-soft-shadow: 0 10px 24px rgba(20, 33, 43, 0.1);
+  --admin-radius: 22px;
+  --admin-radius-sm: 16px;
   --admin-font: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
-.admin-welcome,
-.admin-shortcuts,
-.admin-welcome *,
-.admin-shortcuts * {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--admin-ink);
+  font-family: var(--admin-font);
+  background:
+    radial-gradient(circle at top left, rgba(15, 118, 110, 0.14), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(244, 184, 96, 0.14), transparent 26%),
+    linear-gradient(180deg, #eff7f4 0%, #eef3f7 52%, #f7f9fb 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(20, 33, 43, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 33, 43, 0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 86%);
+  pointer-events: none;
+}
+
+#nc-root {
+  position: relative;
+  min-height: 100vh;
+}
+
+.admin-commandbar,
+.admin-dock,
+.admin-dock * {
   font-family: var(--admin-font);
 }
 
-.admin-welcome,
-.admin-shortcuts__panel {
-  border: 1px solid var(--admin-line);
-  border-radius: 10px;
+.admin-commandbar,
+.admin-dock__panel {
   background: var(--admin-panel);
-  color: var(--admin-ink);
+  border: 1px solid var(--admin-line);
   box-shadow: var(--admin-shadow);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(18px);
 }
 
-.admin-welcome {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 2147483000;
-  width: min(390px, calc(100vw - 24px));
-  padding: 18px;
-}
-
-.admin-welcome[hidden] {
-  display: none;
-}
-
-.admin-welcome__eyebrow,
-.admin-shortcuts__eyebrow {
+.admin-eyebrow {
   margin: 0 0 8px;
-  color: var(--admin-teal);
-  font-size: 12px;
+  color: var(--admin-accent);
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
-.admin-welcome h1,
-.admin-shortcuts h2 {
-  margin: 0;
-  color: var(--admin-ink);
-  font-size: 20px;
-  line-height: 1.35;
+.admin-commandbar {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 24;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) auto auto;
+  align-items: center;
+  gap: 18px;
+  width: min(860px, calc(100vw - 420px));
+  padding: 16px 18px;
+  border-radius: calc(var(--admin-radius) - 4px);
 }
 
-.admin-welcome__lead {
-  margin: 10px 0 0;
+.admin-commandbar__intro {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-commandbar__intro h1 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.admin-commandbar__intro p:last-child {
+  margin: 0;
   color: var(--admin-muted);
   font-size: 14px;
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
-.admin-welcome__list {
+.admin-commandbar__meta {
   display: grid;
-  gap: 8px;
-  margin: 14px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.admin-welcome__list li {
-  padding: 10px 12px;
+  gap: 4px;
+  min-width: 144px;
+  padding: 12px 14px;
   border: 1px solid rgba(15, 118, 110, 0.14);
-  border-radius: 8px;
-  background: rgba(15, 118, 110, 0.06);
-  color: #26333d;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.admin-welcome__list strong {
-  color: var(--admin-teal-dark);
-}
-
-.admin-welcome__tip,
-.admin-shortcuts__status {
-  margin: 14px 0 0;
-  padding: 11px 12px;
-  border: 1px solid rgba(183, 121, 31, 0.18);
-  border-radius: 8px;
-  background: rgba(255, 249, 234, 0.9);
-  color: #5b4322;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.admin-welcome__actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.admin-welcome__actions a,
-.admin-welcome__actions button,
-.admin-shortcuts__toggle,
-.admin-shortcuts__grid a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 40px;
-  border-radius: 8px;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 800;
-  text-decoration: none;
-  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
-}
-
-.admin-welcome__actions a,
-.admin-shortcuts__toggle {
-  border: 1px solid rgba(15, 118, 110, 0.2);
-  background: var(--admin-teal);
-  color: #ffffff;
-  box-shadow: 0 8px 18px rgba(15, 118, 110, 0.18);
-}
-
-.admin-welcome__actions button {
-  border: 1px solid var(--admin-line);
-  background: #ffffff;
-  color: var(--admin-ink);
-  cursor: pointer;
-}
-
-.admin-welcome__actions a,
-.admin-welcome__actions button {
-  flex: 1;
-  padding: 0 14px;
-}
-
-.admin-shortcuts {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  z-index: 2147483000;
-  width: min(420px, calc(100vw - 24px));
-}
-
-.admin-shortcuts__toggle {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 0 16px;
-  cursor: pointer;
-}
-
-.admin-shortcuts__panel {
-  padding: 18px;
-  border-top: 5px solid var(--admin-teal);
-}
-
-.admin-shortcuts.is-collapsed .admin-shortcuts__panel {
-  display: none;
-}
-
-.admin-shortcuts.is-collapsed .admin-shortcuts__toggle {
-  margin-bottom: 0;
-  background: #ffffff;
-  color: var(--admin-teal-dark);
-  box-shadow: var(--admin-soft-shadow);
-}
-
-.admin-shortcuts__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.admin-shortcuts__grid a {
-  padding: 0 10px;
-  border: 1px solid rgba(21, 32, 41, 0.1);
-  background: #ffffff;
-  color: var(--admin-ink);
-  box-shadow: 0 5px 14px rgba(21, 32, 41, 0.06);
-}
-
-.admin-shortcuts__grid a:nth-child(1),
-.admin-shortcuts__grid a:nth-child(4) {
-  border-color: rgba(15, 118, 110, 0.22);
+  border-radius: var(--admin-radius-sm);
   background: rgba(15, 118, 110, 0.08);
-  color: var(--admin-teal-dark);
 }
 
-.admin-shortcuts__grid a:hover,
-.admin-welcome__actions a:hover,
-.admin-welcome__actions button:hover,
-.admin-shortcuts__toggle:hover {
-  transform: translateY(-1px);
-}
-
-.admin-shortcuts__status {
-  display: grid;
-  gap: 3px;
-}
-
-.admin-shortcuts__status span {
+.admin-commandbar__label {
   color: var(--admin-muted);
   font-size: 12px;
 }
 
-.admin-shortcuts__status strong {
-  color: var(--admin-ink);
-  font-size: 14px;
+.admin-commandbar__meta strong {
+  font-size: 15px;
 }
 
-@media (max-width: 920px) {
-  .admin-welcome {
+.admin-commandbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-commandbar__actions a,
+.admin-dock__toggle,
+.admin-dock__hero-actions a,
+.admin-last-route__body a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 15px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 118, 110, 0.2);
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--admin-accent) 0%, #139488 100%);
+  box-shadow: 0 10px 24px rgba(15, 118, 110, 0.2);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    filter 160ms ease;
+}
+
+.admin-commandbar__actions a:first-child {
+  color: var(--admin-accent-deep);
+  background: #ffffff;
+  box-shadow: var(--admin-soft-shadow);
+}
+
+.admin-dock {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  bottom: 18px;
+  z-index: 24;
+  display: grid;
+  grid-template-columns: auto;
+  align-content: start;
+  width: min(380px, calc(100vw - 32px));
+}
+
+.admin-dock__toggle {
+  justify-self: end;
+  min-width: 98px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.admin-dock__panel {
+  display: grid;
+  gap: 18px;
+  max-height: calc(100vh - 88px);
+  padding: 18px;
+  overflow: auto;
+  border-radius: var(--admin-radius);
+}
+
+.admin-dock.is-collapsed .admin-dock__panel {
+  display: none;
+}
+
+.admin-dock.is-collapsed .admin-dock__toggle {
+  color: var(--admin-accent-deep);
+  background: #ffffff;
+  box-shadow: var(--admin-soft-shadow);
+}
+
+.admin-dock__hero {
+  position: relative;
+  padding: 18px;
+  border: 1px solid rgba(15, 118, 110, 0.16);
+  border-radius: calc(var(--admin-radius) - 4px);
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(255, 255, 255, 0.94)),
+    #ffffff;
+  overflow: hidden;
+}
+
+.admin-dock__hero::after {
+  content: "";
+  position: absolute;
+  inset: auto -20px -36px auto;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(244, 184, 96, 0.28), transparent 70%);
+  pointer-events: none;
+}
+
+.admin-dock__hero h2,
+.admin-section__head h3,
+.admin-last-route__body h3 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.admin-dock__hero p:last-of-type,
+.admin-card p,
+.admin-last-route__body p {
+  margin: 10px 0 0;
+  color: var(--admin-muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.admin-dock__hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.admin-dock__hero-actions a:last-child,
+.admin-last-route__body a {
+  color: var(--admin-accent-deep);
+  background: #ffffff;
+  box-shadow: var(--admin-soft-shadow);
+}
+
+.admin-section {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-section__head {
+  display: grid;
+  gap: 2px;
+}
+
+.admin-card-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-card {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid var(--admin-line);
+  border-radius: var(--admin-radius-sm);
+  background: var(--admin-panel-strong);
+  color: var(--admin-ink);
+  text-decoration: none;
+  box-shadow: var(--admin-soft-shadow);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.admin-card:hover,
+.admin-card.is-active,
+.admin-commandbar__actions a:hover,
+.admin-dock__toggle:hover,
+.admin-dock__hero-actions a:hover,
+.admin-last-route__body a:hover {
+  transform: translateY(-1px);
+}
+
+.admin-card:hover,
+.admin-card.is-active {
+  border-color: rgba(15, 118, 110, 0.32);
+  box-shadow: 0 14px 30px rgba(20, 33, 43, 0.12);
+}
+
+.admin-card.is-active {
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(255, 255, 255, 0.98));
+}
+
+.admin-card--accent {
+  border-color: rgba(15, 118, 110, 0.24);
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.09), rgba(255, 255, 255, 0.98));
+}
+
+.admin-card--soft {
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.admin-card__kicker {
+  color: var(--admin-accent-deep);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-card strong {
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.admin-last-route {
+  padding: 16px;
+  border: 1px solid rgba(244, 184, 96, 0.22);
+  border-radius: calc(var(--admin-radius) - 4px);
+  background: linear-gradient(135deg, rgba(255, 248, 233, 0.98), rgba(255, 255, 255, 0.94));
+}
+
+.admin-last-route__body {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-last-route__body a {
+  flex: none;
+}
+
+body[data-admin-view="entry"] .admin-commandbar,
+body[data-admin-view="new"] .admin-commandbar {
+  width: min(680px, calc(100vw - 400px));
+}
+
+body[data-admin-view="entry"] .admin-commandbar__intro h1,
+body[data-admin-view="new"] .admin-commandbar__intro h1 {
+  font-size: 20px;
+}
+
+body[data-admin-view="entry"] .admin-dock__hero,
+body[data-admin-view="new"] .admin-dock__hero {
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.08), rgba(255, 255, 255, 0.94)),
+    #ffffff;
+}
+
+@media (max-width: 1360px) {
+  .admin-commandbar {
+    grid-template-columns: 1fr;
+    width: min(720px, calc(100vw - 400px));
+  }
+
+  .admin-commandbar__actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 1080px) {
+  .admin-commandbar {
     top: 12px;
+    left: 12px;
     right: 12px;
+    width: auto;
+  }
+
+  .admin-dock {
+    top: auto;
+    right: 12px;
+    bottom: 12px;
     width: min(360px, calc(100vw - 24px));
   }
 
-  .admin-shortcuts {
-    right: 12px;
-    bottom: 12px;
-    width: min(340px, calc(100vw - 24px));
+  .admin-dock__panel {
+    max-height: min(72vh, 780px);
   }
 }
 
-@media (max-width: 640px) {
-  .admin-welcome {
+@media (max-width: 720px) {
+  .admin-commandbar {
     position: static;
-    width: auto;
+    gap: 14px;
     margin: 12px;
+    width: auto;
   }
 
-  .admin-shortcuts {
+  .admin-dock {
+    right: 12px;
     left: 12px;
     width: auto;
   }
 
-  .admin-shortcuts__grid {
-    grid-template-columns: 1fr;
+  .admin-dock__toggle {
+    width: 100%;
   }
 
-  .admin-welcome__actions {
+  .admin-dock__panel {
+    max-height: 62vh;
+    padding: 14px;
+  }
+
+  .admin-dock__hero-actions,
+  .admin-commandbar__actions,
+  .admin-last-route__body {
     flex-direction: column;
+    align-items: stretch;
   }
 }
