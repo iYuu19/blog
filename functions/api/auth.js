@@ -75,7 +75,7 @@ function serializeCookie(name, value, options = {}) {
 
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
-  const provider = url.searchParams.get("provider");
+  const provider = url.searchParams.get("provider") || "github";
 
   if (provider !== "github") {
     return new Response(html("不支持的登录方式", "<h1>登录失败</h1><p>当前只支持 <code>github</code> 登录。</p>"), {
