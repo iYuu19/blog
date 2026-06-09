@@ -180,26 +180,6 @@
         return "home";
       }
 
-      function getEditorToolbar(root) {
-        const splitPane = root.querySelector(".Resizer.vertical")?.parentElement;
-        const toolbarAnchor = root.querySelector('a[href^="/collections/"]');
-
-        if (!splitPane || !toolbarAnchor) {
-          return null;
-        }
-
-        let candidate = toolbarAnchor.closest("div");
-        while (candidate && candidate !== root) {
-          if (candidate !== splitPane && candidate.querySelector("button")) {
-            return candidate;
-          }
-
-          candidate = candidate.parentElement;
-        }
-
-        return null;
-      }
-
       function decorateDecapUi() {
         const root = document.getElementById("nc-root");
         if (!root) {
@@ -243,20 +223,6 @@
           link.setAttribute("data-iyuu-entry-link", "true");
           link.closest("li")?.setAttribute("data-iyuu-entry-card", "true");
         });
-
-        const editorToolbar = getEditorToolbar(root);
-        if (editorToolbar) {
-          editorToolbar.setAttribute("data-iyuu-editor-toolbar", "true");
-        }
-
-        const splitPaneResizer = root.querySelector(".Resizer.vertical");
-        if (splitPaneResizer) {
-          const splitPane = splitPaneResizer.parentElement;
-          splitPane?.setAttribute("data-iyuu-editor-split", "true");
-          const editorControls = splitPaneResizer.previousElementSibling;
-          editorControls?.setAttribute("data-iyuu-editor-controls", "true");
-          splitPaneResizer.nextElementSibling?.setAttribute("data-iyuu-editor-preview", "true");
-        }
 
         if (authenticated) {
           welcome?.setAttribute("hidden", "hidden");
