@@ -4,167 +4,108 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>iYuu Notes 后台</title>
-    <link rel="stylesheet" href="/admin/admin.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #f7f5ef;
+        color: #1d2228;
+        font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      }
+
+      .admin-loading {
+        max-width: 720px;
+        margin: 32px auto 0;
+        padding: 0 20px;
+      }
+
+      .admin-loading__card {
+        border: 1px solid #ddd4c5;
+        border-radius: 18px;
+        background: rgba(255, 253, 249, 0.94);
+        box-shadow: 0 16px 36px rgba(20, 24, 28, 0.06);
+        padding: 20px 22px;
+      }
+
+      .admin-loading__eyebrow {
+        margin: 0 0 8px;
+        color: #6b756f;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .admin-loading h1 {
+        margin: 0;
+        font-size: 28px;
+        line-height: 1.25;
+      }
+
+      .admin-loading p {
+        margin: 10px 0 0;
+        color: #46505a;
+        font-size: 14px;
+        line-height: 1.8;
+      }
+
+      .admin-loading[hidden] {
+        display: none;
+      }
+    </style>
   </head>
   <body>
-    <aside class="admin-welcome" id="admin-welcome">
-      <p class="admin-eyebrow">iYuu Notes</p>
-      <h1>后台入口不用太多，顺手最重要。</h1>
-      <p class="admin-welcome__lead">
-        这里沿用前台博客的气质，只保留最常用的入口。平时写文章、整理分类、改页面文案，都从右上和右下这两块进，不过要先用 GitHub 登录。
-      </p>
-      <div class="admin-welcome__chips">
-        <span>写作发布</span>
-        <span>分类体系</span>
-        <span>页面文案</span>
-        <span>站点设置</span>
+    <section class="admin-loading" id="admin-loading">
+      <div class="admin-loading__card">
+        <p class="admin-loading__eyebrow">iYuu Notes</p>
+        <h1>后台加载中</h1>
+        <p>登录后可以直接管理文章、页面文案和站点设置。如果后台没有自动出现，刷新一次即可。</p>
       </div>
-      <div class="admin-welcome__actions">
-        <a href="/admin/#/collections/blog" data-admin-requires-auth="true">登录后开始写文章</a>
-        <button type="button" id="admin-welcome-close">收起这块</button>
-      </div>
-    </aside>
+    </section>
 
-    <aside class="admin-shortcuts" id="admin-shortcuts" aria-label="后台快捷入口">
-      <button class="admin-shortcuts__toggle" type="button" id="admin-shortcuts-toggle" aria-expanded="true">
-        常用入口
-      </button>
-      <div class="admin-shortcuts__panel">
-        <div class="admin-shortcuts__head">
-          <p class="admin-eyebrow">Quick Access</p>
-          <h2 id="admin-current-label">先从这里走</h2>
-          <p id="admin-current-text">模板、分类、文章、页面文案四个入口最常用。</p>
-        </div>
-        <p class="admin-shortcuts__hint" id="admin-auth-hint">后台核心加载中，马上就好。</p>
-
-        <nav class="admin-shortcuts__grid">
-          <a href="/admin/#/collections/blog" data-admin-hash="#/collections/blog" data-admin-requires-auth="true">
-            <strong>文章发布</strong>
-            <span>新建、编辑、草稿</span>
-          </a>
-          <a href="/admin/#/collections/template_center" data-admin-hash="#/collections/template_center" data-admin-requires-auth="true">
-            <strong>写作模板</strong>
-            <span>先找结构再开写</span>
-          </a>
-          <a href="/admin/#/collections/category_center" data-admin-hash="#/collections/category_center" data-admin-requires-auth="true">
-            <strong>分类体系</strong>
-            <span>说明、排序、结构</span>
-          </a>
-          <a href="/admin/#/collections/page_center" data-admin-hash="#/collections/page_center" data-admin-requires-auth="true">
-            <strong>页面文案</strong>
-            <span>首页、关于、详情页</span>
-          </a>
-          <a href="/admin/#/collections/site" data-admin-hash="#/collections/site" data-admin-requires-auth="true">
-            <strong>站点设置</strong>
-            <span>品牌、导航、评论</span>
-          </a>
-          <a href="/" target="_blank" rel="noreferrer">
-            <strong>查看前台</strong>
-            <span>改完直接检查效果</span>
-          </a>
-        </nav>
-
-        <div class="admin-shortcuts__meta" id="admin-last-route" hidden>
-          <span>上次位置</span>
-          <a href="/admin/#/" id="admin-last-route-link">继续刚才编辑的内容</a>
-        </div>
-      </div>
-    </aside>
+    <noscript>后台需要启用 JavaScript。</noscript>
 
     <script>
-      const welcome = document.getElementById("admin-welcome");
-      const closeButton = document.getElementById("admin-welcome-close");
-      const shortcuts = document.getElementById("admin-shortcuts");
-      const shortcutsToggle = document.getElementById("admin-shortcuts-toggle");
-      const currentLabel = document.getElementById("admin-current-label");
-      const currentText = document.getElementById("admin-current-text");
-      const lastRouteWrap = document.getElementById("admin-last-route");
-      const lastRouteLink = document.getElementById("admin-last-route-link");
-      const authHint = document.getElementById("admin-auth-hint");
-
-      const welcomeStorageKey = "iyuu-admin-welcome-dismissed-v4";
-      const shortcutsStorageKey = "iyuu-admin-shortcuts-collapsed-v4";
-      const lastRouteStorageKey = "iyuu-admin-last-route-v4";
-      const authenticatedCollapseStorageKey = "iyuu-admin-auth-collapsed-v1";
+      const loading = document.getElementById("admin-loading");
       const cmsScriptSources = [
         "https://unpkg.com/decap-cms@3.13.0/dist/decap-cms.js",
         "https://cdn.jsdelivr.net/npm/decap-cms@3.13.0/dist/decap-cms.js"
       ];
 
-      function setAuthHintState(state) {
-        if (!authHint) {
-          return;
+      function updateLoadingState(message) {
+        const paragraph = loading?.querySelector("p:last-of-type");
+        if (paragraph && message) {
+          paragraph.textContent = message;
         }
-
-        const content = {
-          loading: "后台核心加载中，马上就好。",
-          login: "先点击页面中间的“使用 GitHub 登录”，登录后右侧这些入口才会真正打开。",
-          error: "后台核心没加载出来。通常是 CDN 资源加载失败，刷新后重试，或换个网络再打开。",
-          ready: ""
-        };
-
-        authHint.hidden = state === "ready";
-        authHint.dataset.state = state;
-        authHint.textContent = content[state] ?? content.loading;
       }
 
-      function findLoginButton() {
-        const root = document.getElementById("nc-root");
-        if (!root) {
-          return null;
-        }
+      function waitForCmsRender() {
+        const start = Date.now();
 
-        return (
-          Array.from(root.querySelectorAll("button")).find((button) => /github/i.test(button.textContent || "")) ?? null
-        );
-      }
-
-      function pulseLoginButton() {
-        const loginButton = findLoginButton();
-        if (!loginButton) {
-          return;
-        }
-
-        loginButton.scrollIntoView({ behavior: "smooth", block: "center" });
-        loginButton.focus({ preventScroll: true });
-        loginButton.classList.add("iyuu-login-pulse");
-        window.setTimeout(() => {
-          loginButton.classList.remove("iyuu-login-pulse");
-        }, 1600);
-      }
-
-      function isAuthenticated() {
-        return document.body.classList.contains("iyuu-admin-authenticated");
-      }
-
-      function bindAuthRequiredLinks() {
-        document.querySelectorAll("[data-admin-requires-auth]").forEach((link) => {
-          if (link.dataset.adminBound === "true") {
+        function check() {
+          const root = document.getElementById("nc-root");
+          if (root && root.childElementCount > 0) {
+            loading?.setAttribute("hidden", "hidden");
             return;
           }
 
-          link.dataset.adminBound = "true";
-          link.addEventListener("click", (event) => {
-            if (isAuthenticated()) {
-              return;
-            }
+          if (Date.now() - start > 12000) {
+            updateLoadingState("后台核心已经加载，但界面还没出来。刷新一次；如果还是空白，再重新登录。");
+            return;
+          }
 
-            event.preventDefault();
-            setAuthHintState(document.getElementById("nc-root") ? "login" : "loading");
-            pulseLoginButton();
-          });
-        });
+          window.requestAnimationFrame(check);
+        }
+
+        check();
       }
 
       function loadCmsScript(index = 0) {
-        if (document.getElementById("nc-root")) {
-          setAuthHintState("login");
-          return;
-        }
-
         const source = cmsScriptSources[index];
+
         if (!source) {
-          setAuthHintState("error");
+          updateLoadingState("后台核心加载失败了。通常是 CDN 资源没拉下来，刷新一次或换个网络再试。");
           return;
         }
 
@@ -172,251 +113,13 @@
         script.src = source;
         script.async = true;
         script.onload = () => {
-          window.setTimeout(() => {
-            if (document.getElementById("nc-root")) {
-              setAuthHintState("login");
-              updateCurrentState();
-              decorateDecapUi();
-              bindAuthRequiredLinks();
-              return;
-            }
-
-            if (index === cmsScriptSources.length - 1) {
-              setAuthHintState("error");
-            } else {
-              loadCmsScript(index + 1);
-            }
-          }, 1200);
+          waitForCmsRender();
         };
         script.onerror = () => {
           loadCmsScript(index + 1);
         };
         document.body.appendChild(script);
       }
-
-      const routeMeta = [
-        {
-          match: "#/collections/blog",
-          label: "文章发布",
-          text: "现在在文章区，适合直接新建、改草稿或补正文。"
-        },
-        {
-          match: "#/collections/template_center",
-          label: "写作模板",
-          text: "先看结构，再开始写，最接近前台博客目前的内容节奏。"
-        },
-        {
-          match: "#/collections/category_center",
-          label: "分类体系",
-          text: "先理结构再发文，分类名、说明和排序都在这里维护。"
-        },
-        {
-          match: "#/collections/page_center",
-          label: "页面文案",
-          text: "首页、关于页、归档页和详情页固定文案都在这里。"
-        },
-        {
-          match: "#/collections/site",
-          label: "站点设置",
-          text: "品牌、导航和评论配置属于这一层。"
-        },
-        {
-          match: "#/collections/help",
-          label: "使用帮助",
-          text: "一时忘了去哪里改，可以先看说明。"
-        }
-      ];
-
-      function getMeta(hash) {
-        if (!hash || hash === "#/" || hash === "#") {
-          return {
-            label: "先从这里走",
-            text: "模板、分类、文章、页面文案四个入口最常用。"
-          };
-        }
-
-        const matched = routeMeta.find((item) => hash.startsWith(item.match));
-        return (
-          matched ?? {
-            label: "后台编辑中",
-            text: "你现在已经进入具体后台页面，可以继续专注改内容。"
-          }
-        );
-      }
-
-      function updateCurrentState() {
-        const hash = window.location.hash || "#/";
-        const meta = getMeta(hash);
-        const loggedIn = isAuthenticated();
-
-        currentLabel.textContent = meta.label;
-        currentText.textContent =
-          !loggedIn && hash.startsWith("#/collections/")
-            ? "这些入口要在 GitHub 登录后才会真正打开，先点中间的登录按钮。"
-            : meta.text;
-
-        document.querySelectorAll("[data-admin-hash]").forEach((link) => {
-          const targetHash = link.getAttribute("data-admin-hash");
-          link.classList.toggle("is-active", Boolean(targetHash && hash.startsWith(targetHash)));
-        });
-
-        if (hash !== "#/" && hash !== "#") {
-          window.localStorage.setItem(lastRouteStorageKey, hash);
-        }
-
-        const saved = window.localStorage.getItem(lastRouteStorageKey);
-        if (saved) {
-          lastRouteWrap?.removeAttribute("hidden");
-          lastRouteLink.href = `/admin/${saved}`;
-        } else {
-          lastRouteWrap?.setAttribute("hidden", "hidden");
-        }
-      }
-
-      function getAdminScreen(hash) {
-        if (!hash || hash === "#/" || hash === "#") {
-          return "home";
-        }
-
-        if (hash.includes("/entries/") || hash.includes("/new")) {
-          return "editor";
-        }
-
-        if (hash.startsWith("#/workflow")) {
-          return "workflow";
-        }
-
-        if (hash.startsWith("#/collections/")) {
-          return "collection";
-        }
-
-        return "home";
-      }
-
-      function clearDecapDecorations(root) {
-        const decoratedAttributes = [
-          "data-iyuu-header",
-          "data-iyuu-sidebar",
-          "data-iyuu-main",
-          "data-iyuu-main-top",
-          "data-iyuu-main-controls",
-          "data-iyuu-main-content",
-          "data-iyuu-sidebar-link",
-          "data-iyuu-entry-link",
-          "data-iyuu-entry-card"
-        ];
-
-        decoratedAttributes.forEach((attribute) => {
-          root.querySelectorAll(`[${attribute}]`).forEach((node) => {
-            node.removeAttribute(attribute);
-          });
-        });
-      }
-
-      function decorateDecapUi() {
-        const root = document.getElementById("nc-root");
-        if (!root) {
-          return;
-        }
-
-        const hash = window.location.hash || "#/";
-        const screen = getAdminScreen(hash);
-        const header = root.querySelector("header");
-        const sidebar = root.querySelector("aside");
-        const main = root.querySelector("main");
-        const authenticated = Boolean(screen !== "home" || header || main);
-
-        document.body.classList.toggle("iyuu-admin-authenticated", authenticated);
-        document.body.dataset.adminScreen = screen;
-        clearDecapDecorations(root);
-        setAuthHintState(authenticated ? "ready" : "login");
-
-        if (screen === "editor") {
-          if (authenticated) {
-            welcome?.setAttribute("hidden", "hidden");
-          }
-
-          return;
-        }
-
-        if (header) {
-          header.setAttribute("data-iyuu-header", "true");
-        }
-
-        if (sidebar) {
-          sidebar.setAttribute("data-iyuu-sidebar", "true");
-        }
-
-        if (main) {
-          main.setAttribute("data-iyuu-main", "true");
-
-          const mainBlocks = Array.from(main.children).filter((node) => node.nodeType === 1);
-          mainBlocks[0]?.setAttribute("data-iyuu-main-top", "true");
-          mainBlocks[1]?.setAttribute("data-iyuu-main-controls", "true");
-          mainBlocks.slice(2).forEach((node) => {
-            node.setAttribute("data-iyuu-main-content", "true");
-          });
-        }
-
-        root.querySelectorAll('aside a[href^="/collections/"]').forEach((link) => {
-          link.setAttribute("data-iyuu-sidebar-link", "true");
-        });
-
-        root.querySelectorAll('a[href*="/entries/"]').forEach((link) => {
-          link.setAttribute("data-iyuu-entry-link", "true");
-          link.closest("li")?.setAttribute("data-iyuu-entry-card", "true");
-        });
-
-        if (authenticated) {
-          welcome?.setAttribute("hidden", "hidden");
-
-          if (window.localStorage.getItem(authenticatedCollapseStorageKey) !== "true") {
-            shortcuts?.classList.add("is-collapsed");
-            shortcutsToggle?.setAttribute("aria-expanded", "false");
-            window.localStorage.setItem(shortcutsStorageKey, "true");
-            window.localStorage.setItem(authenticatedCollapseStorageKey, "true");
-          }
-        }
-      }
-
-      if (window.localStorage.getItem(welcomeStorageKey) === "true") {
-        welcome?.setAttribute("hidden", "hidden");
-      }
-
-      if (window.localStorage.getItem(shortcutsStorageKey) === "true") {
-        shortcuts?.classList.add("is-collapsed");
-        shortcutsToggle?.setAttribute("aria-expanded", "false");
-      }
-
-      closeButton?.addEventListener("click", () => {
-        window.localStorage.setItem(welcomeStorageKey, "true");
-        welcome?.setAttribute("hidden", "hidden");
-      });
-
-      shortcutsToggle?.addEventListener("click", () => {
-        const isCollapsed = shortcuts?.classList.toggle("is-collapsed");
-        shortcutsToggle.setAttribute("aria-expanded", String(!isCollapsed));
-        window.localStorage.setItem(shortcutsStorageKey, String(Boolean(isCollapsed)));
-      });
-
-      window.addEventListener("hashchange", updateCurrentState);
-      window.addEventListener("hashchange", decorateDecapUi);
-      updateCurrentState();
-      decorateDecapUi();
-      bindAuthRequiredLinks();
-      setAuthHintState("loading");
-
-      const adminObserver = new MutationObserver(() => {
-        window.requestAnimationFrame(() => {
-          updateCurrentState();
-          decorateDecapUi();
-        });
-      });
-
-      adminObserver.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
 
       loadCmsScript();
     </script>
