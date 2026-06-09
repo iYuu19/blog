@@ -1,9 +1,35 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 import ArchiveRow from "../../components/ArchiveRow.astro";
 import TagPill from "../../components/TagPill.astro";
 import Layout from "../../layouts/Layout.astro";
 import { getCategoryDefinitions, getCategoryName, getCategorySlug } from "../../utils/content";
+import { getSiteSettings } from "../../utils/site";
+
+const detailPages =
+  (
+    await getEntry("site-detail-pages", "detail-pages")
+  )?.data ?? {
+    categoryPage: {
+      pageEyebrow: "Category View",
+      pageDescriptionTemplate: "{{category}} 分类下的所有文章。",
+      postsLabel: "文章数",
+      contestsLabel: "比赛数",
+      latestUpdateLabel: "最近更新",
+      emptyLatestUpdateText: "待补充",
+      overviewLabel: "这个栏目会看到什么",
+      overviewBody: "这一页会把同一主题下的内容集中放在一起，方便按方向连续阅读，而不是零散地按时间翻找。",
+      commonTagsLabel: "常见标签",
+      commonTagsEmpty: "相关标签会随着内容更新逐步补齐",
+      commonTracksLabel: "常见方向",
+      commonTracksEmpty: "等文章继续补充之后会更清楚",
+      topicsLabel: "这个栏目会涉及的话题",
+      topicsEmpty: "相关话题会随着后续文章一起慢慢补充。",
+      emptyFeed: "这个栏目已经先建好，相关内容会在后续更新中逐步补充进来。"
+    }
+  };
+const categoryPage = detailPages.categoryPage;
+const site = await getSiteSettings();
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -57,39 +83,40 @@ const description =
 const writingFocus =
   definition?.writingFocus ?? "这里会逐步收录同一主题下的相关文章、记录和笔记。";
 const exampleTopics = definition?.exampleTopics ?? [];
+const pageDescription = categoryPage.pageDescriptionTemplate.replace("{{category}}", category);
 ---
 
-<Layout title={`${category} | iYuu Notes`} description={`${category} 分类下的所有文章。`}>
+<Layout title={`${category} | ${site.siteTitle}`} description={pageDescription}>
   <section class="shell page-intro">
-    <p class="eyebrow">Category View</p>
+    <p class="eyebrow">{categoryPage.pageEyebrow}</p>
     <h1>{category}</h1>
     <p>{description}</p>
     <dl class="page-stats">
       <div>
-        <dt>文章数</dt>
+        <dt>{categoryPage.postsLabel}</dt>
         <dd>{posts.length}</dd>
       </div>
       <div>
-        <dt>比赛数</dt>
+        <dt>{categoryPage.contestsLabel}</dt>
         <dd>{contestCount}</dd>
       </div>
       <div>
-        <dt>最近更新</dt>
-        <dd>{latestDateText || "待补充"}</dd>
+        <dt>{categoryPage.latestUpdateLabel}</dt>
+        <dd>{latestDateText || categoryPage.emptyLatestUpdateText}</dd>
       </div>
     </dl>
   </section>
 
   <section class="shell category-overview section-block">
     <article class="guide-card">
-      <p class="guide-card-label">这个栏目会看到什么</p>
+      <p class="guide-card-label">{categoryPage.overviewLabel}</p>
       <h2>{writingFocus}</h2>
-      <p>这一页会把同一主题下的内容集中放在一起，方便按方向连续阅读，而不是零散地按时间翻找。</p>
+      <p>{categoryPage.overviewBody}</p>
     </article>
     <article class="guide-card">
-      <p class="guide-card-label">常见标签</p>
+      <p class="guide-card-label">{categoryPage.commonTagsLabel}</p>
       <div class="tag-cloud">
-        {topTags.length > 0 ? topTags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />) : <span class="empty-inline">相关标签会随着内容更新逐步补齐</span>}
+        {topTags.length > 0 ? topTags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />) : <span class="empty-inline">{categoryPage.commonTagsEmpty}</span>}
       </div>
     </article>
   </section>
@@ -97,11 +124,11 @@ const exampleTopics = definition?.exampleTopics ?? [];
   {(tracks.length > 0 || exampleTopics.length > 0) && (
     <section class="shell guide-grid section-block">
       <article class="guide-card">
-        <p class="guide-card-label">常见方向</p>
-        <h2>{tracks.length > 0 ? tracks.join(" / ") : "等文章继续补充之后会更清楚"}</h2>
+        <p class="guide-card-label">{categoryPage.commonTracksLabel}</p>
+        <h2>{tracks.length > 0 ? tracks.join(" / ") : categoryPage.commonTracksEmpty}</h2>
       </article>
       <article class="guide-card">
-        <p class="guide-card-label">这个栏目会涉及的话题</p>
+        <p class="guide-card-label">{categoryPage.topicsLabel}</p>
         {exampleTopics.length > 0 ? (
           <div class="category-example-row">
             {exampleTopics.map((topic) => (
@@ -109,7 +136,7 @@ const exampleTopics = definition?.exampleTopics ?? [];
             ))}
           </div>
         ) : (
-          <p class="empty-inline">相关话题会随着后续文章一起慢慢补充。</p>
+          <p class="empty-inline">{categoryPage.topicsEmpty}</p>
         )}
       </article>
     </section>
@@ -121,7 +148,7 @@ const exampleTopics = definition?.exampleTopics ?? [];
         {posts.map((post) => <ArchiveRow post={post} />)}
       </div>
     ) : (
-      <p class="empty-feed">这个栏目已经先建好，相关内容会在后续更新中逐步补充进来。</p>
+      <p class="empty-feed">{categoryPage.emptyFeed}</p>
     )}
   </section>
 </Layout>

@@ -279,19 +279,43 @@ collections:
         fields:
           - { label: 关于页眉题, name: aboutEyebrow, widget: string }
           - { label: 关于页标题, name: aboutTitle, widget: string }
+          - { label: 头像替代文案, name: aboutAvatarAlt, widget: string }
           - label: 关于页开场
             name: aboutIntro
             widget: list
             field: { label: 段落, name: paragraph, widget: text }
+          - { label: 文章统计标签, name: aboutPostsLabel, widget: string }
+          - { label: 分类统计标签, name: aboutCategoriesLabel, widget: string }
+          - { label: 标签统计标签, name: aboutTagsLabel, widget: string }
+          - { label: 内容地图标签, name: contentMapLabel, widget: string }
+          - { label: 常见标签标题, name: commonTagsLabel, widget: string }
+          - { label: 主要内容标签, name: focusLabel, widget: string }
+          - { label: 主要内容标题, name: focusTitle, widget: string }
           - label: 主要内容列表
             name: aboutFocusAreas
             widget: list
             field: { label: 条目, name: item, widget: string }
+          - { label: 写作方式标签, name: writingLabel, widget: string }
+          - { label: 写作方式标题, name: writingTitle, widget: string }
           - label: 写作方式列表
             name: aboutWritingApproach
             widget: list
             field: { label: 条目, name: item, widget: string }
+          - { label: 说明模块标签, name: noteLabel, widget: string }
+          - { label: 说明模块标题, name: noteTitle, widget: string }
           - { label: 关于页说明, name: aboutNote, widget: text }
+          - { label: 比赛模块标签, name: contestsLabel, widget: string }
+          - { label: 比赛模块空状态, name: contestsEmpty, widget: text }
+          - { label: 比赛模块统计文案, name: contestsMeta, widget: string }
+          - { label: 最近内容标题, name: latestContentHeading, widget: string }
+          - { label: 最近内容说明, name: latestContentNote, widget: string }
+          - { label: 浏览指引标签, name: browseGuideLabel, widget: string }
+          - label: 浏览指引卡片
+            name: browseGuides
+            widget: list
+            fields:
+              - { label: 标题, name: title, widget: string }
+              - { label: 描述, name: description, widget: text }
       - name: site_comments
         label: 评论区设置
         file: src/content/site-comments/comments.yaml
@@ -511,6 +535,46 @@ collections:
           - { label: 主标题, name: heroTitle, widget: string }
           - { label: 介绍, name: heroIntro, widget: text }
           - { label: 最新内容前缀, name: latestPrefix, widget: string }
+
+      - name: detail_page_copy
+        label: 详情页固定文案
+        file: src/content/site-detail-pages/detail-pages.yaml
+        fields:
+          - label: 分类详情页
+            name: categoryPage
+            widget: object
+            fields:
+              - { label: 眉题, name: pageEyebrow, widget: string }
+              - { label: 页面描述模板, name: pageDescriptionTemplate, widget: string }
+              - { label: 文章统计标签, name: postsLabel, widget: string }
+              - { label: 比赛统计标签, name: contestsLabel, widget: string }
+              - { label: 最近更新标签, name: latestUpdateLabel, widget: string }
+              - { label: 最近更新空状态, name: emptyLatestUpdateText, widget: string }
+              - { label: 概览标签, name: overviewLabel, widget: string }
+              - { label: 概览说明, name: overviewBody, widget: text }
+              - { label: 常见标签标题, name: commonTagsLabel, widget: string }
+              - { label: 常见标签空状态, name: commonTagsEmpty, widget: string }
+              - { label: 常见方向标题, name: commonTracksLabel, widget: string }
+              - { label: 常见方向空状态, name: commonTracksEmpty, widget: string }
+              - { label: 话题标题, name: topicsLabel, widget: string }
+              - { label: 话题空状态, name: topicsEmpty, widget: string }
+              - { label: 内容区空状态, name: emptyFeed, widget: text }
+          - label: 比赛详情页
+            name: contestPage
+            widget: object
+            fields:
+              - { label: 眉题, name: pageEyebrow, widget: string }
+              - { label: 页面描述模板, name: pageDescriptionTemplate, widget: string }
+              - { label: 导语, name: heroIntro, widget: text }
+              - { label: 篇数文案模板, name: postCountTemplate, widget: string }
+              - { label: 最近更新前缀, name: latestPrefix, widget: string }
+          - label: 标签详情页
+            name: tagPage
+            widget: object
+            fields:
+              - { label: 眉题, name: pageEyebrow, widget: string }
+              - { label: 页面描述模板, name: pageDescriptionTemplate, widget: string }
+              - { label: 导语模板, name: heroIntroTemplate, widget: string }
 
       - name: not_found_page_copy
         label: 404 页文案

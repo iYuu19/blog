@@ -1,8 +1,24 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 import ArchiveRow from "../../components/ArchiveRow.astro";
 import Layout from "../../layouts/Layout.astro";
 import { getContestCover, getContestName, getContestSlug } from "../../utils/content";
+import { getSiteSettings } from "../../utils/site";
+
+const detailPages =
+  (
+    await getEntry("site-detail-pages", "detail-pages")
+  )?.data ?? {
+    contestPage: {
+      pageEyebrow: "Contest",
+      pageDescriptionTemplate: "{{contest}} 相关的 WP、复盘与题目记录。",
+      heroIntro: "这里汇总这场比赛相关的文章，包括单题 WP、赛后复盘和后续补充。",
+      postCountTemplate: "目前共 {{count}} 篇。",
+      latestPrefix: "最近更新："
+    }
+  };
+const contestPage = detailPages.contestPage;
+const site = await getSiteSettings();
 
 export async function getStaticPaths() {
   const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
@@ -75,20 +91,29 @@ const latestDate = latest
       day: "2-digit"
     }).format(latest.data.pubDate)
   : "";
+const pageDescription = contestPage.pageDescriptionTemplate.replace("{{contest}}", contest);
+const postCountText = contestPage.postCountTemplate.replace("{{count}}", String(posts.length));
 ---
 
-<Layout title={`${contest} | iYuu Notes`} description={`${contest} 相关的 WP、复盘与题目记录。`}>
+<Layout title={`${contest} | ${site.siteTitle}`} description={pageDescription}>
   <section
     class:list={["shell", "page-intro", "contest-hero", coverImage ? "has-cover" : ""]}
     style={coverImage ? `--contest-cover: url('${coverImage}')` : undefined}
   >
     <div class="contest-hero-inner">
-      <p class="eyebrow">Contest</p>
+      <p class="eyebrow">{contestPage.pageEyebrow}</p>
       <h1>{contest}</h1>
-      <p>这里汇总这场比赛相关的文章，包括单题 WP、赛后复盘和后续补充。</p>
+      <p>{contestPage.heroIntro}</p>
       <p class="meta-line">
-        目前共 {posts.length} 篇。
-        {latest && <> 最近更新：<a href={`/blog/${latest.slug}/`}>{latest.data.title}</a> · {latestDate}</>}
+        {postCountText}{" "}
+        {latest && (
+          <>
+            {contestPage.latestPrefix}
+            <a href={`/blog/${latest.slug}/`}>{latest.data.title}</a>
+            {" · "}
+            {latestDate}
+          </>
+        )}
       </p>
       <div class="tag-cloud contest-meta-cloud">
         {tracks.map((track: string) => <span class="tag-pill">#{track}</span>)}

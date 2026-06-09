@@ -85,10 +85,36 @@ const siteAbout = defineCollection({
   schema: z.object({
     aboutEyebrow: z.string(),
     aboutTitle: z.string(),
+    aboutAvatarAlt: z.string().default(""),
     aboutIntro: z.array(z.string()).default([]),
+    aboutPostsLabel: z.string().default(""),
+    aboutCategoriesLabel: z.string().default(""),
+    aboutTagsLabel: z.string().default(""),
+    contentMapLabel: z.string().default(""),
+    commonTagsLabel: z.string().default(""),
+    focusLabel: z.string().default(""),
+    focusTitle: z.string().default(""),
     aboutFocusAreas: z.array(z.string()).default([]),
+    writingLabel: z.string().default(""),
+    writingTitle: z.string().default(""),
     aboutWritingApproach: z.array(z.string()).default([]),
-    aboutNote: z.string()
+    noteLabel: z.string().default(""),
+    noteTitle: z.string().default(""),
+    aboutNote: z.string(),
+    contestsLabel: z.string().default(""),
+    contestsEmpty: z.string().default(""),
+    contestsMeta: z.string().default(""),
+    latestContentHeading: z.string().default(""),
+    latestContentNote: z.string().default(""),
+    browseGuideLabel: z.string().default(""),
+    browseGuides: z
+      .array(
+        z.object({
+          title: z.string(),
+          description: z.string()
+        })
+      )
+      .default([])
   })
 });
 
@@ -269,6 +295,41 @@ const siteNotFound = defineCollection({
   })
 });
 
+const siteDetailPages = defineCollection({
+  type: "data",
+  schema: z.object({
+    categoryPage: z.object({
+      pageEyebrow: z.string(),
+      pageDescriptionTemplate: z.string(),
+      postsLabel: z.string(),
+      contestsLabel: z.string(),
+      latestUpdateLabel: z.string(),
+      emptyLatestUpdateText: z.string(),
+      overviewLabel: z.string(),
+      overviewBody: z.string(),
+      commonTagsLabel: z.string(),
+      commonTagsEmpty: z.string(),
+      commonTracksLabel: z.string(),
+      commonTracksEmpty: z.string(),
+      topicsLabel: z.string(),
+      topicsEmpty: z.string(),
+      emptyFeed: z.string()
+    }),
+    contestPage: z.object({
+      pageEyebrow: z.string(),
+      pageDescriptionTemplate: z.string(),
+      heroIntro: z.string(),
+      postCountTemplate: z.string(),
+      latestPrefix: z.string()
+    }),
+    tagPage: z.object({
+      pageEyebrow: z.string(),
+      pageDescriptionTemplate: z.string(),
+      heroIntroTemplate: z.string()
+    })
+  })
+});
+
 export const collections = {
   blog,
   "site-brand": siteBrand,
@@ -282,5 +343,6 @@ export const collections = {
   "site-categories-page": siteCategoriesPage,
   "site-contests-page": siteContestsPage,
   "site-tags-page": siteTagsPage,
-  "site-not-found": siteNotFound
+  "site-not-found": siteNotFound,
+  "site-detail-pages": siteDetailPages
 };

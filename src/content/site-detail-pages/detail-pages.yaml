@@ -1,0 +1,28 @@
+categoryPage:
+  pageEyebrow: Category View
+  pageDescriptionTemplate: "{{category}} 分类下的所有文章。"
+  postsLabel: 文章数
+  contestsLabel: 比赛数
+  latestUpdateLabel: 最近更新
+  emptyLatestUpdateText: 待补充
+  overviewLabel: 这个栏目会看到什么
+  overviewBody: 这一页会把同一主题下的内容集中放在一起，方便按方向连续阅读，而不是零散地按时间翻找。
+  commonTagsLabel: 常见标签
+  commonTagsEmpty: 相关标签会随着内容更新逐步补齐
+  commonTracksLabel: 常见方向
+  commonTracksEmpty: 等文章继续补充之后会更清楚
+  topicsLabel: 这个栏目会涉及的话题
+  topicsEmpty: 相关话题会随着后续文章一起慢慢补充。
+  emptyFeed: 这个栏目已经先建好，相关内容会在后续更新中逐步补充进来。
+
+contestPage:
+  pageEyebrow: Contest
+  pageDescriptionTemplate: "{{contest}} 相关的 WP、复盘与题目记录。"
+  heroIntro: 这里汇总这场比赛相关的文章，包括单题 WP、赛后复盘和后续补充。
+  postCountTemplate: "目前共 {{count}} 篇。"
+  latestPrefix: 最近更新：
+
+tagPage:
+  pageEyebrow: Tag View
+  pageDescriptionTemplate: "标签 {{tag}} 下的所有文章。"
+  heroIntroTemplate: "这个标签下目前有 {{count}} 篇内容。"
