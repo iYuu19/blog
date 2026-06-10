@@ -8,15 +8,6 @@ categories:
       - Misc 题解
       - 电子取证单题
     sortOrder: 10
-  - name: 赛后复盘
-    slug: 赛后复盘
-    description: 这里会放整场比赛的总结，不只是单题过程。
-    writingFocus: 更偏整场节奏、失误点、团队配合、赛后回看和后续补题计划。
-    exampleTopics:
-      - 整场比赛总结
-      - 赛中失误记录
-      - 复盘清单
-    sortOrder: 20
   - name: 专题总结
     slug: 专题总结
     description: 这里会长期整理反复出现的知识点、方法和题型。
@@ -35,12 +26,3 @@ categories:
       - 环境搭建
       - 新知识速记
     sortOrder: 40
-  - name: 工具记录
-    slug: 工具记录
-    description: 这里会整理常用工具的使用方法、场景和踩坑记录。
-    writingFocus: 更偏工具怎么装、怎么用、适合什么场景、踩过什么坑。
-    exampleTopics:
-      - Wireshark 使用
-      - Volatility 记录
-      - Burp 插件整理
-    sortOrder: 50
