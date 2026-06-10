@@ -150,26 +150,124 @@ a {
   min-height: 120px !important;
 }
 
-#nc-root [contenteditable="true"] {
-  min-height: 520px !important;
-  padding: 28px 30px !important;
-  border: 1px solid var(--admin-line) !important;
-  border-radius: 22px !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(250, 247, 241, 0.94)) !important;
-  color: var(--admin-text) !important;
-  font-size: 16px !important;
-  line-height: 1.95 !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 14px 30px rgba(20, 24, 28, 0.04) !important;
+.wordish-field {
+  display: grid;
+  gap: 14px;
 }
 
-#nc-root [contenteditable="true"] img {
+.wordish-toolbar-note,
+.wordish-hint,
+.wordish-footnote,
+.wordish-error {
+  margin: 0;
+}
+
+.wordish-toolbar-note {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--admin-line-soft);
+  border-radius: 16px;
+  background: rgba(255, 253, 249, 0.86);
+  color: var(--admin-soft-text);
+}
+
+.wordish-toolbar-note strong {
+  color: var(--admin-text);
+  font-family: var(--admin-font-serif);
+  font-size: 18px;
+}
+
+.wordish-hint {
+  color: var(--admin-muted);
+  font-size: 13px;
+}
+
+.wordish-error {
+  padding: 12px 14px;
+  border: 1px solid rgba(178, 70, 57, 0.2);
+  border-radius: 14px;
+  background: rgba(255, 241, 238, 0.95);
+  color: #8f2e22;
+  font-size: 14px;
+}
+
+.wordish-footnote {
+  color: var(--admin-muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.wordish-editor-shell .toastui-editor-defaultUI {
+  border: 1px solid var(--admin-line) !important;
+  border-radius: 24px !important;
+  overflow: hidden;
+  box-shadow: 0 18px 36px rgba(20, 24, 28, 0.06) !important;
+}
+
+.wordish-editor-shell .toastui-editor-toolbar {
+  padding: 10px 12px !important;
+  border-bottom: 1px solid var(--admin-line-soft) !important;
+  background: linear-gradient(180deg, rgba(255, 253, 249, 0.98), rgba(246, 241, 232, 0.92)) !important;
+}
+
+.wordish-editor-shell .toastui-editor-toolbar-group {
+  margin-right: 10px !important;
+}
+
+.wordish-editor-shell .toastui-editor-toolbar-icons {
+  border-radius: 12px !important;
+}
+
+.wordish-editor-shell .toastui-editor-main {
+  background: rgba(255, 253, 249, 0.98) !important;
+}
+
+.wordish-editor-shell .toastui-editor-main-container {
+  font-family: var(--admin-font-sans) !important;
+}
+
+.wordish-editor-shell .toastui-editor-ww-container,
+.wordish-editor-shell .toastui-editor-md-container {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(250, 247, 241, 0.95)) !important;
+}
+
+.wordish-editor-shell .toastui-editor-contents {
+  padding: 26px 30px 34px !important;
+  color: var(--admin-text) !important;
+  font-family: var(--admin-font-sans) !important;
+  font-size: 16px !important;
+  line-height: 1.95 !important;
+}
+
+.wordish-editor-shell .toastui-editor-contents h1,
+.wordish-editor-shell .toastui-editor-contents h2,
+.wordish-editor-shell .toastui-editor-contents h3,
+.wordish-editor-shell .toastui-editor-contents h4 {
+  font-family: var(--admin-font-serif) !important;
+}
+
+.wordish-editor-shell .toastui-editor-contents img {
   margin: 18px auto !important;
   border: 1px solid var(--admin-line-soft) !important;
   border-radius: 14px !important;
   box-shadow: 0 12px 24px rgba(20, 24, 28, 0.08) !important;
+}
+
+.wordish-editor-shell .toastui-editor-mode-switch {
+  border-top: 1px solid var(--admin-line-soft) !important;
+  background: rgba(255, 253, 249, 0.92) !important;
+}
+
+.wordish-editor-shell .toastui-editor-md-tab-container .tab-item,
+.wordish-editor-shell .toastui-editor-mode-switch .tab-item {
+  color: var(--admin-soft-text) !important;
+}
+
+.wordish-editor-shell .toastui-editor-md-tab-container .active,
+.wordish-editor-shell .toastui-editor-mode-switch .active {
+  color: var(--admin-accent-strong) !important;
 }
 
 #nc-root input:focus,

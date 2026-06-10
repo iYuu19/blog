@@ -147,7 +147,7 @@ collections:
         field: category
         pattern: 专题总结
     editor:
-      preview: true
+      preview: false
     fields:
       - label: 标题
         name: title
@@ -244,25 +244,8 @@ collections:
         required: false
       - label: 正文
         name: body
-        widget: richtext
-        modes:
-          - rich_text
-          - raw
-        buttons:
-          - bold
-          - italic
-          - code
-          - link
-          - heading-two
-          - heading-three
-          - quote
-          - bulleted-list
-          - numbered-list
-        editor_components:
-          - image
-          - code-block
-        minimal: false
-        hint: 直接把截图拖进正文区域，或用工具栏插图。推荐按“题目分析 -> 截图 -> 结论”的顺序边写边排。
+        widget: wordish
+        hint: 支持直接粘贴截图、拖拽图片和插入代码块。默认是可视化编辑，也可以切到 Markdown 看源码。
 
   - name: site
     label: 站点设置

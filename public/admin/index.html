@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>iYuu Notes 后台</title>
     <link rel="stylesheet" href="/admin/admin.css" />
+    <link
+      rel="stylesheet"
+      href="https://uicdn.toast.com/editor/3.2.2/toastui-editor.min.css"
+    />
   </head>
   <body>
     <section class="admin-loading" id="admin-loading">
@@ -19,6 +23,10 @@
 
     <script>
       const loading = document.getElementById("admin-loading");
+      const editorScriptSources = [
+        "https://uicdn.toast.com/editor/3.2.2/toastui-editor-all.min.js",
+        "https://cdn.jsdelivr.net/npm/@toast-ui/editor@3.2.2/dist/toastui-editor-all.min.js"
+      ];
       const cmsScriptSources = [
         "https://unpkg.com/decap-cms@3.14.0/dist/decap-cms.js",
         "https://cdn.jsdelivr.net/npm/decap-cms@3.14.0/dist/decap-cms.js"
@@ -52,27 +60,52 @@
         check();
       }
 
-      function loadCmsScript(index = 0) {
-        const source = cmsScriptSources[index];
+      function loadScript(sources, index = 0) {
+        const source = sources[index];
 
         if (!source) {
-          updateLoadingState("后台核心加载失败了。通常是 CDN 资源没拉下来，刷新一次或换个网络再试。");
-          return;
+          return Promise.reject(new Error("all script sources failed"));
         }
 
-        const script = document.createElement("script");
-        script.src = source;
-        script.async = true;
-        script.onload = () => {
-          waitForCmsRender();
-        };
-        script.onerror = () => {
-          loadCmsScript(index + 1);
-        };
-        document.body.appendChild(script);
+        return new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = source;
+          script.async = true;
+          script.onload = () => resolve(source);
+          script.onerror = () => {
+            script.remove();
+            loadScript(sources, index + 1).then(resolve).catch(reject);
+          };
+          document.body.appendChild(script);
+        });
       }
 
-      loadCmsScript();
+      function loadLocalScript(source) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = source;
+          script.async = false;
+          script.onload = () => resolve(source);
+          script.onerror = () => reject(new Error(`failed to load ${source}`));
+          document.body.appendChild(script);
+        });
+      }
+
+      async function bootAdmin() {
+        try {
+          updateLoadingState("正在加载可视化编辑器…");
+          await loadScript(editorScriptSources);
+          updateLoadingState("正在加载后台核心…");
+          await loadScript(cmsScriptSources);
+          await loadLocalScript("/admin/wordish-widget.js");
+          waitForCmsRender();
+        } catch (error) {
+          updateLoadingState("后台核心加载失败了。通常是 CDN 资源没拉下来，刷新一次或换个网络再试。");
+          console.error(error);
+        }
+      }
+
+      bootAdmin();
     </script>
   </body>
 </html>
