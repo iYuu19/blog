@@ -1341,12 +1341,25 @@ h3 {
 }
 
 .prose pre {
+  position: relative;
   overflow-x: auto;
-  padding: 14px;
+  padding: 38px 14px 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: #fbfbf8;
   font-family: var(--font-mono);
+}
+
+.prose pre[data-language]::before {
+  content: attr(data-language);
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .prose code {

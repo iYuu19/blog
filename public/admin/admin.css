@@ -162,6 +162,35 @@ a {
   margin: 0;
 }
 
+.wordish-code-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.wordish-shortcuts-label {
+  color: var(--admin-soft-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.wordish-shortcut-button {
+  border: 1px solid var(--admin-line-soft);
+  border-radius: 999px;
+  background: rgba(255, 253, 249, 0.92);
+  color: var(--admin-accent-strong);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(20, 24, 28, 0.04);
+}
+
+.wordish-shortcut-button.is-accent {
+  background: linear-gradient(135deg, rgba(31, 92, 87, 0.12), rgba(255, 253, 249, 0.98));
+}
+
 .wordish-toolbar-note {
   display: grid;
   gap: 4px;

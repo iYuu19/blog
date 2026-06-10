@@ -32,6 +32,17 @@
     ["code", "codeblock"]
   ];
 
+  const commonCodeLanguages = [
+    { label: "JS", value: "js" },
+    { label: "Python", value: "python" },
+    { label: "Bash", value: "bash" },
+    { label: "HTML", value: "html" },
+    { label: "YAML", value: "yaml" },
+    { label: "JSON", value: "json" },
+    { label: "SQL", value: "sql" },
+    { label: "Text", value: "text" }
+  ];
+
   const WordishControl = createClass({
     getInitialState() {
       return {
@@ -107,6 +118,27 @@
       }
     },
 
+    insertCodeBlock(language) {
+      if (!this.editor) {
+        return;
+      }
+
+      const resolvedLanguage = language || "text";
+      const snippet = `\n\`\`\`${resolvedLanguage}\n在这里写 ${resolvedLanguage} 代码\n\`\`\`\n`;
+      this.editor.insertText(snippet);
+      this.handleChange();
+      this.clearError();
+    },
+
+    insertCustomCodeBlock() {
+      const input = window.prompt("输入代码块语言，例如 python、bash、js、yaml：", "python");
+      if (!input) {
+        return;
+      }
+
+      this.insertCodeBlock(input.trim().toLowerCase());
+    },
+
     mountEditor() {
       if (!this.editorRoot) {
         return;
@@ -161,7 +193,40 @@
           h(
             "span",
             {},
-            "支持直接粘贴截图、拖拽图片、所见即所得排版，还保留行内代码和代码块。"
+            "支持直接粘贴截图、拖拽图片、所见即所得排版，还保留行内代码和代码块。工具栏里 </> 是行内代码，CB 是代码块。"
+          )
+        ),
+        h(
+          "div",
+          {
+            className: "wordish-code-shortcuts"
+          },
+          h(
+            "span",
+            {
+              className: "wordish-shortcuts-label"
+            },
+            "常用代码块："
+          ),
+          ...commonCodeLanguages.map((item) =>
+            h(
+              "button",
+              {
+                type: "button",
+                className: "wordish-shortcut-button",
+                onClick: () => this.insertCodeBlock(item.value)
+              },
+              item.label
+            )
+          ),
+          h(
+            "button",
+            {
+              type: "button",
+              className: "wordish-shortcut-button is-accent",
+              onClick: this.insertCustomCodeBlock
+            },
+            "自定义语言"
           )
         ),
         hint
@@ -191,7 +256,7 @@
           {
             className: "wordish-footnote"
           },
-          "当前图片会直接嵌入文章内容里，所以复制粘贴最顺手；如果后面你想改成单独上传文件，我也可以继续给你升级。"
+          "当前图片会直接嵌入文章内容里，所以复制粘贴最顺手。代码块如果带上 js / python / bash / html / yaml 这类语言名，前台会自动做语法高亮。"
         )
       );
     }
