@@ -1059,6 +1059,7 @@ h3 {
 
 .article-index-column {
   min-width: 0;
+  align-self: stretch;
 }
 
 .article-index {
