@@ -127,9 +127,7 @@ a {
 }
 
 #nc-root article,
-#nc-root fieldset,
-#nc-root form section,
-#nc-root main section {
+#nc-root fieldset {
   border: 1px solid var(--admin-line-soft) !important;
   border-radius: var(--admin-radius) !important;
   background: var(--admin-surface) !important;
@@ -181,6 +179,76 @@ a {
 #nc-root a[href*="/collections/"],
 #nc-root a[href*="/entries/"] {
   text-decoration: none;
+}
+
+#nc-root ul:has(> li > a[href*="/entries/"]) {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  padding: 0 !important;
+  width: 100% !important;
+  align-items: start !important;
+  grid-auto-rows: minmax(220px, auto) !important;
+  gap: 18px !important;
+}
+
+#nc-root li:has(> a[href*="/entries/"]) {
+  display: block !important;
+  list-style: none !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+}
+
+#nc-root li:has(> a[href*="/entries/"]) > a[href*="/entries/"] {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+  width: 100% !important;
+  min-height: 220px !important;
+  padding: 24px 24px 22px !important;
+  border: 1px solid var(--admin-line-soft) !important;
+  border-radius: 24px !important;
+  background:
+    radial-gradient(circle at top right, rgba(31, 92, 87, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(255, 254, 250, 0.98), rgba(247, 242, 234, 0.94)) !important;
+  box-shadow: var(--admin-shadow) !important;
+  color: var(--admin-text) !important;
+  overflow: hidden;
+  position: relative;
+}
+
+#nc-root li:has(> a[href*="/entries/"]) > a[href*="/entries/"]::before {
+  content: "CONTENT ENTRY";
+  color: rgba(24, 72, 68, 0.58);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+#nc-root li:has(> a[href*="/entries/"]) > a[href*="/entries/"]::after {
+  content: "点击进入编辑";
+  color: var(--admin-accent-strong);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+#nc-root li:has(> a[href*="/entries/"]) > a[href*="/entries/"] h2,
+#nc-root li:has(> a[href*="/entries/"]) > a[href*="/entries/"] h3 {
+  margin: 0 !important;
+  color: var(--admin-text) !important;
+  font-family: var(--admin-font-serif) !important;
+  font-size: clamp(28px, 2vw, 38px) !important;
+  font-weight: 600 !important;
+  line-height: 1.22 !important;
+  max-width: 100%;
+}
+
+#nc-root li:has(> a[href*="/entries/"]) > a[href*="/entries/"]:hover,
+#nc-root li:has(> a[href*="/entries/"]) > a[href*="/entries/"]:focus-visible {
+  border-color: rgba(31, 92, 87, 0.2) !important;
+  box-shadow: var(--admin-shadow-strong) !important;
+  color: var(--admin-text) !important;
+  transform: translateY(-2px);
 }
 
 #nc-root a[href*="/collections/"]:hover,

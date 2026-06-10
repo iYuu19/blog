@@ -14,7 +14,7 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 const dateText = new Intl.DateTimeFormat("zh-CN", {
   year: "numeric",
   month: "long",
@@ -37,36 +37,117 @@ const difficultyClassMap: Record<string, string> = {
 const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-notes";
 const contestLabel = post.data.contest || post.data.oj || null;
 const contestHref = contestLabel ? `/contests/${getContestSlug(post)}/` : null;
+const tocItems = headings.filter(({ depth, slug, text }) => depth === 2 && slug && text);
 ---
 
 <Layout title={`${post.data.title} | iYuu Notes`} description={post.data.description}>
-  <article class="shell article-shell fade-up">
-    <header class="article-header">
-      <p class="article-back">
-        <a href="/blog">返回归档</a>
-      </p>
-      <p class="eyebrow">{post.data.category}</p>
-      <h1>{post.data.title}</h1>
-      <p class="article-description">{post.data.description}</p>
-      <div class="article-context">
-        {contestLabel && (contestHref ? <a href={contestHref}>{contestLabel}</a> : <span>{contestLabel}</span>)}
-        {post.data.track && <span>{post.data.track}</span>}
-      </div>
-      <div class="article-meta">
-        <span>发布于 {dateText}</span>
-        {updatedDateText && <span>更新于 {updatedDateText}</span>}
-        <span class:list={["difficulty-pill", difficultyClass]}>{post.data.difficulty}</span>
-        <span>{post.data.language}</span>
-      </div>
-      <div class="tag-row">
-        {post.data.tags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
-      </div>
-    </header>
+  <section class="shell article-layout fade-up">
+    {
+      tocItems.length > 0 && (
+        <aside class="index-column article-index-column">
+          <div class="site-index article-index">
+            <p class="index-title">本文目录</p>
+            <ul class="index-list article-index-list">
+              {tocItems.map((item) => (
+                <li class="article-index-item">
+                  <a href={`#${item.slug}`} data-toc-link={item.slug}>
+                    {item.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <p class="index-meta">发布后会根据正文里的 Markdown 二级标题自动更新。</p>
+          </div>
+        </aside>
+      )
+    }
 
-    <div class="article-body prose">
-      <Content />
-    </div>
+    <article class="article-shell">
+      <header class="article-header">
+        <p class="article-back">
+          <a href="/blog">返回文章列表</a>
+        </p>
+        <p class="eyebrow">{post.data.category}</p>
+        <h1>{post.data.title}</h1>
+        <p class="article-description">{post.data.description}</p>
+        <div class="article-context">
+          {contestLabel && (contestHref ? <a href={contestHref}>{contestLabel}</a> : <span>{contestLabel}</span>)}
+          {post.data.track && <span>{post.data.track}</span>}
+        </div>
+        <div class="article-meta">
+          <span>发布于 {dateText}</span>
+          {updatedDateText && <span>更新于 {updatedDateText}</span>}
+          <span class:list={["difficulty-pill", difficultyClass]}>{post.data.difficulty}</span>
+          <span>{post.data.language}</span>
+        </div>
+        <div class="tag-row">
+          {post.data.tags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
+        </div>
+      </header>
 
-    <GiscusComments />
-  </article>
+      <div class="article-body prose">
+        <Content />
+      </div>
+
+      <GiscusComments />
+    </article>
+  </section>
+
+  {
+    tocItems.length > 0 && (
+      <script is:inline>
+        {`
+          (() => {
+            const tocLinks = Array.from(document.querySelectorAll("[data-toc-link]"));
+            if (tocLinks.length === 0) return;
+
+            const headingEntries = tocLinks
+              .map((link) => {
+                const id = link.getAttribute("data-toc-link");
+                const heading = id ? document.getElementById(id) : null;
+                return heading ? { id, link, heading } : null;
+              })
+              .filter(Boolean);
+
+            if (headingEntries.length === 0) return;
+
+            const setActive = (id) => {
+              for (const entry of headingEntries) {
+                const isActive = entry.id === id;
+                entry.link.classList.toggle("is-active", isActive);
+                if (isActive) {
+                  entry.link.scrollIntoView({
+                    block: "nearest",
+                    inline: "nearest"
+                  });
+                }
+              }
+            };
+
+            const observer = new IntersectionObserver(
+              (entries) => {
+                const visible = entries
+                  .filter((entry) => entry.isIntersecting)
+                  .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+                if (visible.length > 0) {
+                  setActive(visible[0].target.id);
+                }
+              },
+              {
+                rootMargin: "-18% 0px -64% 0px",
+                threshold: [0, 1]
+              }
+            );
+
+            for (const entry of headingEntries) {
+              observer.observe(entry.heading);
+            }
+
+            setActive(headingEntries[0].id);
+          })();
+        `}
+      </script>
+    )
+  }
 </Layout>
