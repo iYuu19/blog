@@ -1079,6 +1079,20 @@ h3 {
   margin: 0;
 }
 
+.article-index-depth-2 a {
+  margin-left: 10px;
+}
+
+.article-index-depth-3 a {
+  margin-left: 20px;
+}
+
+.article-index-depth-4 a,
+.article-index-depth-5 a,
+.article-index-depth-6 a {
+  margin-left: 28px;
+}
+
 .article-index-item a {
   display: block;
   padding: 8px 12px;
@@ -1396,6 +1410,92 @@ h3 {
   background: var(--surface-solid);
 }
 
+.article-zoomable-image {
+  cursor: zoom-in;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.article-zoomable-image:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 30px rgba(20, 24, 28, 0.12);
+}
+
+.image-lightbox[hidden] {
+  display: none;
+}
+
+.image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  padding: 28px;
+  background: rgba(10, 14, 18, 0.82);
+  backdrop-filter: blur(8px);
+}
+
+.image-lightbox-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.image-lightbox-open,
+.image-lightbox-image {
+  display: block;
+}
+
+.image-lightbox-open {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.image-lightbox-stage {
+  overflow: auto;
+  display: grid;
+  place-items: center;
+}
+
+.image-lightbox-image {
+  max-width: min(96vw, 1600px);
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+}
+
+.image-lightbox-close {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.image-lightbox-tip {
+  margin: 14px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 13px;
+  text-align: center;
+}
+
+body.lightbox-open {
+  overflow: hidden;
+}
+
 .prose figure {
   margin: 26px 0;
 }
@@ -1560,6 +1660,19 @@ h3 {
 
   .prose img {
     max-width: 100%;
+  }
+
+  .image-lightbox {
+    padding: 16px;
+  }
+
+  .image-lightbox-toolbar {
+    margin-bottom: 10px;
+  }
+
+  .image-lightbox-image {
+    max-width: 100%;
+    max-height: 86vh;
   }
 }
 

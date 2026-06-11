@@ -37,7 +37,7 @@ const difficultyClassMap: Record<string, string> = {
 const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-notes";
 const contestLabel = post.data.contest || post.data.oj || null;
 const contestHref = contestLabel ? `/contests/${getContestSlug(post)}/` : null;
-const tocItems = headings.filter(({ depth, slug, text }) => depth === 2 && slug && text);
+const tocItems = headings.filter(({ depth, slug, text }) => depth >= 1 && slug && text);
 ---
 
 <Layout title={`${post.data.title} | iYuu Notes`} description={post.data.description}>
@@ -49,7 +49,7 @@ const tocItems = headings.filter(({ depth, slug, text }) => depth === 2 && slug 
             <p class="index-title">本文目录</p>
             <ul class="index-list article-index-list">
               {tocItems.map((item) => (
-                <li class="article-index-item">
+                <li class:list={["article-index-item", `article-index-depth-${item.depth}`]}>
                   <a href={`#${item.slug}`} data-toc-link={item.slug}>
                     {item.text}
                   </a>
@@ -186,6 +186,117 @@ const tocItems = headings.filter(({ depth, slug, text }) => depth === 2 && slug 
 
           block.appendChild(button);
         }
+      })();
+    `}
+  </script>
+
+  <script is:inline>
+    {`
+      (() => {
+        const images = Array.from(document.querySelectorAll(".article-body img"));
+        if (images.length === 0) return;
+
+        const overlay = document.createElement("div");
+        overlay.className = "image-lightbox";
+        overlay.setAttribute("hidden", "hidden");
+        overlay.innerHTML = \`
+          <div class="image-lightbox-toolbar">
+            <a class="image-lightbox-open" href="#" target="_blank" rel="noreferrer">打开原图</a>
+            <button type="button" class="image-lightbox-close" aria-label="关闭预览">×</button>
+          </div>
+          <div class="image-lightbox-stage">
+            <img class="image-lightbox-image" alt="" />
+          </div>
+          <p class="image-lightbox-tip">滚轮缩放，双击图片恢复原始预览大小</p>
+        \`;
+
+        const overlayImage = overlay.querySelector(".image-lightbox-image");
+        const openOriginalLink = overlay.querySelector(".image-lightbox-open");
+        const closeButton = overlay.querySelector(".image-lightbox-close");
+        const stage = overlay.querySelector(".image-lightbox-stage");
+        let imageScale = 1;
+        let fitWidth = 0;
+
+        const updateImageScale = () => {
+          if (!fitWidth) return;
+          overlayImage.style.maxWidth = "none";
+          overlayImage.style.width = fitWidth * imageScale + "px";
+        };
+
+        const resetZoom = () => {
+          imageScale = 1;
+          updateImageScale();
+          stage.scrollTop = 0;
+          stage.scrollLeft = 0;
+        };
+
+        const closeLightbox = () => {
+          overlay.setAttribute("hidden", "hidden");
+          overlayImage.removeAttribute("src");
+          overlayImage.removeAttribute("alt");
+          overlayImage.style.removeProperty("width");
+          overlayImage.style.removeProperty("max-width");
+          openOriginalLink.setAttribute("href", "#");
+          fitWidth = 0;
+          imageScale = 1;
+          document.body.classList.remove("lightbox-open");
+        };
+
+        const openLightbox = (src, alt) => {
+          overlayImage.src = src;
+          overlayImage.alt = alt || "";
+          openOriginalLink.href = src;
+          overlay.removeAttribute("hidden");
+          document.body.classList.add("lightbox-open");
+        };
+
+        overlay.addEventListener("click", (event) => {
+          if (event.target === overlay) {
+            closeLightbox();
+          }
+        });
+
+        closeButton.addEventListener("click", closeLightbox);
+        overlayImage.addEventListener("dblclick", resetZoom);
+
+        overlayImage.addEventListener("load", () => {
+          overlayImage.style.removeProperty("width");
+          overlayImage.style.removeProperty("max-width");
+          requestAnimationFrame(() => {
+            fitWidth = overlayImage.clientWidth;
+            resetZoom();
+          });
+        });
+
+        stage.addEventListener(
+          "wheel",
+          (event) => {
+            if (overlay.hasAttribute("hidden") || !fitWidth) return;
+            event.preventDefault();
+
+            const nextScale = event.deltaY < 0 ? imageScale + 0.18 : imageScale - 0.18;
+            imageScale = Math.min(4, Math.max(1, Number(nextScale.toFixed(2))));
+            updateImageScale();
+          },
+          { passive: false }
+        );
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape" && !overlay.hasAttribute("hidden")) {
+            closeLightbox();
+          }
+        });
+
+        for (const image of images) {
+          image.classList.add("article-zoomable-image");
+          image.addEventListener("click", () => {
+            if (image.currentSrc || image.src) {
+              openLightbox(image.currentSrc || image.src, image.alt);
+            }
+          });
+        }
+
+        document.body.appendChild(overlay);
       })();
     `}
   </script>
