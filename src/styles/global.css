@@ -1388,6 +1388,9 @@ h3 {
 
 .prose img {
   margin: 22px auto;
+  width: auto;
+  max-width: min(78%, 880px);
+  height: auto;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--surface-solid);
@@ -1553,6 +1556,10 @@ h3 {
 
   .article-comments-shell {
     padding: 14px;
+  }
+
+  .prose img {
+    max-width: 100%;
   }
 }
 

@@ -289,6 +289,9 @@ a {
 
 .wordish-editor-shell .toastui-editor-contents img {
   margin: 18px auto !important;
+  width: auto !important;
+  max-width: min(78%, 880px) !important;
+  height: auto !important;
   border: 1px solid var(--admin-line-soft) !important;
   border-radius: 14px !important;
   box-shadow: 0 12px 24px rgba(20, 24, 28, 0.08) !important;
