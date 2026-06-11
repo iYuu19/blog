@@ -24,14 +24,6 @@
   const h = window.h;
   const createClass = window.createClass;
 
-  const toolbarItems = [
-    ["heading", "bold", "italic", "strike"],
-    ["hr", "quote"],
-    ["ul", "ol", "task", "indent", "outdent"],
-    ["table", "link", "image"],
-    ["code", "codeblock"]
-  ];
-
   const commonCodeLanguages = [
     { label: "JS", value: "js" },
     { label: "Python", value: "python" },
@@ -139,6 +131,39 @@
       this.insertCodeBlock(input.trim().toLowerCase());
     },
 
+    buildToolbarItems() {
+      const customCodeButton = document.createElement("button");
+      customCodeButton.type = "button";
+      customCodeButton.className = "toastui-editor-toolbar-icons wordish-toolbar-codeblock";
+      customCodeButton.textContent = "CB";
+      customCodeButton.setAttribute("aria-label", "插入带语言的代码块");
+      customCodeButton.setAttribute("title", "插入带语言的代码块");
+      customCodeButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        this.insertCustomCodeBlock();
+      });
+
+      return [
+        ["heading", "bold", "italic", "strike"],
+        ["hr", "quote"],
+        ["ul", "ol", "task", "indent", "outdent"],
+        ["table", "link", "image"],
+        [
+          "code",
+          {
+            name: "wordishCodeBlock",
+            tooltip: "插入带语言的代码块",
+            el: customCodeButton,
+            state: "codeBlock",
+            onUpdated: ({ active, disabled }) => {
+              customCodeButton.classList.toggle("active", !!active);
+              customCodeButton.disabled = !!disabled;
+            }
+          }
+        ]
+      ];
+    },
+
     mountEditor() {
       if (!this.editorRoot) {
         return;
@@ -155,9 +180,9 @@
           hideModeSwitch: false,
           usageStatistics: false,
           autofocus: false,
-          toolbarItems,
+          toolbarItems: this.buildToolbarItems(),
           placeholder:
-            "从这里开始写题解。可以直接 Ctrl+V 粘贴截图，也可以拖拽图片进来；代码块按钮在工具栏最后一组。",
+            "从这里开始写题解。可以直接 Ctrl+V 粘贴截图，也可以拖拽图片进来；CB 会先让你选语言。",
           hooks: {
             addImageBlobHook: this.handleImageBlob
           }

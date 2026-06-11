@@ -149,4 +149,44 @@ const tocItems = headings.filter(({ depth, slug, text }) => depth === 2 && slug 
       </script>
     )
   }
+
+  <script is:inline>
+    {`
+      (() => {
+        const codeBlocks = Array.from(document.querySelectorAll(".article-body pre"));
+        if (codeBlocks.length === 0) return;
+
+        for (const block of codeBlocks) {
+          if (block.querySelector(".copy-code-button")) continue;
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "copy-code-button";
+          button.textContent = "复制代码";
+
+          button.addEventListener("click", async () => {
+            const code = block.querySelector("code");
+            const text = code ? code.innerText : block.innerText;
+            if (!text) return;
+
+            try {
+              await navigator.clipboard.writeText(text);
+              button.textContent = "已复制";
+              window.setTimeout(() => {
+                button.textContent = "复制代码";
+              }, 1600);
+            } catch (error) {
+              console.error(error);
+              button.textContent = "复制失败";
+              window.setTimeout(() => {
+                button.textContent = "复制代码";
+              }, 1600);
+            }
+          });
+
+          block.appendChild(button);
+        }
+      })();
+    `}
+  </script>
 </Layout>

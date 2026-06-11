@@ -191,6 +191,16 @@ a {
   background: linear-gradient(135deg, rgba(31, 92, 87, 0.12), rgba(255, 253, 249, 0.98));
 }
 
+.wordish-toolbar-codeblock {
+  width: auto !important;
+  min-width: 42px;
+  background-image: none !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  color: var(--admin-accent-strong) !important;
+}
+
 .wordish-toolbar-note {
   display: grid;
   gap: 4px;
