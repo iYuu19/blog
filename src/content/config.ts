@@ -117,12 +117,15 @@ const siteLayout = defineCollection({
             "reviews",
             "tags",
             "summaries",
-            "note"
+            "note",
+            "rich"
           ]),
           enabled: z.boolean().default(true),
           placement: z.enum(["main", "side"]).default("main"),
+          eyebrow: z.string().default(""),
           title: z.string().default(""),
           note: z.string().default(""),
+          body: z.string().default(""),
           linkLabel: z.string().default(""),
           linkHref: z.string().default(""),
           anchor: z.string().default("")

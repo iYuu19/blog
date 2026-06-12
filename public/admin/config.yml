@@ -207,6 +207,7 @@ collections:
                   - { label: 标签云, value: tags }
                   - { label: 专题总结列表, value: summaries }
                   - { label: 自定义说明块, value: note }
+                  - { label: 自定义富文本块, value: rich }
               - { label: 是否显示, name: enabled, widget: boolean, default: true }
               - label: 所在列
                 name: placement
@@ -215,6 +216,11 @@ collections:
                 options:
                   - { label: 主内容列, value: main }
                   - { label: 侧栏列, value: side }
+              - label: 眉题
+                name: eyebrow
+                widget: string
+                required: false
+                hint: 自定义富文本块或说明块可用，不填就不显示。
               - label: 标题覆盖
                 name: title
                 widget: string
@@ -225,6 +231,11 @@ collections:
                 widget: text
                 required: false
                 hint: 对 note 类型是正文，对内置板块则会作为副说明使用。
+              - label: 富文本正文
+                name: body
+                widget: markdown
+                required: false
+                hint: rich 类型会渲染这里的 Markdown；其他类型可留空。
               - { label: 链接文案, name: linkLabel, widget: string, required: false }
               - { label: 链接地址, name: linkHref, widget: string, required: false }
               - label: 锚点标识

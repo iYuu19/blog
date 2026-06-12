@@ -11,88 +11,110 @@ homeSections:
   - type: featured
     enabled: true
     placement: main
+    eyebrow: ""
     title: ""
     note: ""
+    body: ""
     linkLabel: ""
     linkHref: ""
     anchor: featured
   - type: fresh
     enabled: true
     placement: main
+    eyebrow: ""
     title: ""
     note: ""
+    body: ""
     linkLabel: ""
     linkHref: ""
     anchor: fresh
   - type: writeups
     enabled: true
     placement: main
+    eyebrow: ""
     title: ""
     note: ""
+    body: ""
     linkLabel: 查看归档
     linkHref: /blog
     anchor: writeups
   - type: contests
     enabled: true
     placement: main
+    eyebrow: ""
     title: ""
     note: ""
+    body: ""
     linkLabel: 查看全部比赛
     linkHref: /contests
     anchor: contests
   - type: categories
     enabled: true
     placement: main
+    eyebrow: ""
     title: ""
     note: ""
+    body: ""
     linkLabel: 查看全部分类
     linkHref: /categories
     anchor: categories
   - type: routes
     enabled: true
     placement: main
+    eyebrow: ""
     title: ""
     note: ""
+    body: ""
     linkLabel: ""
     linkHref: ""
     anchor: routes
   - type: note
     enabled: true
     placement: side
+    eyebrow: ""
     title: 更新方式
     note: 这里会尽量把题目背景、分析过程和关键结论写清楚，让每篇文章都既方便阅读，也方便后续回看。
+    body: ""
     linkLabel: ""
     linkHref: ""
     anchor: update-method
   - type: note
     enabled: true
     placement: side
+    eyebrow: ""
     title: 持续补充中
     note: 除了比赛 WP，这里也会慢慢补充赛后复盘、专题总结和学习过程中的记录，让内容越来越完整。
+    body: ""
     linkLabel: ""
     linkHref: ""
     anchor: filling
   - type: reviews
     enabled: true
     placement: side
+    eyebrow: ""
     title: ""
     note: ""
+    body: ""
     linkLabel: ""
     linkHref: ""
     anchor: reviews
   - type: tags
     enabled: true
     placement: side
+    eyebrow: ""
     title: ""
     note: ""
+    body: ""
     linkLabel: ""
     linkHref: ""
     anchor: tags
   - type: summaries
     enabled: true
     placement: side
+    eyebrow: ""
     title: ""
     note: ""
+    body: ""
     linkLabel: ""
     linkHref: ""
     anchor: summaries

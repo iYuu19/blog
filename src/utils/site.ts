@@ -1,4 +1,5 @@
 import { getEntry } from "astro:content";
+import { createMarkdownProcessor } from "@astrojs/markdown-remark";
 
 export const defaultSiteSettings = {
   brandMark: "iYuu",
@@ -76,8 +77,10 @@ export const defaultSiteSettings = {
       type: "featured",
       enabled: true,
       placement: "main",
+      eyebrow: "",
       title: "",
       note: "",
+      body: "",
       linkLabel: "",
       linkHref: "",
       anchor: "featured"
@@ -86,8 +89,10 @@ export const defaultSiteSettings = {
       type: "fresh",
       enabled: true,
       placement: "main",
+      eyebrow: "",
       title: "",
       note: "",
+      body: "",
       linkLabel: "",
       linkHref: "",
       anchor: "fresh"
@@ -96,8 +101,10 @@ export const defaultSiteSettings = {
       type: "writeups",
       enabled: true,
       placement: "main",
+      eyebrow: "",
       title: "",
       note: "",
+      body: "",
       linkLabel: "查看归档",
       linkHref: "/blog",
       anchor: "writeups"
@@ -106,8 +113,10 @@ export const defaultSiteSettings = {
       type: "contests",
       enabled: true,
       placement: "main",
+      eyebrow: "",
       title: "",
       note: "",
+      body: "",
       linkLabel: "查看全部比赛",
       linkHref: "/contests",
       anchor: "contests"
@@ -116,8 +125,10 @@ export const defaultSiteSettings = {
       type: "categories",
       enabled: true,
       placement: "main",
+      eyebrow: "",
       title: "",
       note: "",
+      body: "",
       linkLabel: "查看全部分类",
       linkHref: "/categories",
       anchor: "categories"
@@ -126,8 +137,10 @@ export const defaultSiteSettings = {
       type: "routes",
       enabled: true,
       placement: "main",
+      eyebrow: "",
       title: "",
       note: "",
+      body: "",
       linkLabel: "",
       linkHref: "",
       anchor: "routes"
@@ -136,9 +149,11 @@ export const defaultSiteSettings = {
       type: "note",
       enabled: true,
       placement: "side",
+      eyebrow: "",
       title: "更新方式",
       note:
         "这里会尽量把题目背景、分析过程和关键结论写清楚，让每篇文章都既方便阅读，也方便后续回看。",
+      body: "",
       linkLabel: "",
       linkHref: "",
       anchor: "update-method"
@@ -147,9 +162,11 @@ export const defaultSiteSettings = {
       type: "note",
       enabled: true,
       placement: "side",
+      eyebrow: "",
       title: "持续补充中",
       note:
         "除了比赛 WP，这里也会慢慢补充赛后复盘、专题总结和学习过程中的记录，让内容越来越完整。",
+      body: "",
       linkLabel: "",
       linkHref: "",
       anchor: "filling"
@@ -158,8 +175,10 @@ export const defaultSiteSettings = {
       type: "reviews",
       enabled: true,
       placement: "side",
+      eyebrow: "",
       title: "",
       note: "",
+      body: "",
       linkLabel: "",
       linkHref: "",
       anchor: "reviews"
@@ -168,8 +187,10 @@ export const defaultSiteSettings = {
       type: "tags",
       enabled: true,
       placement: "side",
+      eyebrow: "",
       title: "",
       note: "",
+      body: "",
       linkLabel: "",
       linkHref: "",
       anchor: "tags"
@@ -178,8 +199,10 @@ export const defaultSiteSettings = {
       type: "summaries",
       enabled: true,
       placement: "side",
+      eyebrow: "",
       title: "",
       note: "",
+      body: "",
       linkLabel: "",
       linkHref: "",
       anchor: "summaries"
@@ -419,4 +442,12 @@ export async function getPageLayouts() {
     ...defaultPageLayouts,
     ...(entry?.data ?? {})
   };
+}
+
+const markdownProcessorPromise = createMarkdownProcessor();
+
+export async function renderStructuredMarkdown(content: string) {
+  const processor = await markdownProcessorPromise;
+  const result = await processor.render(content ?? "");
+  return result.code;
 }

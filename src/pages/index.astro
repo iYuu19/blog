@@ -11,7 +11,7 @@ import {
   getContestSlug,
   slugifySegment
 } from "../utils/content";
-import { getSiteSettings } from "../utils/site";
+import { getSiteSettings, renderStructuredMarkdown } from "../utils/site";
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
@@ -163,7 +163,8 @@ const sectionTitleDefaults = {
   reviews: site.reviewsHeading,
   tags: site.tagsHeading,
   summaries: site.summariesHeading,
-  note: ""
+  note: "",
+  rich: "自定义内容"
 };
 
 const sectionNoteDefaults = {
@@ -189,7 +190,8 @@ const sectionLinkDefaults = {
   reviews: { label: "", href: "" },
   tags: { label: "", href: "" },
   summaries: { label: "", href: "" },
-  note: { label: "", href: "" }
+  note: { label: "", href: "" },
+  rich: { label: "", href: "" }
 };
 
 const applyTemplate = (template: string, replacements: Record<string, string>) =>
@@ -199,25 +201,41 @@ const applyTemplate = (template: string, replacements: Record<string, string>) =
   );
 
 const baseHomeSections = site.homeSections?.length ? site.homeSections : [];
-const homeSections = baseHomeSections
-  .filter((section) => section.enabled)
-  .map((section, index) => {
-    const title =
+const homeSections = (
+  await Promise.all(
+    baseHomeSections.filter((section) => section.enabled).map(async (section, index) => {
+      const title =
       section.title || sectionTitleDefaults[section.type] || `板块 ${index + 1}`;
-    const note = section.note || sectionNoteDefaults[section.type] || "";
-    const linkDefaults = sectionLinkDefaults[section.type];
-    const anchorSeed = section.anchor || `${section.type}-${index + 1}`;
+      const note = section.note || sectionNoteDefaults[section.type] || "";
+      const linkDefaults = sectionLinkDefaults[section.type];
+      const anchorSeed = section.anchor || `${section.type}-${index + 1}`;
+      const bodyHtml =
+      section.type === "rich" && section.body
+        ? await renderStructuredMarkdown(section.body)
+        : "";
 
-    return {
-      ...section,
-      title,
-      note,
-      linkLabel: section.linkLabel || linkDefaults.label,
-      linkHref: section.linkHref || linkDefaults.href,
-      id: slugifySegment(anchorSeed) || `section-${index + 1}`
-    };
-  })
-  .filter((section) => section.type !== "note" || section.title || section.note);
+      return {
+        ...section,
+        title,
+        note,
+        bodyHtml,
+        linkLabel: section.linkLabel || linkDefaults.label,
+        linkHref: section.linkHref || linkDefaults.href,
+        id: slugifySegment(anchorSeed) || `section-${index + 1}`
+      };
+    })
+  )
+).filter((section) => {
+  if (section.type === "note") {
+    return section.title || section.note;
+  }
+
+  if (section.type === "rich") {
+    return section.eyebrow || section.title || section.note || section.bodyHtml;
+  }
+
+  return true;
+});
 
 const mainSections = homeSections.filter((section) => section.placement !== "side");
 const sideSections = homeSections.filter((section) => section.placement === "side");
@@ -494,6 +512,30 @@ const indexMetaText = applyTemplate(site.homeIndexMetaTemplate, {
             }
 
             {
+              section.type === "rich" && (
+                <section class="section" id={section.id}>
+                  <article class="rich-section-card">
+                    {section.eyebrow && <p class="rich-section-eyebrow">{section.eyebrow}</p>}
+                    <div class="section-head rich-section-head">
+                      <div>
+                        <h2>{section.title}</h2>
+                        {section.note && <p class="rich-section-note">{section.note}</p>}
+                      </div>
+                      {
+                        section.linkLabel && section.linkHref && (
+                          <a class="section-link" href={section.linkHref}>
+                            {section.linkLabel}
+                          </a>
+                        )
+                      }
+                    </div>
+                    {section.bodyHtml && <div class="prose rich-section-body" set:html={section.bodyHtml} />}
+                  </article>
+                </section>
+              )
+            }
+
+            {
               section.type === "reviews" && (
                 <section class="section" id={section.id}>
                   <h2>{section.title}</h2>
@@ -566,6 +608,30 @@ const indexMetaText = applyTemplate(site.homeIndexMetaTemplate, {
                       </a>
                     )
                   }
+                </section>
+              )
+            }
+
+            {
+              section.type === "rich" && (
+                <section class="section" id={section.id}>
+                  <article class="rich-section-card rich-section-card-side">
+                    {section.eyebrow && <p class="rich-section-eyebrow">{section.eyebrow}</p>}
+                    <div class="section-head rich-section-head">
+                      <div>
+                        <h2>{section.title}</h2>
+                        {section.note && <p class="rich-section-note">{section.note}</p>}
+                      </div>
+                      {
+                        section.linkLabel && section.linkHref && (
+                          <a class="section-link" href={section.linkHref}>
+                            {section.linkLabel}
+                          </a>
+                        )
+                      }
+                    </div>
+                    {section.bodyHtml && <div class="prose rich-section-body" set:html={section.bodyHtml} />}
+                  </article>
                 </section>
               )
             }
