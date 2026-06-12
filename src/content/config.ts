@@ -118,7 +118,8 @@ const siteLayout = defineCollection({
             "tags",
             "summaries",
             "note",
-            "rich"
+            "rich",
+            "links"
           ]),
           enabled: z.boolean().default(true),
           placement: z.enum(["main", "side"]).default("main"),
@@ -126,6 +127,15 @@ const siteLayout = defineCollection({
           title: z.string().default(""),
           note: z.string().default(""),
           body: z.string().default(""),
+          items: z
+            .array(
+              z.object({
+                label: z.string(),
+                href: z.string(),
+                note: z.string().default("")
+              })
+            )
+            .default([]),
           linkLabel: z.string().default(""),
           linkHref: z.string().default(""),
           anchor: z.string().default("")

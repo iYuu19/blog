@@ -229,6 +229,7 @@ collections:
                   - { label: 专题总结列表, value: summaries }
                   - { label: 自定义说明块, value: note }
                   - { label: 自定义富文本块, value: rich }
+                  - { label: 自定义链接入口块, value: links }
               - { label: 是否显示, name: enabled, widget: boolean, default: true }
               - label: 所在列
                 name: placement
@@ -257,6 +258,16 @@ collections:
                 widget: markdown
                 required: false
                 hint: rich 类型会渲染这里的 Markdown；其他类型可留空。
+              - label: 链接入口卡片
+                name: items
+                widget: list
+                required: false
+                summary: "{{fields.label}}"
+                hint: links 类型会渲染这里的入口卡片；其他类型可留空。
+                fields:
+                  - { label: 名称, name: label, widget: string }
+                  - { label: 链接, name: href, widget: string }
+                  - { label: 补充说明, name: note, widget: string, required: false }
               - { label: 链接文案, name: linkLabel, widget: string, required: false }
               - { label: 链接地址, name: linkHref, widget: string, required: false }
               - label: 锚点标识

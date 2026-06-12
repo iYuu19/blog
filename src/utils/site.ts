@@ -81,6 +81,7 @@ export const defaultSiteSettings = {
       title: "",
       note: "",
       body: "",
+      items: [],
       linkLabel: "",
       linkHref: "",
       anchor: "featured"
@@ -93,6 +94,7 @@ export const defaultSiteSettings = {
       title: "",
       note: "",
       body: "",
+      items: [],
       linkLabel: "",
       linkHref: "",
       anchor: "fresh"
@@ -106,6 +108,7 @@ export const defaultSiteSettings = {
       note: "",
       body: "",
       linkLabel: "查看归档",
+      items: [],
       linkHref: "/blog",
       anchor: "writeups"
     },
@@ -118,6 +121,7 @@ export const defaultSiteSettings = {
       note: "",
       body: "",
       linkLabel: "查看全部比赛",
+      items: [],
       linkHref: "/contests",
       anchor: "contests"
     },
@@ -130,6 +134,7 @@ export const defaultSiteSettings = {
       note: "",
       body: "",
       linkLabel: "查看全部分类",
+      items: [],
       linkHref: "/categories",
       anchor: "categories"
     },
@@ -142,8 +147,33 @@ export const defaultSiteSettings = {
       note: "",
       body: "",
       linkLabel: "",
+      items: [],
       linkHref: "",
       anchor: "routes"
+    },
+    {
+      type: "links",
+      enabled: false,
+      placement: "main",
+      eyebrow: "Quick Links",
+      title: "鎴戠殑宸ュ叿绠?",
+      note: "鍙互鎶婂父鐢ㄥ伐鍏枫€佷笓棰樺叆鍙ｅ拰绔欏唴甯哥敤椤甸潰鏀惧湪杩欓噷銆?",
+      body: "",
+      items: [
+        {
+          label: "Markdown",
+          href: "/blog",
+          note: "鐢ㄦ潵鏀惧父鐪嬬殑鍐呭鍏ュ彛"
+        },
+        {
+          label: "Tags",
+          href: "/tags",
+          note: "涔熷彲浠ユ崲鎴愪綘鐨勪笓棰樹笓椤垫垨宸ュ叿椤甸潰"
+        }
+      ],
+      linkLabel: "",
+      linkHref: "",
+      anchor: "toolbox"
     },
     {
       type: "note",
@@ -155,6 +185,7 @@ export const defaultSiteSettings = {
         "这里会尽量把题目背景、分析过程和关键结论写清楚，让每篇文章都既方便阅读，也方便后续回看。",
       body: "",
       linkLabel: "",
+      items: [],
       linkHref: "",
       anchor: "update-method"
     },
@@ -168,6 +199,7 @@ export const defaultSiteSettings = {
         "除了比赛 WP，这里也会慢慢补充赛后复盘、专题总结和学习过程中的记录，让内容越来越完整。",
       body: "",
       linkLabel: "",
+      items: [],
       linkHref: "",
       anchor: "filling"
     },
@@ -180,6 +212,7 @@ export const defaultSiteSettings = {
       note: "",
       body: "",
       linkLabel: "",
+      items: [],
       linkHref: "",
       anchor: "reviews"
     },
@@ -192,6 +225,7 @@ export const defaultSiteSettings = {
       note: "",
       body: "",
       linkLabel: "",
+      items: [],
       linkHref: "",
       anchor: "tags"
     },
@@ -204,6 +238,7 @@ export const defaultSiteSettings = {
       note: "",
       body: "",
       linkLabel: "",
+      items: [],
       linkHref: "",
       anchor: "summaries"
     }

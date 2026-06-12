@@ -153,7 +153,7 @@ const routeCards = site.routeCards.map((route) => {
   };
 });
 
-const sectionTitleDefaults = {
+const sectionTitleDefaults: Record<string, string> = {
   featured: site.featuredHeading,
   fresh: site.freshHeading,
   writeups: site.writeupsHeading,
@@ -167,7 +167,7 @@ const sectionTitleDefaults = {
   rich: "自定义内容"
 };
 
-const sectionNoteDefaults = {
+const sectionNoteDefaults: Record<string, string> = {
   featured: featuredDate,
   fresh: site.freshNote,
   writeups: "",
@@ -180,7 +180,7 @@ const sectionNoteDefaults = {
   note: ""
 };
 
-const sectionLinkDefaults = {
+const sectionLinkDefaults: Record<string, { label: string; href: string }> = {
   featured: { label: "", href: "" },
   fresh: { label: "", href: "" },
   writeups: { label: "查看归档", href: "/blog" },
@@ -208,6 +208,9 @@ const homeSections = (
       section.title || sectionTitleDefaults[section.type] || `板块 ${index + 1}`;
       const note = section.note || sectionNoteDefaults[section.type] || "";
       const linkDefaults = sectionLinkDefaults[section.type];
+      const resolvedTitle = section.type === "links" && !section.title ? "蹇€熷叆鍙?" : title;
+      const safeLinkDefaults =
+      section.type === "links" ? { label: "", href: "" } : linkDefaults;
       const anchorSeed = section.anchor || `${section.type}-${index + 1}`;
       const bodyHtml =
       section.type === "rich" && section.body
@@ -216,11 +219,12 @@ const homeSections = (
 
       return {
         ...section,
-        title,
+        title: resolvedTitle,
         note,
         bodyHtml,
-        linkLabel: section.linkLabel || linkDefaults.label,
-        linkHref: section.linkHref || linkDefaults.href,
+        items: (section.items ?? []).filter((item) => item.label && item.href),
+        linkLabel: section.linkLabel || safeLinkDefaults.label,
+        linkHref: section.linkHref || safeLinkDefaults.href,
         id: slugifySegment(anchorSeed) || `section-${index + 1}`
       };
     })
@@ -232,6 +236,10 @@ const homeSections = (
 
   if (section.type === "rich") {
     return section.eyebrow || section.title || section.note || section.bodyHtml;
+  }
+
+  if (section.type === "links") {
+    return section.items.length > 0;
   }
 
   return true;
@@ -536,6 +544,40 @@ const indexMetaText = applyTemplate(site.homeIndexMetaTemplate, {
             }
 
             {
+              section.type === "links" && (
+                <section class="section" id={section.id}>
+                  <article class="rich-section-card">
+                    {section.eyebrow && <p class="rich-section-eyebrow">{section.eyebrow}</p>}
+                    <div class="section-head rich-section-head">
+                      <div>
+                        <h2>{section.title}</h2>
+                        {section.note && <p class="rich-section-note">{section.note}</p>}
+                      </div>
+                      {
+                        section.linkLabel && section.linkHref && (
+                          <a class="section-link" href={section.linkHref}>
+                            {section.linkLabel}
+                          </a>
+                        )
+                      }
+                    </div>
+                    <div class="toolbox-grid">
+                      {section.items.map((item) => (
+                        <a class="toolbox-card" href={item.href}>
+                          <div class="toolbox-card-head">
+                            <h3>{item.label}</h3>
+                            <span>Open</span>
+                          </div>
+                          {item.note && <p>{item.note}</p>}
+                        </a>
+                      ))}
+                    </div>
+                  </article>
+                </section>
+              )
+            }
+
+            {
               section.type === "reviews" && (
                 <section class="section" id={section.id}>
                   <h2>{section.title}</h2>
@@ -631,6 +673,40 @@ const indexMetaText = applyTemplate(site.homeIndexMetaTemplate, {
                       }
                     </div>
                     {section.bodyHtml && <div class="prose rich-section-body" set:html={section.bodyHtml} />}
+                  </article>
+                </section>
+              )
+            }
+
+            {
+              section.type === "links" && (
+                <section class="section" id={section.id}>
+                  <article class="rich-section-card rich-section-card-side">
+                    {section.eyebrow && <p class="rich-section-eyebrow">{section.eyebrow}</p>}
+                    <div class="section-head rich-section-head">
+                      <div>
+                        <h2>{section.title}</h2>
+                        {section.note && <p class="rich-section-note">{section.note}</p>}
+                      </div>
+                      {
+                        section.linkLabel && section.linkHref && (
+                          <a class="section-link" href={section.linkHref}>
+                            {section.linkLabel}
+                          </a>
+                        )
+                      }
+                    </div>
+                    <div class="toolbox-grid toolbox-grid-side">
+                      {section.items.map((item) => (
+                        <a class="toolbox-card toolbox-card-side" href={item.href}>
+                          <div class="toolbox-card-head">
+                            <h3>{item.label}</h3>
+                            <span>Open</span>
+                          </div>
+                          {item.note && <p>{item.note}</p>}
+                        </a>
+                      ))}
+                    </div>
                   </article>
                 </section>
               )
