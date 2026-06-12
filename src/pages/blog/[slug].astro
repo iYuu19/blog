@@ -6,6 +6,18 @@ import TagPill from "../../components/TagPill.astro";
 import { getContestSlug } from "../../utils/content";
 import { getSiteSettings } from "../../utils/site";
 
+function estimateReadMinutes(markdown: string) {
+  const plainText = markdown
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`[^`]*`/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
+    .replace(/\[[^\]]*\]\([^)]+\)/g, " ")
+    .replace(/[#>*_\-\n\r]/g, " ")
+    .replace(/\s+/g, "");
+
+  return Math.max(1, Math.round(plainText.length / 480));
+}
+
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
   return posts.map((post) => ({
@@ -39,7 +51,8 @@ const difficultyClassMap: Record<string, string> = {
 const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-notes";
 const contestLabel = post.data.contest || post.data.oj || null;
 const contestHref = contestLabel ? `/contests/${getContestSlug(post)}/` : null;
-const tocItems = headings.filter(({ depth, slug, text }) => depth >= 1 && slug && text);
+const tocItems = headings.filter(({ depth, slug, text }) => depth >= 2 && depth <= 4 && slug && text);
+const readingMinutes = estimateReadMinutes(post.body);
 ---
 
 <Layout
@@ -53,10 +66,11 @@ const tocItems = headings.filter(({ depth, slug, text }) => depth >= 1 && slug &
         <aside class="index-column article-index-column">
           <div class="site-index article-index">
             <p class="index-title">本文目录</p>
+            <p class="article-index-meta">{tocItems.length} sections · {readingMinutes} min read</p>
             <ul class="index-list article-index-list">
               {tocItems.map((item) => (
-                <li class:list={["article-index-item", `article-index-depth-${item.depth}`]}>
-                  <a href={`#${item.slug}`} data-toc-link={item.slug}>
+                <li class:list={["article-index-item", `article-index-depth-${item.depth}`]} data-depth={item.depth}>
+                  <a href={`#${item.slug}`} data-toc-link={item.slug} title={item.text}>
                     {item.text}
                   </a>
                 </li>
@@ -82,6 +96,7 @@ const tocItems = headings.filter(({ depth, slug, text }) => depth >= 1 && slug &
         <div class="article-meta">
           <span>发布于 {dateText}</span>
           {updatedDateText && <span>更新于 {updatedDateText}</span>}
+          <span>{readingMinutes} min read</span>
           <span class:list={["difficulty-pill", difficultyClass]}>{post.data.difficulty}</span>
           <span>{post.data.language}</span>
         </div>

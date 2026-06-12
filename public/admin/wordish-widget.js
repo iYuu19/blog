@@ -67,6 +67,49 @@
     };
   }
 
+  function analyzeMarkdown(markdown) {
+    const source = toText(markdown);
+    const outline = source
+      .split(/\r?\n/)
+      .map((line) => {
+        const match = line.match(/^(#{1,6})\s+(.+)$/);
+
+        if (!match) {
+          return null;
+        }
+
+        return {
+          depth: match[1].length,
+          text: match[2].trim()
+        };
+      })
+      .filter(Boolean);
+
+    const plainText = source
+      .replace(/```[\s\S]*?```/g, " ")
+      .replace(/`[^`]*`/g, " ")
+      .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
+      .replace(/\[[^\]]*\]\([^)]+\)/g, " ")
+      .replace(/[#>*_\-\n\r]/g, " ")
+      .replace(/\s+/g, "");
+
+    const imageCount = (source.match(/!\[[^\]]*\]\([^)]+\)/g) || []).length;
+    const codeBlockCount = Math.floor((source.match(/```/g) || []).length / 2);
+    const linkCount = (
+      source.replace(/!\[[^\]]*\]\([^)]+\)/g, "").match(/\[[^\]]+\]\([^)]+\)/g) || []
+    ).length;
+    const readingMinutes = Math.max(1, Math.round(plainText.length / 480));
+
+    return {
+      readingMinutes,
+      headingCount: outline.length,
+      imageCount,
+      codeBlockCount,
+      linkCount,
+      outline: outline.slice(0, 14)
+    };
+  }
+
   function stripQuotes(value) {
     return value.replace(/^['"]|['"]$/g, "");
   }
@@ -377,7 +420,8 @@
       return {
         errorMessage: "",
         previewHtml: "",
-        showReaderPreview: true
+        showReaderPreview: true,
+        writingInsights: analyzeMarkdown(toText(this.props.value))
       };
     },
 
@@ -484,13 +528,22 @@
         return;
       }
 
+      const nextMarkdown = this.editor.getMarkdown();
       const nextHtml = this.editor.getHTML();
+      const nextInsights = analyzeMarkdown(nextMarkdown);
+      this.setState((state) => {
+        if (
+          state.previewHtml === nextHtml &&
+          JSON.stringify(state.writingInsights) === JSON.stringify(nextInsights)
+        ) {
+          return null;
+        }
 
-      if (nextHtml !== this.state.previewHtml) {
-        this.setState({
-          previewHtml: nextHtml
-        });
-      }
+        return {
+          previewHtml: nextHtml,
+          writingInsights: nextInsights
+        };
+      });
     },
 
     handleEditorChange() {
@@ -840,6 +893,183 @@
       );
     },
 
+    renderInsightsPanel() {
+      const insights = this.state.writingInsights;
+      const summaryCards = [
+        {
+          label: "Read Time",
+          value: `${insights.readingMinutes} min`,
+          detail: "Estimated from current draft length."
+        },
+        {
+          label: "Headings",
+          value: String(insights.headingCount),
+          detail: insights.headingCount > 0 ? "Your current article structure." : "Add headings to improve scanability."
+        },
+        {
+          label: "Code Blocks",
+          value: String(insights.codeBlockCount),
+          detail: insights.codeBlockCount > 0 ? "Useful for payloads and scripts." : "Code snippets will show up here."
+        },
+        {
+          label: "Images",
+          value: String(insights.imageCount),
+          detail: insights.imageCount > 0 ? "Screenshots already embedded in the draft." : "Pasted screenshots will count here."
+        }
+      ];
+
+      return h(
+        "section",
+        {
+          className: "wordish-insights-panel"
+        },
+        h(
+          "div",
+          {
+            className: "wordish-insights-head"
+          },
+          h(
+            "div",
+            {
+              className: "wordish-insights-copy"
+            },
+            h(
+              "p",
+              {
+                className: "wordish-insights-eyebrow"
+              },
+              "Draft Insights"
+            ),
+            h(
+              "h3",
+              {
+                className: "wordish-insights-title"
+              },
+              "Keep the draft readable while you write"
+            ),
+            h(
+              "p",
+              {
+                className: "wordish-insights-note"
+              },
+              "This panel updates from the current Markdown so you can catch structure issues before publishing."
+            )
+          ),
+          h(
+            "div",
+            {
+              className: "wordish-insights-pills"
+            },
+            h(
+              "span",
+              {
+                className: "wordish-insights-pill"
+              },
+              `${insights.linkCount} links`
+            ),
+            h(
+              "span",
+              {
+                className: "wordish-insights-pill"
+              },
+              `${insights.outline.length} outline items`
+            )
+          )
+        ),
+        h(
+          "div",
+          {
+            className: "wordish-insights-grid"
+          },
+          ...summaryCards.map((item) =>
+            h(
+              "article",
+              {
+                className: "wordish-insight-card"
+              },
+              h(
+                "span",
+                {
+                  className: "wordish-insight-card-label"
+                },
+                item.label
+              ),
+              h(
+                "strong",
+                {
+                  className: "wordish-insight-card-value"
+                },
+                item.value
+              ),
+              h(
+                "p",
+                {
+                  className: "wordish-insight-card-detail"
+                },
+                item.detail
+              )
+            )
+          )
+        ),
+        h(
+          "div",
+          {
+            className: "wordish-outline-panel"
+          },
+          h(
+            "div",
+            {
+              className: "wordish-outline-head"
+            },
+            h(
+              "h4",
+              {
+                className: "wordish-outline-title"
+              },
+              "Live Outline"
+            ),
+            h(
+              "span",
+              {
+                className: "wordish-outline-count"
+              },
+              `${insights.headingCount} headings`
+            )
+          ),
+          insights.outline.length > 0
+            ? h(
+                "ol",
+                {
+                  className: "wordish-outline-list"
+                },
+                ...insights.outline.map((item, index) =>
+                  h(
+                    "li",
+                    {
+                      className: `wordish-outline-item depth-${Math.min(item.depth, 4)}`,
+                      key: `${item.text}-${index}`
+                    },
+                    h(
+                      "span",
+                      {
+                        className: "wordish-outline-item-label"
+                      },
+                      item.text
+                    )
+                  )
+                )
+              )
+            : h(
+                "p",
+                {
+                  className: "wordish-outline-empty"
+                },
+                "Add headings in the editor and your live outline will appear here."
+              )
+        )
+      );
+    },
+
     render() {
       const hint = this.props.field && this.props.field.get ? this.props.field.get("hint") : "";
 
@@ -924,6 +1154,7 @@
           className: "wordish-editor-shell",
           ref: this.setEditorRoot
         }),
+        this.renderInsightsPanel(),
         this.renderStatusPanel(),
         this.renderReaderPreview(),
         h(

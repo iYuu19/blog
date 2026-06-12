@@ -241,6 +241,166 @@ a {
   line-height: 1.8;
 }
 
+.wordish-insights-panel {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid var(--admin-line-soft);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(31, 92, 87, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(255, 254, 250, 0.98), rgba(247, 242, 234, 0.94));
+  box-shadow: var(--admin-shadow);
+}
+
+.wordish-insights-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.wordish-insights-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.wordish-insights-eyebrow,
+.wordish-outline-count {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.wordish-insights-title,
+.wordish-outline-title {
+  margin: 0;
+  color: var(--admin-text);
+  font-family: var(--admin-font-serif);
+}
+
+.wordish-insights-title {
+  font-size: 26px;
+  line-height: 1.24;
+}
+
+.wordish-insights-note {
+  margin: 0;
+  color: var(--admin-soft-text);
+  font-size: 14px;
+}
+
+.wordish-insights-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.wordish-insights-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--admin-line-soft);
+  border-radius: 999px;
+  background: rgba(255, 253, 249, 0.92);
+  color: var(--admin-accent-strong);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.wordish-insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.wordish-insight-card {
+  display: grid;
+  gap: 8px;
+  min-height: 124px;
+  padding: 16px;
+  border: 1px solid var(--admin-line-soft);
+  border-radius: 18px;
+  background: rgba(255, 253, 249, 0.92);
+}
+
+.wordish-insight-card-label {
+  color: var(--admin-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.wordish-insight-card-value {
+  color: var(--admin-accent-strong);
+  font-family: var(--admin-font-serif);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.wordish-insight-card-detail,
+.wordish-outline-empty {
+  margin: 0;
+  color: var(--admin-soft-text);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.wordish-outline-panel {
+  display: grid;
+  gap: 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--admin-line-soft);
+}
+
+.wordish-outline-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wordish-outline-title {
+  font-size: 22px;
+}
+
+.wordish-outline-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wordish-outline-item {
+  margin: 0;
+}
+
+.wordish-outline-item-label {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid var(--admin-line-soft);
+  border-radius: 14px;
+  background: rgba(255, 253, 249, 0.86);
+  color: var(--admin-text);
+  font-size: 14px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.wordish-outline-item.depth-3 .wordish-outline-item-label {
+  margin-left: 14px;
+}
+
+.wordish-outline-item.depth-4 .wordish-outline-item-label {
+  margin-left: 28px;
+}
+
 .wordish-status-panel {
   display: grid;
   gap: 18px;
@@ -686,6 +846,7 @@ a {
     flex-direction: column;
   }
 
+  .wordish-insights-head,
   .wordish-reader-preview-head {
     flex-direction: column;
   }
@@ -693,6 +854,11 @@ a {
   .wordish-reader-preview-cover {
     width: 100%;
     min-width: 0;
+  }
+
+  .wordish-outline-head {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
