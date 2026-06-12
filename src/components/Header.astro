@@ -27,14 +27,23 @@ const isActive = (href: string) =>
         <small>{site.headerTagline}</small>
       </span>
     </a>
-    <nav class="nav-links" aria-label="主导航">
+    <div class="nav-right">
+      <nav class="nav-links" aria-label="主导航">
+        {
+          links.map((link) => (
+            <a class:list={["nav-link", isActive(link.href) ? "is-active" : ""]} href={link.href}>
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
       {
-        links.map((link) => (
-          <a class:list={["nav-link", isActive(link.href) ? "is-active" : ""]} href={link.href}>
-            {link.label}
+        site.headerCtaLabel && site.headerCtaHref && (
+          <a class="nav-cta" href={site.headerCtaHref}>
+            {site.headerCtaLabel}
           </a>
-        ))
+        )
       }
-    </nav>
+    </div>
   </div>
 </header>

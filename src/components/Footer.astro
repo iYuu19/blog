@@ -32,8 +32,9 @@ const footerLinks = site.navLinks?.length
     </nav>
 
     <div class="footer-meta-card">
-      <p class="footer-meta-title">持续补充中</p>
-      <p>这个站会继续往比赛 WP、赛后复盘、专题总结这几个方向慢慢整理。</p>
+      {site.footerPanelEyebrow && <p class="footer-meta-kicker">{site.footerPanelEyebrow}</p>}
+      <p class="footer-meta-title">{site.footerPanelTitle}</p>
+      <p>{site.footerPanelText}</p>
       <p>© {year} {site.copyrightName}</p>
     </div>
   </div>

@@ -152,6 +152,79 @@ const routeCards = site.routeCards.map((route) => {
     latestTitle: routePosts[0]?.data.title ?? route.emptyLatestTitle
   };
 });
+
+const sectionTitleDefaults = {
+  featured: site.featuredHeading,
+  fresh: site.freshHeading,
+  writeups: site.writeupsHeading,
+  contests: site.contestsHeading,
+  categories: site.categoriesHeading,
+  routes: site.routesHeading,
+  reviews: site.reviewsHeading,
+  tags: site.tagsHeading,
+  summaries: site.summariesHeading,
+  note: ""
+};
+
+const sectionNoteDefaults = {
+  featured: featuredDate,
+  fresh: site.freshNote,
+  writeups: "",
+  contests: "",
+  categories: "",
+  routes: site.routesNote,
+  reviews: "",
+  tags: "",
+  summaries: "",
+  note: ""
+};
+
+const sectionLinkDefaults = {
+  featured: { label: "", href: "" },
+  fresh: { label: "", href: "" },
+  writeups: { label: "查看归档", href: "/blog" },
+  contests: { label: "查看全部比赛", href: "/contests" },
+  categories: { label: "查看全部分类", href: "/categories" },
+  routes: { label: "", href: "" },
+  reviews: { label: "", href: "" },
+  tags: { label: "", href: "" },
+  summaries: { label: "", href: "" },
+  note: { label: "", href: "" }
+};
+
+const applyTemplate = (template: string, replacements: Record<string, string>) =>
+  Object.entries(replacements).reduce(
+    (result, [key, value]) => result.replaceAll(`{{${key}}}`, value),
+    template
+  );
+
+const baseHomeSections = site.homeSections?.length ? site.homeSections : [];
+const homeSections = baseHomeSections
+  .filter((section) => section.enabled)
+  .map((section, index) => {
+    const title =
+      section.title || sectionTitleDefaults[section.type] || `板块 ${index + 1}`;
+    const note = section.note || sectionNoteDefaults[section.type] || "";
+    const linkDefaults = sectionLinkDefaults[section.type];
+    const anchorSeed = section.anchor || `${section.type}-${index + 1}`;
+
+    return {
+      ...section,
+      title,
+      note,
+      linkLabel: section.linkLabel || linkDefaults.label,
+      linkHref: section.linkHref || linkDefaults.href,
+      id: slugifySegment(anchorSeed) || `section-${index + 1}`
+    };
+  })
+  .filter((section) => section.type !== "note" || section.title || section.note);
+
+const mainSections = homeSections.filter((section) => section.placement !== "side");
+const sideSections = homeSections.filter((section) => section.placement === "side");
+const indexMetaText = applyTemplate(site.homeIndexMetaTemplate, {
+  count: String(posts.length),
+  date: latestDate || "最近"
+});
 ---
 
 <Layout title={site.siteTitle} description={site.siteDescription}>
@@ -221,202 +294,485 @@ const routeCards = site.routeCards.map((route) => {
   <section class="shell home-layout">
     <aside class="index-column">
       <div class="site-index">
-        <p class="index-title">浏览索引</p>
+        <p class="index-title">{site.homeIndexTitle}</p>
         <ul class="index-list">
-          <li><a href="#featured">{site.featuredHeading}</a></li>
-          <li><a href="#fresh">{site.freshHeading}</a></li>
-          <li><a href="#writeups">{site.writeupsHeading}</a></li>
-          <li><a href="#contests">{site.contestsHeading}</a></li>
-          <li><a href="#routes">{site.routesHeading}</a></li>
-          <li><a href="#reviews">{site.reviewsHeading}</a></li>
-          <li><a href="#tags">{site.tagsHeading}</a></li>
+          {homeSections.map((section) => (
+            <li><a href={`#${section.id}`}>{section.title}</a></li>
+          ))}
         </ul>
-        <p class="index-meta">目前 {posts.length} 篇，最近更新在 {latestDate || "这几天"}。</p>
+        <p class="index-meta">{indexMetaText}</p>
         <div class="index-block">
-          <p class="index-label">内容方向</p>
-          <p class="index-text">这里主要更新比赛 WP、电子取证题分析、赛后复盘，以及比赛中反复出现的知识点整理。</p>
+          <p class="index-label">{site.homeIndexFocusLabel}</p>
+          <p class="index-text">{site.homeIndexFocusText}</p>
         </div>
       </div>
     </aside>
 
     <div class="home-grid">
       <div class="main-column">
-        {
-          featuredPost && (
-            <section class="section" id="featured">
-              <div class="section-head">
-                <h2>{site.featuredHeading}</h2>
-                <span class="section-note">{featuredDate}</span>
-              </div>
-              <article class="featured-card">
-                <p class="featured-kicker">
-                  {[featuredPost.data.category, featuredPost.data.contest || featuredPost.data.oj, featuredPost.data.track]
-                    .filter(Boolean)
-                    .join(" / ")}
-                </p>
-                <h3>
-                  <a href={`/blog/${featuredPost.slug}/`}>{featuredPost.data.title}</a>
-                </h3>
-                <p>{featuredPost.data.description}</p>
-                <div class="featured-meta">
-                  <span>{featuredPost.data.language}</span>
-                  <span>{featuredPost.data.tags.length} 个标签</span>
-                </div>
-              </article>
-            </section>
-          )
-        }
+        {mainSections.map((section) => (
+          <>
+            {
+              section.type === "featured" &&
+                featuredPost && (
+                  <section class="section" id={section.id}>
+                    <div class="section-head">
+                      <h2>{section.title}</h2>
+                      <span class="section-note">{section.note}</span>
+                    </div>
+                    <article class="featured-card">
+                      <p class="featured-kicker">
+                        {[featuredPost.data.category, featuredPost.data.contest || featuredPost.data.oj, featuredPost.data.track]
+                          .filter(Boolean)
+                          .join(" / ")}
+                      </p>
+                      <h3>
+                        <a href={`/blog/${featuredPost.slug}/`}>{featuredPost.data.title}</a>
+                      </h3>
+                      <p>{featuredPost.data.description}</p>
+                      <div class="featured-meta">
+                        <span>{featuredPost.data.language}</span>
+                        <span>{featuredPost.data.tags.length} 个标签</span>
+                      </div>
+                    </article>
+                  </section>
+                )
+            }
 
-        <section class="section" id="fresh">
-          <div class="section-head">
-            <h2>{site.freshHeading}</h2>
-            <span class="section-note">{site.freshNote}</span>
-          </div>
-          <div class="signal-grid">
-            {recentSignalCards.map((post) => (
-              <a class="signal-card" href={`/blog/${post.slug}/`}>
-                <p class="signal-label">{[post.data.category, post.data.contest || post.data.oj].filter(Boolean).join(" / ")}</p>
-                <h3>{post.data.title}</h3>
-                <p>{post.data.description}</p>
-                <div class="signal-card-footer">
-                  <span>{post.dateText}</span>
-                  <span>{post.metaText}</span>
-                </div>
-              </a>
-            ))}
-          </div>
-        </section>
+            {
+              section.type === "fresh" && (
+                <section class="section" id={section.id}>
+                  <div class="section-head">
+                    <h2>{section.title}</h2>
+                    <span class="section-note">{section.note}</span>
+                  </div>
+                  <div class="signal-grid">
+                    {recentSignalCards.map((post) => (
+                      <a class="signal-card" href={`/blog/${post.slug}/`}>
+                        <p class="signal-label">{[post.data.category, post.data.contest || post.data.oj].filter(Boolean).join(" / ")}</p>
+                        <h3>{post.data.title}</h3>
+                        <p>{post.data.description}</p>
+                        <div class="signal-card-footer">
+                          <span>{post.dateText}</span>
+                          <span>{post.metaText}</span>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )
+            }
 
-        <section class="section" id="writeups">
-          <div class="section-head">
-            <h2>{site.writeupsHeading}</h2>
-            <a class="section-link" href="/blog">查看归档</a>
-          </div>
-          {
-            recentWpPosts.length > 0 ? (
-              <div class="archive-list">
-                {recentWpPosts.map((post) => <ArchiveRow post={post} />)}
-              </div>
-            ) : (
-              <p class="empty-feed">{site.writeupsEmpty}</p>
-            )
-          }
-        </section>
+            {
+              section.type === "writeups" && (
+                <section class="section" id={section.id}>
+                  <div class="section-head">
+                    <h2>{section.title}</h2>
+                    {
+                      section.linkLabel && section.linkHref && (
+                        <a class="section-link" href={section.linkHref}>
+                          {section.linkLabel}
+                        </a>
+                      )
+                    }
+                  </div>
+                  {
+                    recentWpPosts.length > 0 ? (
+                      <div class="archive-list">
+                        {recentWpPosts.map((post) => <ArchiveRow post={post} />)}
+                      </div>
+                    ) : (
+                      <p class="empty-feed">{site.writeupsEmpty}</p>
+                    )
+                  }
+                </section>
+              )
+            }
 
-        <section class="section" id="contests">
-          <div class="section-head">
-            <h2>{site.contestsHeading}</h2>
-            <a class="section-link" href="/contests">查看全部比赛</a>
-          </div>
-          <div class="track-grid">
-            {contestCards.map((contest) => (
-              <a
-                class:list={["track-board", contest.coverImage ? "has-cover" : ""]}
-                href={`/contests/${contest.slug}/`}
-                style={contest.coverImage ? `--contest-cover: url('${contest.coverImage}')` : undefined}
-              >
-                <div class="track-board-content">
-                  <p class="track-name">比赛</p>
-                  <strong>{contest.name}</strong>
-                  <p>{contest.count} 篇文章 · {contest.tracks.join(" / ") || "待补充方向"}</p>
-                  <p>最近一篇：{contest.latestTitle}</p>
-                </div>
-              </a>
-            ))}
-          </div>
-        </section>
+            {
+              section.type === "contests" && (
+                <section class="section" id={section.id}>
+                  <div class="section-head">
+                    <h2>{section.title}</h2>
+                    {
+                      section.linkLabel && section.linkHref && (
+                        <a class="section-link" href={section.linkHref}>
+                          {section.linkLabel}
+                        </a>
+                      )
+                    }
+                  </div>
+                  <div class="track-grid">
+                    {contestCards.map((contest) => (
+                      <a
+                        class:list={["track-board", contest.coverImage ? "has-cover" : ""]}
+                        href={`/contests/${contest.slug}/`}
+                        style={contest.coverImage ? `--contest-cover: url('${contest.coverImage}')` : undefined}
+                      >
+                        <div class="track-board-content">
+                          <p class="track-name">比赛</p>
+                          <strong>{contest.name}</strong>
+                          <p>{contest.count} 篇文章 · {contest.tracks.join(" / ") || "待补充方向"}</p>
+                          <p>最近一篇：{contest.latestTitle}</p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )
+            }
 
-        <section class="section" id="categories">
-          <div class="section-head">
-            <h2>{site.categoriesHeading}</h2>
-            <a class="section-link" href="/categories">查看全部分类</a>
-          </div>
-          <div class="tag-index-grid compact-grid">
-            {categoryCards.map((category) => (
-              <a class="tag-board" href={`/categories/${category.slug}/`}>
-                <div class="tag-board-head">
-                  <span class="tag-board-name">{category.name}</span>
-                  <strong>{category.count}</strong>
-                </div>
-                <p>最新内容：{category.latestTitle}</p>
-              </a>
-            ))}
-          </div>
-        </section>
+            {
+              section.type === "categories" && (
+                <section class="section" id={section.id}>
+                  <div class="section-head">
+                    <h2>{section.title}</h2>
+                    {
+                      section.linkLabel && section.linkHref && (
+                        <a class="section-link" href={section.linkHref}>
+                          {section.linkLabel}
+                        </a>
+                      )
+                    }
+                  </div>
+                  <div class="tag-index-grid compact-grid">
+                    {categoryCards.map((category) => (
+                      <a class="tag-board" href={`/categories/${category.slug}/`}>
+                        <div class="tag-board-head">
+                          <span class="tag-board-name">{category.name}</span>
+                          <strong>{category.count}</strong>
+                        </div>
+                        <p>最新内容：{category.latestTitle}</p>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )
+            }
 
-        <section class="section" id="routes">
-          <div class="section-head">
-            <h2>{site.routesHeading}</h2>
-            <span class="section-note">{site.routesNote}</span>
-          </div>
-          <div class="route-grid">
-            {routeCards.map((route) => (
-              <a class="route-card" href={route.count > 0 ? route.href : "/categories"}>
-                <div class="route-card-head">
-                  <span>{route.title}</span>
-                  <strong>{route.count}</strong>
-                </div>
-                <p>{route.description}</p>
-                <p class="route-card-meta">最近内容：{route.latestTitle}</p>
-              </a>
-            ))}
-          </div>
-        </section>
+            {
+              section.type === "routes" && (
+                <section class="section" id={section.id}>
+                  <div class="section-head">
+                    <h2>{section.title}</h2>
+                    <span class="section-note">{section.note}</span>
+                  </div>
+                  <div class="route-grid">
+                    {routeCards.map((route) => (
+                      <a class="route-card" href={route.count > 0 ? route.href : "/categories"}>
+                        <div class="route-card-head">
+                          <span>{route.title}</span>
+                          <strong>{route.count}</strong>
+                        </div>
+                        <p>{route.description}</p>
+                        <p class="route-card-meta">最近内容：{route.latestTitle}</p>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )
+            }
+
+            {
+              section.type === "note" && (
+                <section class="section side-note" id={section.id}>
+                  <h2>{section.title}</h2>
+                  <p>{section.note}</p>
+                  {
+                    section.linkLabel && section.linkHref && (
+                      <a class="section-link" href={section.linkHref}>
+                        {section.linkLabel}
+                      </a>
+                    )
+                  }
+                </section>
+              )
+            }
+
+            {
+              section.type === "reviews" && (
+                <section class="section" id={section.id}>
+                  <h2>{section.title}</h2>
+                  {
+                    recentReviewPosts.length > 0 ? (
+                      <ul class="link-list note-list">
+                        {recentReviewPosts.map((post) => (
+                          <li>
+                            <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+                            <span>{post.data.contest || post.data.oj || post.data.track}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p class="empty-feed">{site.reviewsEmpty}</p>
+                    )
+                  }
+                </section>
+              )
+            }
+
+            {
+              section.type === "tags" && (
+                <section class="section" id={section.id}>
+                  <h2>{section.title}</h2>
+                  <div class="tag-cloud">
+                    {tags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
+                  </div>
+                </section>
+              )
+            }
+
+            {
+              section.type === "summaries" && (
+                <section class="section" id={section.id}>
+                  <h2>{section.title}</h2>
+                  {
+                    summaryPosts.length > 0 ? (
+                      <ul class="link-list note-list">
+                        {summaryPosts.slice(0, 4).map((post) => (
+                          <li>
+                            <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+                            <span>{post.data.track || post.data.category}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p class="empty-feed">{site.summariesEmpty}</p>
+                    )
+                  }
+                </section>
+              )
+            }
+          </>
+        ))}
       </div>
 
       <aside class="side-column">
-        <section class="section side-note">
-          <h2>{site.updateMethodHeading}</h2>
-          <p>{site.updateMethodText}</p>
-        </section>
+        {sideSections.map((section) => (
+          <>
+            {
+              section.type === "note" && (
+                <section class="section side-note" id={section.id}>
+                  <h2>{section.title}</h2>
+                  <p>{section.note}</p>
+                  {
+                    section.linkLabel && section.linkHref && (
+                      <a class="section-link" href={section.linkHref}>
+                        {section.linkLabel}
+                      </a>
+                    )
+                  }
+                </section>
+              )
+            }
 
-        <section class="section side-note">
-          <h2>{site.fillingHeading}</h2>
-          <p>{site.fillingText}</p>
-        </section>
+            {
+              section.type === "reviews" && (
+                <section class="section" id={section.id}>
+                  <h2>{section.title}</h2>
+                  {
+                    recentReviewPosts.length > 0 ? (
+                      <ul class="link-list note-list">
+                        {recentReviewPosts.map((post) => (
+                          <li>
+                            <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+                            <span>{post.data.contest || post.data.oj || post.data.track}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p class="empty-feed">{site.reviewsEmpty}</p>
+                    )
+                  }
+                </section>
+              )
+            }
 
-        <section class="section" id="reviews">
-          <h2>{site.reviewsHeading}</h2>
-          {
-            recentReviewPosts.length > 0 ? (
-              <ul class="link-list note-list">
-                {recentReviewPosts.map((post) => (
-                  <li>
-                    <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
-                    <span>{post.data.contest || post.data.oj || post.data.track}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p class="empty-feed">{site.reviewsEmpty}</p>
-            )
-          }
-        </section>
+            {
+              section.type === "tags" && (
+                <section class="section" id={section.id}>
+                  <h2>{section.title}</h2>
+                  <div class="tag-cloud">
+                    {tags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
+                  </div>
+                </section>
+              )
+            }
 
-        <section class="section" id="tags">
-          <h2>{site.tagsHeading}</h2>
-          <div class="tag-cloud">
-            {tags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
-          </div>
-        </section>
+            {
+              section.type === "summaries" && (
+                <section class="section" id={section.id}>
+                  <h2>{section.title}</h2>
+                  {
+                    summaryPosts.length > 0 ? (
+                      <ul class="link-list note-list">
+                        {summaryPosts.slice(0, 4).map((post) => (
+                          <li>
+                            <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+                            <span>{post.data.track || post.data.category}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p class="empty-feed">{site.summariesEmpty}</p>
+                    )
+                  }
+                </section>
+              )
+            }
 
-        <section class="section">
-          <h2>{site.summariesHeading}</h2>
-          {
-            summaryPosts.length > 0 ? (
-              <ul class="link-list note-list">
-                {summaryPosts.slice(0, 4).map((post) => (
-                  <li>
-                    <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
-                    <span>{post.data.track || post.data.category}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p class="empty-feed">{site.summariesEmpty}</p>
-            )
-          }
-        </section>
+            {
+              section.type === "featured" &&
+                featuredPost && (
+                  <section class="section" id={section.id}>
+                    <div class="section-head">
+                      <h2>{section.title}</h2>
+                      <span class="section-note">{section.note}</span>
+                    </div>
+                    <article class="featured-card">
+                      <p class="featured-kicker">
+                        {[featuredPost.data.category, featuredPost.data.contest || featuredPost.data.oj, featuredPost.data.track]
+                          .filter(Boolean)
+                          .join(" / ")}
+                      </p>
+                      <h3>
+                        <a href={`/blog/${featuredPost.slug}/`}>{featuredPost.data.title}</a>
+                      </h3>
+                      <p>{featuredPost.data.description}</p>
+                    </article>
+                  </section>
+                )
+            }
+
+            {
+              section.type === "fresh" && (
+                <section class="section" id={section.id}>
+                  <div class="section-head">
+                    <h2>{section.title}</h2>
+                    <span class="section-note">{section.note}</span>
+                  </div>
+                  <div class="signal-grid">
+                    {recentSignalCards.map((post) => (
+                      <a class="signal-card" href={`/blog/${post.slug}/`}>
+                        <p class="signal-label">{[post.data.category, post.data.contest || post.data.oj].filter(Boolean).join(" / ")}</p>
+                        <h3>{post.data.title}</h3>
+                        <p>{post.data.description}</p>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )
+            }
+
+            {
+              section.type === "writeups" && (
+                <section class="section" id={section.id}>
+                  <div class="section-head">
+                    <h2>{section.title}</h2>
+                    {
+                      section.linkLabel && section.linkHref && (
+                        <a class="section-link" href={section.linkHref}>
+                          {section.linkLabel}
+                        </a>
+                      )
+                    }
+                  </div>
+                  {
+                    recentWpPosts.length > 0 ? (
+                      <div class="archive-list">
+                        {recentWpPosts.map((post) => <ArchiveRow post={post} />)}
+                      </div>
+                    ) : (
+                      <p class="empty-feed">{site.writeupsEmpty}</p>
+                    )
+                  }
+                </section>
+              )
+            }
+
+            {
+              section.type === "contests" && (
+                <section class="section" id={section.id}>
+                  <div class="section-head">
+                    <h2>{section.title}</h2>
+                    {
+                      section.linkLabel && section.linkHref && (
+                        <a class="section-link" href={section.linkHref}>
+                          {section.linkLabel}
+                        </a>
+                      )
+                    }
+                  </div>
+                  <div class="track-grid">
+                    {contestCards.map((contest) => (
+                      <a
+                        class:list={["track-board", contest.coverImage ? "has-cover" : ""]}
+                        href={`/contests/${contest.slug}/`}
+                        style={contest.coverImage ? `--contest-cover: url('${contest.coverImage}')` : undefined}
+                      >
+                        <div class="track-board-content">
+                          <p class="track-name">比赛</p>
+                          <strong>{contest.name}</strong>
+                          <p>{contest.count} 篇文章 · {contest.tracks.join(" / ") || "待补充方向"}</p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )
+            }
+
+            {
+              section.type === "categories" && (
+                <section class="section" id={section.id}>
+                  <div class="section-head">
+                    <h2>{section.title}</h2>
+                    {
+                      section.linkLabel && section.linkHref && (
+                        <a class="section-link" href={section.linkHref}>
+                          {section.linkLabel}
+                        </a>
+                      )
+                    }
+                  </div>
+                  <div class="tag-index-grid compact-grid">
+                    {categoryCards.map((category) => (
+                      <a class="tag-board" href={`/categories/${category.slug}/`}>
+                        <div class="tag-board-head">
+                          <span class="tag-board-name">{category.name}</span>
+                          <strong>{category.count}</strong>
+                        </div>
+                        <p>最新内容：{category.latestTitle}</p>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )
+            }
+
+            {
+              section.type === "routes" && (
+                <section class="section" id={section.id}>
+                  <div class="section-head">
+                    <h2>{section.title}</h2>
+                    <span class="section-note">{section.note}</span>
+                  </div>
+                  <div class="route-grid">
+                    {routeCards.map((route) => (
+                      <a class="route-card" href={route.count > 0 ? route.href : "/categories"}>
+                        <div class="route-card-head">
+                          <span>{route.title}</span>
+                          <strong>{route.count}</strong>
+                        </div>
+                        <p>{route.description}</p>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )
+            }
+          </>
+        ))}
       </aside>
     </div>
   </section>

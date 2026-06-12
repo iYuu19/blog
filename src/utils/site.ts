@@ -19,6 +19,8 @@ export const defaultSiteSettings = {
     { label: "看标签", href: "/tags" },
     { label: "看看这个站在写什么", href: "/about" }
   ],
+  headerCtaLabel: "",
+  headerCtaHref: "",
   browseTitle: "浏览方式",
   browseTips: [
     "比赛页适合按赛事集中查看一整场记录",
@@ -30,11 +32,12 @@ export const defaultSiteSettings = {
   freshHeading: "最近在补这些",
   freshNote: "把零散记录慢慢补成一个自己的知识库",
   writeupsHeading: "最近比赛 WP",
-  writeupsEmpty: "目前公开的比赛 WP 还不多，先从上面那篇开始，后面会慢慢把每场比赛的过程补起来。",
+  writeupsEmpty:
+    "目前公开的比赛 WP 还不多，先从上面那篇开始，后面会慢慢把每场比赛的过程补起来。",
   contestsHeading: "按比赛分类",
   categoriesHeading: "按内容分类",
   routesHeading: "内容路线图",
-  routesNote: "可以从不同内容类型进入，按自己感兴趣的方向浏览",
+  routesNote: "可以从不同内容类型进入，按自己感兴趣的方向浏览。",
   routeCards: [
     {
       title: "比赛 WP",
@@ -63,6 +66,125 @@ export const defaultSiteSettings = {
   tagsHeading: "标签",
   summariesHeading: "专题总结",
   summariesEmpty: "等比赛文章积累起来之后，再把常出现的知识点单独整理成专题。",
+  homeIndexTitle: "浏览索引",
+  homeIndexMetaTemplate: "目前 {{count}} 篇，最近更新在 {{date}}。",
+  homeIndexFocusLabel: "内容方向",
+  homeIndexFocusText:
+    "这里主要更新比赛 WP、电子取证题分析、赛后复盘，以及比赛中反复出现的知识点整理。",
+  homeSections: [
+    {
+      type: "featured",
+      enabled: true,
+      placement: "main",
+      title: "",
+      note: "",
+      linkLabel: "",
+      linkHref: "",
+      anchor: "featured"
+    },
+    {
+      type: "fresh",
+      enabled: true,
+      placement: "main",
+      title: "",
+      note: "",
+      linkLabel: "",
+      linkHref: "",
+      anchor: "fresh"
+    },
+    {
+      type: "writeups",
+      enabled: true,
+      placement: "main",
+      title: "",
+      note: "",
+      linkLabel: "查看归档",
+      linkHref: "/blog",
+      anchor: "writeups"
+    },
+    {
+      type: "contests",
+      enabled: true,
+      placement: "main",
+      title: "",
+      note: "",
+      linkLabel: "查看全部比赛",
+      linkHref: "/contests",
+      anchor: "contests"
+    },
+    {
+      type: "categories",
+      enabled: true,
+      placement: "main",
+      title: "",
+      note: "",
+      linkLabel: "查看全部分类",
+      linkHref: "/categories",
+      anchor: "categories"
+    },
+    {
+      type: "routes",
+      enabled: true,
+      placement: "main",
+      title: "",
+      note: "",
+      linkLabel: "",
+      linkHref: "",
+      anchor: "routes"
+    },
+    {
+      type: "note",
+      enabled: true,
+      placement: "side",
+      title: "更新方式",
+      note:
+        "这里会尽量把题目背景、分析过程和关键结论写清楚，让每篇文章都既方便阅读，也方便后续回看。",
+      linkLabel: "",
+      linkHref: "",
+      anchor: "update-method"
+    },
+    {
+      type: "note",
+      enabled: true,
+      placement: "side",
+      title: "持续补充中",
+      note:
+        "除了比赛 WP，这里也会慢慢补充赛后复盘、专题总结和学习过程中的记录，让内容越来越完整。",
+      linkLabel: "",
+      linkHref: "",
+      anchor: "filling"
+    },
+    {
+      type: "reviews",
+      enabled: true,
+      placement: "side",
+      title: "",
+      note: "",
+      linkLabel: "",
+      linkHref: "",
+      anchor: "reviews"
+    },
+    {
+      type: "tags",
+      enabled: true,
+      placement: "side",
+      title: "",
+      note: "",
+      linkLabel: "",
+      linkHref: "",
+      anchor: "tags"
+    },
+    {
+      type: "summaries",
+      enabled: true,
+      placement: "side",
+      title: "",
+      note: "",
+      linkLabel: "",
+      linkHref: "",
+      anchor: "summaries"
+    }
+  ],
   aboutEyebrow: "About",
   aboutTitle: "关于这个博客",
   aboutAvatarAlt: "iYuu 的头像",
@@ -110,10 +232,14 @@ export const defaultSiteSettings = {
     },
     {
       title: "标签页",
-      description: "适合快速回看某个知识点，比如原型污染、流量分析、文本隐写这类主题。"
+      description: "适合快速回看某一个知识点，比如原型污染、流量分析、文本隐写这类主题。"
     }
   ],
   footerDescription: "记录 CTF、电子取证与比赛复盘。",
+  footerPanelEyebrow: "HOME STATUS",
+  footerPanelTitle: "持续补充中",
+  footerPanelText:
+    "这个站会继续往比赛 WP、赛后复盘、专题总结这几个方向慢慢整理。",
   copyrightName: "iYuu",
   commentsEnabled: false,
   commentsTitle: "评论区",
@@ -140,18 +266,21 @@ export const defaultSiteSettings = {
 };
 
 export async function getSiteSettings() {
-  const [brandEntry, homeEntry, aboutEntry, navigationEntry, commentsEntry] = await Promise.all([
-    getEntry("site-brand", "brand"),
-    getEntry("site-home", "home"),
-    getEntry("site-about", "about"),
-    getEntry("site-navigation", "navigation"),
-    getEntry("site-comments", "comments")
-  ]);
+  const [brandEntry, homeEntry, layoutEntry, aboutEntry, navigationEntry, commentsEntry] =
+    await Promise.all([
+      getEntry("site-brand", "brand"),
+      getEntry("site-home", "home"),
+      getEntry("site-layout", "layout"),
+      getEntry("site-about", "about"),
+      getEntry("site-navigation", "navigation"),
+      getEntry("site-comments", "comments")
+    ]);
 
   return {
     ...defaultSiteSettings,
     ...(brandEntry?.data ?? {}),
     ...(homeEntry?.data ?? {}),
+    ...(layoutEntry?.data ?? {}),
     ...(aboutEntry?.data ?? {}),
     ...(navigationEntry?.data ?? {}),
     ...(commentsEntry?.data ?? {})

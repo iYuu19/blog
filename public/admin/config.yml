@@ -15,104 +15,10 @@ media_folder: public/uploads
 public_folder: /uploads
 
 collections:
-  - name: category_center
-    label: 分类体系
-    delete: false
-    description: 先定结构，再写内容。这里负责分类名字、说明和排序。
-    editor:
-      preview: false
-    files:
-      - name: category_definitions
-        label: 分类列表
-        file: src/content/site-categories/categories.yaml
-        fields:
-          - label: 分类列表
-            name: categories
-            widget: list
-            summary: "{{fields.name}}"
-            fields:
-              - label: 分类名
-                name: name
-                widget: string
-              - label: 链接标识
-                name: slug
-                widget: string
-                required: false
-              - label: 分类说明
-                name: description
-                widget: text
-              - label: 适合写什么
-                name: writingFocus
-                widget: text
-              - label: 示例内容
-                name: exampleTopics
-                widget: list
-                required: false
-                field:
-                  label: 示例
-                  name: item
-                  widget: string
-              - label: 排序
-                name: sortOrder
-                widget: number
-                value_type: int
-                default: 100
-                required: false
-
-  - name: template_center
-    label: 写作模板
-    delete: false
-    description: 发文前先选模板，减少漏项，也更容易统一写作节奏。
-    editor:
-      preview: false
-    files:
-      - name: template_usage
-        label: 模板怎么用
-        file: templates/template-guide.md
-        fields:
-          - label: 内容
-            name: body
-            widget: markdown
-      - name: general_wp_template
-        label: 通用比赛 WP 模板
-        file: templates/general-match-wp.md
-        fields:
-          - label: 内容
-            name: body
-            widget: markdown
-      - name: web_wp_template
-        label: Web 比赛 WP 模板
-        file: templates/web-match-wp.md
-        fields:
-          - label: 内容
-            name: body
-            widget: markdown
-      - name: forensics_wp_template
-        label: 电子取证 / 流量分析模板
-        file: templates/forensics-match-wp.md
-        fields:
-          - label: 内容
-            name: body
-            widget: markdown
-      - name: review_template
-        label: 赛后复盘模板
-        file: templates/review-template.md
-        fields:
-          - label: 内容
-            name: body
-            widget: markdown
-      - name: summary_template
-        label: 专题总结模板
-        file: templates/summary-template.md
-        fields:
-          - label: 内容
-            name: body
-            widget: markdown
-
   - name: blog
-    label: 文章发布
+    label: 文章中心
     label_singular: 文章
-    description: 新建、编辑、草稿、首页推荐都在这里，是内容生产主入口。
+    description: 新建、编辑、草稿、首页推荐都在这里，是日常写博客的主入口。
     folder: src/content/blog
     create: true
     delete: true
@@ -214,7 +120,7 @@ collections:
           label: 标签
           name: tag
           widget: string
-      - label: 简称 / OJ
+      - label: 平台 / OJ
         name: oj
         widget: string
         required: false
@@ -247,23 +153,13 @@ collections:
         widget: wordish
         hint: 支持直接粘贴截图、拖拽图片和插入代码块。默认是可视化编辑，也可以切到 Markdown 看源码。
 
-  - name: site
-    label: 站点设置
+  - name: structure_center
+    label: 结构与导航
     delete: false
-    description: 品牌、导航、关于页和评论配置，属于站点级设置。
+    description: 这里控制站点结构，不只是改字，还能决定首页板块顺序、侧栏内容和导航。
     editor:
       preview: false
     files:
-      - name: site_brand
-        label: 品牌和基础信息
-        file: src/content/site-brand/brand.yaml
-        fields:
-          - { label: 品牌简称, name: brandMark, widget: string }
-          - { label: 网站标题, name: siteTitle, widget: string }
-          - { label: 顶部副标题, name: headerTagline, widget: string }
-          - { label: 网站描述, name: siteDescription, widget: text }
-          - { label: 页脚描述, name: footerDescription, widget: text }
-          - { label: 版权名称, name: copyrightName, widget: string }
       - name: site_navigation
         label: 导航菜单
         file: src/content/site-navigation/navigation.yaml
@@ -271,106 +167,98 @@ collections:
           - label: 导航链接
             name: navLinks
             widget: list
+            summary: "{{fields.label}}"
             fields:
               - { label: 名称, name: label, widget: string }
               - { label: 路径, name: href, widget: string }
-      - name: site_about
-        label: 关于页内容
-        file: src/content/site-about/about.yaml
+      - name: home_layout
+        label: 首页结构与全站公共区
+        file: src/content/site-layout/layout.yaml
         fields:
-          - { label: 关于页眉题, name: aboutEyebrow, widget: string }
-          - { label: 关于页标题, name: aboutTitle, widget: string }
-          - { label: 头像替代文案, name: aboutAvatarAlt, widget: string }
-          - label: 关于页开场
-            name: aboutIntro
+          - { label: 头部按钮文案, name: headerCtaLabel, widget: string, required: false }
+          - { label: 头部按钮链接, name: headerCtaHref, widget: string, required: false }
+          - { label: 页脚卡片眉题, name: footerPanelEyebrow, widget: string, required: false }
+          - { label: 页脚卡片标题, name: footerPanelTitle, widget: string }
+          - { label: 页脚卡片说明, name: footerPanelText, widget: text }
+          - { label: 首页索引标题, name: homeIndexTitle, widget: string }
+          - label: 首页索引说明模板
+            name: homeIndexMetaTemplate
+            widget: string
+            hint: 可用变量 {{count}} 和 {{date}}，例如：目前 {{count}} 篇，最近更新在 {{date}}。
+          - { label: 首页索引说明块标题, name: homeIndexFocusLabel, widget: string }
+          - { label: 首页索引说明块内容, name: homeIndexFocusText, widget: text }
+          - label: 首页板块编排
+            name: homeSections
             widget: list
-            field: { label: 段落, name: paragraph, widget: text }
-          - { label: 文章统计标签, name: aboutPostsLabel, widget: string }
-          - { label: 分类统计标签, name: aboutCategoriesLabel, widget: string }
-          - { label: 标签统计标签, name: aboutTagsLabel, widget: string }
-          - { label: 内容地图标签, name: contentMapLabel, widget: string }
-          - { label: 常见标签标题, name: commonTagsLabel, widget: string }
-          - { label: 主要内容标签, name: focusLabel, widget: string }
-          - { label: 主要内容标题, name: focusTitle, widget: string }
-          - label: 主要内容列表
-            name: aboutFocusAreas
-            widget: list
-            field: { label: 条目, name: item, widget: string }
-          - { label: 写作方式标签, name: writingLabel, widget: string }
-          - { label: 写作方式标题, name: writingTitle, widget: string }
-          - label: 写作方式列表
-            name: aboutWritingApproach
-            widget: list
-            field: { label: 条目, name: item, widget: string }
-          - { label: 说明模块标签, name: noteLabel, widget: string }
-          - { label: 说明模块标题, name: noteTitle, widget: string }
-          - { label: 关于页说明, name: aboutNote, widget: text }
-          - { label: 比赛模块标签, name: contestsLabel, widget: string }
-          - { label: 比赛模块空状态, name: contestsEmpty, widget: text }
-          - { label: 比赛模块统计文案, name: contestsMeta, widget: string }
-          - { label: 最近内容标题, name: latestContentHeading, widget: string }
-          - { label: 最近内容说明, name: latestContentNote, widget: string }
-          - { label: 浏览指引标签, name: browseGuideLabel, widget: string }
-          - label: 浏览指引卡片
-            name: browseGuides
-            widget: list
+            summary: "{{fields.type}} / {{fields.placement}} / {{fields.title}}"
+            hint: 可拖拽排序。内置板块可以改顺序、改位置、隐藏；自定义说明块请把类型选为 note。
             fields:
-              - { label: 标题, name: title, widget: string }
-              - { label: 描述, name: description, widget: text }
-      - name: site_comments
-        label: 评论区设置
-        file: src/content/site-comments/comments.yaml
+              - label: 板块类型
+                name: type
+                widget: select
+                options:
+                  - { label: 推荐文章, value: featured }
+                  - { label: 最近更新, value: fresh }
+                  - { label: 比赛 WP 列表, value: writeups }
+                  - { label: 比赛入口卡片, value: contests }
+                  - { label: 内容分类卡片, value: categories }
+                  - { label: 内容路线图, value: routes }
+                  - { label: 赛后复盘列表, value: reviews }
+                  - { label: 标签云, value: tags }
+                  - { label: 专题总结列表, value: summaries }
+                  - { label: 自定义说明块, value: note }
+              - { label: 是否显示, name: enabled, widget: boolean, default: true }
+              - label: 所在列
+                name: placement
+                widget: select
+                default: main
+                options:
+                  - { label: 主内容列, value: main }
+                  - { label: 侧栏列, value: side }
+              - label: 标题覆盖
+                name: title
+                widget: string
+                required: false
+                hint: 不填则使用系统默认标题；note 类型建议填写。
+              - label: 说明文字
+                name: note
+                widget: text
+                required: false
+                hint: 对 note 类型是正文，对内置板块则会作为副说明使用。
+              - { label: 链接文案, name: linkLabel, widget: string, required: false }
+              - { label: 链接地址, name: linkHref, widget: string, required: false }
+              - label: 锚点标识
+                name: anchor
+                widget: string
+                required: false
+                hint: 用于首页左侧索引跳转，建议用英文或短横线，例如 featured / update-method。
+      - name: category_definitions
+        label: 分类说明卡
+        file: src/content/site-categories/categories.yaml
         fields:
-          - { label: 启用评论区, name: commentsEnabled, widget: boolean, default: false }
-          - { label: 评论区标题, name: commentsTitle, widget: string, default: 评论区 }
-          - { label: 评论区说明, name: commentsDescription, widget: text }
-          - { label: GitHub 仓库, name: giscusRepo, widget: string, default: iYuu19/blog }
-          - { label: Repo ID, name: giscusRepoId, widget: string }
-          - { label: Discussions 分类名, name: giscusCategory, widget: string, default: General }
-          - { label: Category ID, name: giscusCategoryId, widget: string }
-          - label: 绑定方式
-            name: giscusMapping
-            widget: select
-            default: pathname
-            options:
-              - { label: 按文章链接匹配, value: pathname }
-              - { label: 按文章标题匹配, value: title }
-          - { label: 严格匹配, name: giscusStrict, widget: boolean, default: false }
-          - { label: 开启点赞反应, name: giscusReactionsEnabled, widget: boolean, default: true }
-          - label: 输入框位置
-            name: giscusInputPosition
-            widget: select
-            default: bottom
-            options:
-              - { label: 底部, value: bottom }
-              - { label: 顶部, value: top }
-          - label: 评论区主题
-            name: giscusTheme
-            widget: select
-            default: light
-            options:
-              - { label: 浅色, value: light }
-              - { label: 深色, value: dark }
-              - { label: 跟随系统, value: preferred_color_scheme }
-          - { label: 评论区语言, name: giscusLang, widget: string, default: zh-CN }
-
-  - name: help
-    label: 使用帮助
-    delete: false
-    description: 忘了去哪里改、字段怎么填时，先看这里。
-    editor:
-      preview: false
-    files:
-      - name: authoring_guide
-        label: 后台写作与结构说明
-        file: AUTHORING_GUIDE.md
-        fields:
-          - { label: 内容, name: body, widget: markdown }
+          - label: 分类列表
+            name: categories
+            widget: list
+            summary: "{{fields.name}}"
+            fields:
+              - { label: 分类名, name: name, widget: string }
+              - { label: 链接标识, name: slug, widget: string, required: false }
+              - { label: 分类说明, name: description, widget: text }
+              - { label: 适合写什么, name: writingFocus, widget: text }
+              - label: 示例内容
+                name: exampleTopics
+                widget: list
+                required: false
+                field:
+                  label: 示例
+                  name: item
+                  widget: string
+              - { label: 排序, name: sortOrder, widget: number, value_type: int, default: 100, required: false }
 
   - name: page_center
     label: 页面文案
     delete: false
-    description: 集中管理首页、留言板、归档和详情页的固定文案。
+    description: 首页、关于页、留言板、归档页等固定页面文案都在这里改。
     editor:
       preview: false
     files:
@@ -397,7 +285,7 @@ collections:
             widget: list
             field: { label: 提示, name: item, widget: string }
           - { label: 常用入口标题, name: commonEntryTitle, widget: string }
-          - { label: 焦点文章标题, name: featuredHeading, widget: string }
+          - { label: 推荐文章标题, name: featuredHeading, widget: string }
           - { label: 最近更新标题, name: freshHeading, widget: string }
           - { label: 最近更新说明, name: freshNote, widget: string }
           - { label: 比赛 WP 标题, name: writeupsHeading, widget: string }
@@ -412,7 +300,7 @@ collections:
             fields:
               - { label: 标题, name: title, widget: string }
               - { label: 描述, name: description, widget: text }
-              - { label: 空状态默认最新内容, name: emptyLatestTitle, widget: string }
+              - { label: 空状态最近内容, name: emptyLatestTitle, widget: string }
           - { label: 更新方式标题, name: updateMethodHeading, widget: string }
           - { label: 更新方式说明, name: updateMethodText, widget: text }
           - { label: 持续补充标题, name: fillingHeading, widget: string }
@@ -422,7 +310,49 @@ collections:
           - { label: 标签区标题, name: tagsHeading, widget: string }
           - { label: 专题总结标题, name: summariesHeading, widget: string }
           - { label: 专题总结空状态, name: summariesEmpty, widget: text }
-
+      - name: about_page_copy
+        label: 关于页文案
+        file: src/content/site-about/about.yaml
+        fields:
+          - { label: 眉题, name: aboutEyebrow, widget: string }
+          - { label: 标题, name: aboutTitle, widget: string }
+          - { label: 头像替代文案, name: aboutAvatarAlt, widget: string }
+          - label: 开场段落
+            name: aboutIntro
+            widget: list
+            field: { label: 段落, name: paragraph, widget: text }
+          - { label: 文章统计标签, name: aboutPostsLabel, widget: string }
+          - { label: 分类统计标签, name: aboutCategoriesLabel, widget: string }
+          - { label: 标签统计标签, name: aboutTagsLabel, widget: string }
+          - { label: 内容地图标签, name: contentMapLabel, widget: string }
+          - { label: 常见标签标题, name: commonTagsLabel, widget: string }
+          - { label: 主要内容标签, name: focusLabel, widget: string }
+          - { label: 主要内容标题, name: focusTitle, widget: string }
+          - label: 主要内容列表
+            name: aboutFocusAreas
+            widget: list
+            field: { label: 条目, name: item, widget: string }
+          - { label: 写作方式标签, name: writingLabel, widget: string }
+          - { label: 写作方式标题, name: writingTitle, widget: string }
+          - label: 写作方式列表
+            name: aboutWritingApproach
+            widget: list
+            field: { label: 条目, name: item, widget: string }
+          - { label: 说明模块标签, name: noteLabel, widget: string }
+          - { label: 说明模块标题, name: noteTitle, widget: string }
+          - { label: 说明模块内容, name: aboutNote, widget: text }
+          - { label: 比赛模块标签, name: contestsLabel, widget: string }
+          - { label: 比赛模块空状态, name: contestsEmpty, widget: text }
+          - { label: 比赛模块统计文案, name: contestsMeta, widget: string }
+          - { label: 最近内容标题, name: latestContentHeading, widget: string }
+          - { label: 最近内容说明, name: latestContentNote, widget: string }
+          - { label: 浏览引导标签, name: browseGuideLabel, widget: string }
+          - label: 浏览引导卡片
+            name: browseGuides
+            widget: list
+            fields:
+              - { label: 标题, name: title, widget: string }
+              - { label: 描述, name: description, widget: text }
       - name: guestbook_page_copy
         label: 留言板文案
         file: src/content/site-guestbook/guestbook.yaml
@@ -468,7 +398,6 @@ collections:
           - { label: 评论区眉题, name: commentsEyebrow, widget: string }
           - { label: 评论区标题, name: commentsTitle, widget: string }
           - { label: 评论区说明, name: commentsDescription, widget: text }
-
       - name: archive_page_copy
         label: 归档页文案
         file: src/content/site-archive/archive.yaml
@@ -483,12 +412,11 @@ collections:
           - { label: 复盘标签, name: reviewsLabel, widget: string }
           - { label: 索引标题, name: indexTitle, widget: string }
           - { label: 索引说明, name: indexMeta, widget: string }
-          - { label: 建议标签, name: indexBlockLabel, widget: string }
+          - { label: 建议标题, name: indexBlockLabel, widget: string }
           - { label: 建议内容, name: indexBlockText, widget: text }
           - { label: 全部文章区标题, name: allPostsHeading, widget: string }
           - { label: 全部文章区说明, name: allPostsNote, widget: string }
           - { label: 常看标签区标题, name: commonTagsHeading, widget: string }
-
       - name: categories_page_copy
         label: 分类页文案
         file: src/content/site-categories-page/categories-page.yaml
@@ -502,7 +430,7 @@ collections:
           - { label: 文章数标签, name: postsLabel, widget: string }
           - { label: 活跃标签, name: activeLabel, widget: string }
           - { label: 最近内容前缀, name: latestPrefix, widget: string }
-          - { label: 准备中提示, name: preparingText, widget: string }
+          - { label: 准备中文案, name: preparingText, widget: string }
           - label: 引导卡片
             name: guideCards
             widget: list
@@ -510,7 +438,6 @@ collections:
               - { label: 眉题, name: eyebrow, widget: string }
               - { label: 标题, name: title, widget: string }
               - { label: 内容, name: text, widget: text }
-
       - name: contests_page_copy
         label: 比赛页文案
         file: src/content/site-contests-page/contests-page.yaml
@@ -525,7 +452,6 @@ collections:
           - { label: 方向前缀, name: tracksPrefix, widget: string }
           - { label: 最新内容前缀, name: latestPrefix, widget: string }
           - { label: 空方向提示, name: emptyTracksText, widget: string }
-
       - name: tags_page_copy
         label: 标签页文案
         file: src/content/site-tags-page/tags-page.yaml
@@ -536,7 +462,6 @@ collections:
           - { label: 主标题, name: heroTitle, widget: string }
           - { label: 介绍, name: heroIntro, widget: text }
           - { label: 最新内容前缀, name: latestPrefix, widget: string }
-
       - name: detail_page_copy
         label: 详情页固定文案
         file: src/content/site-detail-pages/detail-pages.yaml
@@ -576,9 +501,8 @@ collections:
               - { label: 眉题, name: pageEyebrow, widget: string }
               - { label: 页面描述模板, name: pageDescriptionTemplate, widget: string }
               - { label: 导语模板, name: heroIntroTemplate, widget: string }
-
       - name: not_found_page_copy
-        label: 404 页文案
+        label: 404 页面文案
         file: src/content/site-not-found/not-found.yaml
         fields:
           - { label: 页面标题, name: pageTitle, widget: string }
@@ -588,3 +512,108 @@ collections:
           - { label: 介绍, name: heroIntro, widget: text }
           - { label: 主按钮文案, name: primaryLinkLabel, widget: string }
           - { label: 次按钮文案, name: secondaryLinkLabel, widget: string }
+
+  - name: site_center
+    label: 全站设置
+    delete: false
+    description: 品牌名、站点标题、评论系统这些全站级配置放在这里。
+    editor:
+      preview: false
+    files:
+      - name: site_brand
+        label: 品牌与基础信息
+        file: src/content/site-brand/brand.yaml
+        fields:
+          - { label: 品牌简称, name: brandMark, widget: string }
+          - { label: 网站标题, name: siteTitle, widget: string }
+          - { label: 顶部副标题, name: headerTagline, widget: string }
+          - { label: 网站描述, name: siteDescription, widget: text }
+          - { label: 页脚描述, name: footerDescription, widget: text }
+          - { label: 版权名称, name: copyrightName, widget: string }
+      - name: site_comments
+        label: 评论区设置
+        file: src/content/site-comments/comments.yaml
+        fields:
+          - { label: 启用评论区, name: commentsEnabled, widget: boolean, default: false }
+          - { label: 评论区标题, name: commentsTitle, widget: string, default: 评论区 }
+          - { label: 评论区说明, name: commentsDescription, widget: text }
+          - { label: GitHub 仓库, name: giscusRepo, widget: string, default: iYuu19/blog }
+          - { label: Repo ID, name: giscusRepoId, widget: string }
+          - { label: Discussions 分类名, name: giscusCategory, widget: string, default: General }
+          - { label: Category ID, name: giscusCategoryId, widget: string }
+          - label: 绑定方式
+            name: giscusMapping
+            widget: select
+            default: pathname
+            options:
+              - { label: 按文章链接匹配, value: pathname }
+              - { label: 按文章标题匹配, value: title }
+          - { label: 严格匹配, name: giscusStrict, widget: boolean, default: false }
+          - { label: 开启点赞反应, name: giscusReactionsEnabled, widget: boolean, default: true }
+          - label: 输入框位置
+            name: giscusInputPosition
+            widget: select
+            default: bottom
+            options:
+              - { label: 底部, value: bottom }
+              - { label: 顶部, value: top }
+          - label: 评论区主题
+            name: giscusTheme
+            widget: select
+            default: light
+            options:
+              - { label: 浅色, value: light }
+              - { label: 深色, value: dark }
+              - { label: 跟随系统, value: preferred_color_scheme }
+          - { label: 评论区语言, name: giscusLang, widget: string, default: zh-CN }
+
+  - name: template_center
+    label: 写作模板
+    delete: false
+    description: 发文前先选模板，减少漏项，也更容易统一写作节奏。
+    editor:
+      preview: false
+    files:
+      - name: template_usage
+        label: 模板怎么用
+        file: templates/template-guide.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }
+      - name: general_wp_template
+        label: 通用比赛 WP 模板
+        file: templates/general-match-wp.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }
+      - name: web_wp_template
+        label: Web 比赛 WP 模板
+        file: templates/web-match-wp.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }
+      - name: forensics_wp_template
+        label: 电子取证 / 流量分析模板
+        file: templates/forensics-match-wp.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }
+      - name: review_template
+        label: 赛后复盘模板
+        file: templates/review-template.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }
+      - name: summary_template
+        label: 专题总结模板
+        file: templates/summary-template.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }
+
+  - name: help_center
+    label: 使用帮助
+    delete: false
+    description: 忘了去哪改、字段怎么填时，先看这里。
+    editor:
+      preview: false
+    files:
+      - name: authoring_guide
+        label: 后台写作与结构说明
+        file: AUTHORING_GUIDE.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }

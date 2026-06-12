@@ -80,6 +80,46 @@ const siteHome = defineCollection({
   })
 });
 
+const siteLayout = defineCollection({
+  type: "data",
+  schema: z.object({
+    headerCtaLabel: z.string().default(""),
+    headerCtaHref: z.string().default(""),
+    footerPanelEyebrow: z.string().default(""),
+    footerPanelTitle: z.string().default(""),
+    footerPanelText: z.string().default(""),
+    homeIndexTitle: z.string().default(""),
+    homeIndexMetaTemplate: z.string().default(""),
+    homeIndexFocusLabel: z.string().default(""),
+    homeIndexFocusText: z.string().default(""),
+    homeSections: z
+      .array(
+        z.object({
+          type: z.enum([
+            "featured",
+            "fresh",
+            "writeups",
+            "contests",
+            "categories",
+            "routes",
+            "reviews",
+            "tags",
+            "summaries",
+            "note"
+          ]),
+          enabled: z.boolean().default(true),
+          placement: z.enum(["main", "side"]).default("main"),
+          title: z.string().default(""),
+          note: z.string().default(""),
+          linkLabel: z.string().default(""),
+          linkHref: z.string().default(""),
+          anchor: z.string().default("")
+        })
+      )
+      .default([])
+  })
+});
+
 const siteAbout = defineCollection({
   type: "data",
   schema: z.object({
@@ -334,6 +374,7 @@ export const collections = {
   blog,
   "site-brand": siteBrand,
   "site-home": siteHome,
+  "site-layout": siteLayout,
   "site-about": siteAbout,
   "site-navigation": siteNavigation,
   "site-categories": siteCategories,

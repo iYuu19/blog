@@ -1,0 +1,98 @@
+headerCtaLabel: ""
+headerCtaHref: ""
+footerPanelEyebrow: HOME STATUS
+footerPanelTitle: 持续补充中
+footerPanelText: 这个站会继续往比赛 WP、赛后复盘、专题总结这几个方向慢慢整理。
+homeIndexTitle: 浏览索引
+homeIndexMetaTemplate: 目前 {{count}} 篇，最近更新在 {{date}}。
+homeIndexFocusLabel: 内容方向
+homeIndexFocusText: 这里主要更新比赛 WP、电子取证题分析、赛后复盘，以及比赛中反复出现的知识点整理。
+homeSections:
+  - type: featured
+    enabled: true
+    placement: main
+    title: ""
+    note: ""
+    linkLabel: ""
+    linkHref: ""
+    anchor: featured
+  - type: fresh
+    enabled: true
+    placement: main
+    title: ""
+    note: ""
+    linkLabel: ""
+    linkHref: ""
+    anchor: fresh
+  - type: writeups
+    enabled: true
+    placement: main
+    title: ""
+    note: ""
+    linkLabel: 查看归档
+    linkHref: /blog
+    anchor: writeups
+  - type: contests
+    enabled: true
+    placement: main
+    title: ""
+    note: ""
+    linkLabel: 查看全部比赛
+    linkHref: /contests
+    anchor: contests
+  - type: categories
+    enabled: true
+    placement: main
+    title: ""
+    note: ""
+    linkLabel: 查看全部分类
+    linkHref: /categories
+    anchor: categories
+  - type: routes
+    enabled: true
+    placement: main
+    title: ""
+    note: ""
+    linkLabel: ""
+    linkHref: ""
+    anchor: routes
+  - type: note
+    enabled: true
+    placement: side
+    title: 更新方式
+    note: 这里会尽量把题目背景、分析过程和关键结论写清楚，让每篇文章都既方便阅读，也方便后续回看。
+    linkLabel: ""
+    linkHref: ""
+    anchor: update-method
+  - type: note
+    enabled: true
+    placement: side
+    title: 持续补充中
+    note: 除了比赛 WP，这里也会慢慢补充赛后复盘、专题总结和学习过程中的记录，让内容越来越完整。
+    linkLabel: ""
+    linkHref: ""
+    anchor: filling
+  - type: reviews
+    enabled: true
+    placement: side
+    title: ""
+    note: ""
+    linkLabel: ""
+    linkHref: ""
+    anchor: reviews
+  - type: tags
+    enabled: true
+    placement: side
+    title: ""
+    note: ""
+    linkLabel: ""
+    linkHref: ""
+    anchor: tags
+  - type: summaries
+    enabled: true
+    placement: side
+    title: ""
+    note: ""
+    linkLabel: ""
+    linkHref: ""
+    anchor: summaries
