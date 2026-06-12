@@ -3,6 +3,8 @@ import { getCollection, getEntry } from "astro:content";
 import ArchiveRow from "../../components/ArchiveRow.astro";
 import TagPill from "../../components/TagPill.astro";
 import Layout from "../../layouts/Layout.astro";
+import { slugifySegment } from "../../utils/content";
+import { getPageLayouts } from "../../utils/site";
 
 const archivePage =
   (
@@ -24,6 +26,7 @@ const archivePage =
     allPostsNote: "从新到旧",
     commonTagsHeading: "常看标签"
   };
+const pageLayouts = await getPageLayouts();
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
@@ -48,6 +51,25 @@ const groupedPosts = Object.entries(
     return acc;
   }, {})
 ).sort((a, b) => Number(b[0]) - Number(a[0]));
+
+const archiveSectionTitleDefaults = {
+  "all-posts": archivePage.allPostsHeading,
+  "common-tags": archivePage.commonTagsHeading
+};
+
+const archiveSectionNoteDefaults = {
+  "all-posts": archivePage.allPostsNote,
+  "common-tags": ""
+};
+
+const archiveSections = (pageLayouts.archiveSections?.length ? pageLayouts.archiveSections : [])
+  .filter((section) => section.enabled)
+  .map((section, index) => ({
+    ...section,
+    title: section.title || archiveSectionTitleDefaults[section.type] || `归档板块 ${index + 1}`,
+    note: section.note || archiveSectionNoteDefaults[section.type] || "",
+    id: slugifySegment(section.anchor || `${section.type}-${index + 1}`)
+  }));
 ---
 
 <Layout title={`${archivePage.pageTitle} | iYuu Notes`} description={archivePage.pageDescription}>
@@ -80,8 +102,9 @@ const groupedPosts = Object.entries(
       <div class="site-index">
         <p class="index-title">{archivePage.indexTitle}</p>
         <ul class="index-list">
-          <li><a href="#all-posts">全部文章</a></li>
-          <li><a href="#common-tags">常看标签</a></li>
+          {archiveSections.map((section) => (
+            <li><a href={`#${section.id}`}>{section.title}</a></li>
+          ))}
           <li><a href="/about">关于这个站</a></li>
         </ul>
         <p class="index-meta">{archivePage.indexMeta}</p>
@@ -93,29 +116,44 @@ const groupedPosts = Object.entries(
     </aside>
 
     <div class="archive-main">
-      <section class="section" id="all-posts">
-        <div class="section-head">
-          <h2>{archivePage.allPostsHeading}</h2>
-          <span class="section-note">{archivePage.allPostsNote}</span>
-        </div>
-        <div class="year-stack">
-          {groupedPosts.map(([year, items]) => (
-            <section class="archive-year-group">
-              <p class="archive-year">{year}</p>
-              <div class="archive-list">
-                {items.map((post) => <ArchiveRow post={post} />)}
-              </div>
-            </section>
-          ))}
-        </div>
-      </section>
+      {archiveSections.map((section) => (
+        <>
+          {
+            section.type === "all-posts" && (
+              <section class="section" id={section.id}>
+                <div class="section-head">
+                  <h2>{section.title}</h2>
+                  <span class="section-note">{section.note}</span>
+                </div>
+                <div class="year-stack">
+                  {groupedPosts.map(([year, items]) => (
+                    <section class="archive-year-group">
+                      <p class="archive-year">{year}</p>
+                      <div class="archive-list">
+                        {items.map((post) => <ArchiveRow post={post} />)}
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              </section>
+            )
+          }
 
-      <section class="section" id="common-tags">
-        <h2>{archivePage.commonTagsHeading}</h2>
-        <div class="tag-cloud">
-          {tags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
-        </div>
-      </section>
+          {
+            section.type === "common-tags" && (
+              <section class="section" id={section.id}>
+                <div class="section-head">
+                  <h2>{section.title}</h2>
+                  {section.note && <span class="section-note">{section.note}</span>}
+                </div>
+                <div class="tag-cloud">
+                  {tags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
+                </div>
+              </section>
+            )
+          }
+        </>
+      ))}
     </div>
   </section>
 </Layout>

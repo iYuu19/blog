@@ -4,6 +4,7 @@ import GiscusComments from "../../components/GiscusComments.astro";
 import Layout from "../../layouts/Layout.astro";
 import TagPill from "../../components/TagPill.astro";
 import { getContestSlug } from "../../utils/content";
+import { getSiteSettings } from "../../utils/site";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -14,6 +15,7 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
+const site = await getSiteSettings();
 const { Content, headings } = await render(post);
 const dateText = new Intl.DateTimeFormat("zh-CN", {
   year: "numeric",
@@ -40,7 +42,11 @@ const contestHref = contestLabel ? `/contests/${getContestSlug(post)}/` : null;
 const tocItems = headings.filter(({ depth, slug, text }) => depth >= 1 && slug && text);
 ---
 
-<Layout title={`${post.data.title} | iYuu Notes`} description={post.data.description}>
+<Layout
+  title={`${post.data.title} | iYuu Notes`}
+  description={post.data.description}
+  socialImage={post.data.coverImage || site.defaultCoverImage || site.defaultSocialImage}
+>
   <section class="shell article-layout fade-up">
     {
       tocItems.length > 0 && (

@@ -46,3 +46,41 @@ guestbookSections:
     title: ""
     note: ""
     anchor: guestbook-comments
+
+archiveSections:
+  - type: all-posts
+    enabled: true
+    title: ""
+    note: ""
+    anchor: all-posts
+  - type: common-tags
+    enabled: true
+    title: ""
+    note: ""
+    anchor: common-tags
+
+categoriesSections:
+  - type: guide-cards
+    enabled: true
+    title: ""
+    note: ""
+    anchor: category-guides
+  - type: category-grid
+    enabled: true
+    title: ""
+    note: ""
+    anchor: category-grid
+
+contestsSections:
+  - type: contest-grid
+    enabled: true
+    title: ""
+    note: ""
+    anchor: contest-grid
+
+tagsSections:
+  - type: tag-grid
+    enabled: true
+    title: ""
+    note: ""
+    anchor: tag-grid

@@ -28,7 +28,19 @@ const siteBrand = defineCollection({
     headerTagline: z.string(),
     siteDescription: z.string(),
     footerDescription: z.string(),
-    copyrightName: z.string()
+    copyrightName: z.string(),
+    avatarImage: z.string().default(""),
+    defaultSocialImage: z.string().default(""),
+    defaultCoverImage: z.string().default(""),
+    faviconPath: z.string().default(""),
+    socialLinks: z
+      .array(
+        z.object({
+          label: z.string(),
+          href: z.string()
+        })
+      )
+      .default([])
   })
 });
 
@@ -145,6 +157,50 @@ const sitePageLayouts = defineCollection({
       .array(
         z.object({
           type: z.enum(["message-ideas", "login-note", "comments"]),
+          enabled: z.boolean().default(true),
+          title: z.string().default(""),
+          note: z.string().default(""),
+          anchor: z.string().default("")
+        })
+      )
+      .default([]),
+    archiveSections: z
+      .array(
+        z.object({
+          type: z.enum(["all-posts", "common-tags"]),
+          enabled: z.boolean().default(true),
+          title: z.string().default(""),
+          note: z.string().default(""),
+          anchor: z.string().default("")
+        })
+      )
+      .default([]),
+    categoriesSections: z
+      .array(
+        z.object({
+          type: z.enum(["guide-cards", "category-grid"]),
+          enabled: z.boolean().default(true),
+          title: z.string().default(""),
+          note: z.string().default(""),
+          anchor: z.string().default("")
+        })
+      )
+      .default([]),
+    contestsSections: z
+      .array(
+        z.object({
+          type: z.enum(["contest-grid"]),
+          enabled: z.boolean().default(true),
+          title: z.string().default(""),
+          note: z.string().default(""),
+          anchor: z.string().default("")
+        })
+      )
+      .default([]),
+    tagsSections: z
+      .array(
+        z.object({
+          type: z.enum(["tag-grid"]),
           enabled: z.boolean().default(true),
           title: z.string().default(""),
           note: z.string().default(""),

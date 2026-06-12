@@ -241,6 +241,11 @@ export const defaultSiteSettings = {
   footerPanelText:
     "这个站会继续往比赛 WP、赛后复盘、专题总结这几个方向慢慢整理。",
   copyrightName: "iYuu",
+  avatarImage: "/avatar.jpg",
+  defaultSocialImage: "/avatar.jpg",
+  defaultCoverImage: "",
+  faviconPath: "/favicon.svg",
+  socialLinks: [],
   commentsEnabled: false,
   commentsTitle: "评论区",
   commentsDescription: "欢迎交流、补充思路或指出文中的问题。",
@@ -353,6 +358,56 @@ export const defaultPageLayouts = {
       title: "",
       note: "",
       anchor: "guestbook-comments"
+    }
+  ],
+  archiveSections: [
+    {
+      type: "all-posts",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "all-posts"
+    },
+    {
+      type: "common-tags",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "common-tags"
+    }
+  ],
+  categoriesSections: [
+    {
+      type: "guide-cards",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "category-guides"
+    },
+    {
+      type: "category-grid",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "category-grid"
+    }
+  ],
+  contestsSections: [
+    {
+      type: "contest-grid",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "contest-grid"
+    }
+  ],
+  tagsSections: [
+    {
+      type: "tag-grid",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "tag-grid"
     }
   ]
 };

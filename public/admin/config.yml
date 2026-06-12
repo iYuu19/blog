@@ -295,6 +295,68 @@ collections:
                 widget: string
                 required: false
                 hint: 建议用英文短横线，例如 guestbook-comments。
+          - label: 归档页板块
+            name: archiveSections
+            widget: list
+            summary: "{{fields.type}} / {{fields.title}}"
+            hint: 这里控制归档页正文区的顺序和显示。
+            fields:
+              - label: 板块类型
+                name: type
+                widget: select
+                options:
+                  - { label: 全部文章时间线, value: all-posts }
+                  - { label: 常看标签, value: common-tags }
+              - { label: 是否显示, name: enabled, widget: boolean, default: true }
+              - { label: 标题覆盖, name: title, widget: string, required: false }
+              - { label: 说明文字, name: note, widget: text, required: false }
+              - { label: 锚点标识, name: anchor, widget: string, required: false }
+          - label: 分类页板块
+            name: categoriesSections
+            widget: list
+            summary: "{{fields.type}} / {{fields.title}}"
+            hint: 这里控制分类页的引导区和分类卡片区。
+            fields:
+              - label: 板块类型
+                name: type
+                widget: select
+                options:
+                  - { label: 引导卡片, value: guide-cards }
+                  - { label: 分类卡片墙, value: category-grid }
+              - { label: 是否显示, name: enabled, widget: boolean, default: true }
+              - { label: 标题覆盖, name: title, widget: string, required: false }
+              - { label: 说明文字, name: note, widget: text, required: false }
+              - { label: 锚点标识, name: anchor, widget: string, required: false }
+          - label: 比赛页板块
+            name: contestsSections
+            widget: list
+            summary: "{{fields.type}} / {{fields.title}}"
+            hint: 这里控制比赛页的比赛卡片区。
+            fields:
+              - label: 板块类型
+                name: type
+                widget: select
+                options:
+                  - { label: 比赛卡片墙, value: contest-grid }
+              - { label: 是否显示, name: enabled, widget: boolean, default: true }
+              - { label: 标题覆盖, name: title, widget: string, required: false }
+              - { label: 说明文字, name: note, widget: text, required: false }
+              - { label: 锚点标识, name: anchor, widget: string, required: false }
+          - label: 标签页板块
+            name: tagsSections
+            widget: list
+            summary: "{{fields.type}} / {{fields.title}}"
+            hint: 这里控制标签页的标签卡片区。
+            fields:
+              - label: 板块类型
+                name: type
+                widget: select
+                options:
+                  - { label: 标签卡片墙, value: tag-grid }
+              - { label: 是否显示, name: enabled, widget: boolean, default: true }
+              - { label: 标题覆盖, name: title, widget: string, required: false }
+              - { label: 说明文字, name: note, widget: text, required: false }
+              - { label: 锚点标识, name: anchor, widget: string, required: false }
       - name: category_definitions
         label: 分类说明卡
         file: src/content/site-categories/categories.yaml
@@ -593,6 +655,18 @@ collections:
           - { label: 网站描述, name: siteDescription, widget: text }
           - { label: 页脚描述, name: footerDescription, widget: text }
           - { label: 版权名称, name: copyrightName, widget: string }
+          - { label: 站点头像, name: avatarImage, widget: image, required: false }
+          - { label: 默认社交分享图, name: defaultSocialImage, widget: image, required: false }
+          - { label: 默认封面图, name: defaultCoverImage, widget: image, required: false }
+          - { label: Favicon 路径, name: faviconPath, widget: string, required: false }
+          - label: 社交链接
+            name: socialLinks
+            widget: list
+            required: false
+            summary: "{{fields.label}}"
+            fields:
+              - { label: 名称, name: label, widget: string }
+              - { label: 链接, name: href, widget: string }
       - name: site_comments
         label: 评论区设置
         file: src/content/site-comments/comments.yaml

@@ -1584,6 +1584,23 @@ body.lightbox-open {
   padding-top: 8px;
 }
 
+.footer-social-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.footer-social-link {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.footer-social-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 .footer-link-pill {
   display: inline-flex;
   align-items: center;

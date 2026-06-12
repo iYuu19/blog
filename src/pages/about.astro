@@ -115,7 +115,7 @@ const aboutSections = (pageLayouts.aboutSections?.length
     <div class="hero-card about-hero-card">
       <div class="hero-copy">
         <div class="hero-topline">
-          <img class="intro-avatar" src="/avatar.jpg" alt={site.aboutAvatarAlt} />
+          <img class="intro-avatar" src={site.avatarImage || "/avatar.jpg"} alt={site.aboutAvatarAlt} />
           <div>
             <p class="eyebrow">{site.aboutEyebrow}</p>
             <h1>{site.aboutTitle}</h1>

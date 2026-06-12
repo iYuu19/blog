@@ -1,6 +1,8 @@
 ---
 import { getCollection, getEntry } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
+import { slugifySegment } from "../../utils/content";
+import { getPageLayouts } from "../../utils/site";
 
 const tagsPage =
   (
@@ -13,6 +15,7 @@ const tagsPage =
     heroIntro: "按标签翻会比只看日期更方便，尤其是回顾某一类题的时候。",
     latestPrefix: "最新内容："
   };
+const pageLayouts = await getPageLayouts();
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
 
@@ -41,6 +44,15 @@ const tagMap = posts.reduce<Record<string, { count: number; latestTitle: string;
 const tags = Object.entries(tagMap)
   .map(([name, meta]) => ({ name, ...meta }))
   .sort((a, b) => b.count - a.count || b.latestDate - a.latestDate);
+
+const tagsSections = (pageLayouts.tagsSections?.length ? pageLayouts.tagsSections : [])
+  .filter((section) => section.enabled)
+  .map((section, index) => ({
+    ...section,
+    title: section.title || "全部标签",
+    note: section.note || `${tags.length} 个标签`,
+    id: slugifySegment(section.anchor || `${section.type}-${index + 1}`)
+  }));
 ---
 
 <Layout title={`${tagsPage.pageTitle} | iYuu Notes`} description={tagsPage.pageDescription}>
@@ -50,15 +62,29 @@ const tags = Object.entries(tagMap)
     <p>{tagsPage.heroIntro}</p>
   </section>
 
-  <section class="shell tag-index-grid section-block">
-    {tags.map((tag) => (
-      <a class="tag-board" href={`/tags/${tag.name}/`}>
-        <div class="tag-board-head">
-          <span class="tag-board-name">#{tag.name}</span>
-          <strong>{tag.count}</strong>
-        </div>
-        <p>{tagsPage.latestPrefix}{tag.latestTitle}</p>
-      </a>
-    ))}
-  </section>
+  {tagsSections.map((section) => (
+    <>
+      {
+        section.type === "tag-grid" && (
+          <section class="shell section-block" id={section.id}>
+            <div class="section-head">
+              <h2>{section.title}</h2>
+              {section.note && <span class="section-note">{section.note}</span>}
+            </div>
+            <div class="tag-index-grid">
+              {tags.map((tag) => (
+                <a class="tag-board" href={`/tags/${tag.name}/`}>
+                  <div class="tag-board-head">
+                    <span class="tag-board-name">#{tag.name}</span>
+                    <strong>{tag.count}</strong>
+                  </div>
+                  <p>{tagsPage.latestPrefix}{tag.latestTitle}</p>
+                </a>
+              ))}
+            </div>
+          </section>
+        )
+      }
+    </>
+  ))}
 </Layout>

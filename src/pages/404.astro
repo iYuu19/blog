@@ -1,6 +1,7 @@
 ---
 import { getEntry } from "astro:content";
 import Layout from "../layouts/Layout.astro";
+import { getSiteSettings } from "../utils/site";
 
 const notFound =
   (
@@ -14,9 +15,10 @@ const notFound =
     primaryLinkLabel: "返回首页",
     secondaryLinkLabel: "前往归档"
   };
+const site = await getSiteSettings();
 ---
 
-<Layout title={`${notFound.pageTitle} | River Notes`} description={notFound.pageDescription}>
+<Layout title={`${notFound.pageTitle} | ${site.siteTitle}`} description={notFound.pageDescription}>
   <section class="shell listing-hero fade-up">
     <p class="eyebrow">{notFound.heroEyebrow}</p>
     <h1>{notFound.heroTitle}</h1>

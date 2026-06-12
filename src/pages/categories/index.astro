@@ -1,7 +1,8 @@
 ---
 import { getCollection, getEntry } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
-import { getCategoryDefinitions, getCategoryName, getCategorySlug } from "../../utils/content";
+import { getCategoryDefinitions, getCategoryName, getCategorySlug, slugifySegment } from "../../utils/content";
+import { getPageLayouts } from "../../utils/site";
 
 const categoriesPage =
   (
@@ -30,6 +31,7 @@ const categoriesPage =
       }
     ]
   };
+const pageLayouts = await getPageLayouts();
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
@@ -140,6 +142,27 @@ const categories = [
 const totalPosts = posts.length;
 const totalCategories = categories.length;
 const newestCategory = categories.find((category) => category.hasPosts);
+
+const categoriesSectionTitleDefaults = {
+  "guide-cards": "浏览建议",
+  "category-grid": "全部分类"
+};
+
+const categoriesSectionNoteDefaults = {
+  "guide-cards": "",
+  "category-grid": `${categoriesPage.categoriesLabel} ${totalCategories}`
+};
+
+const categoriesSections = (pageLayouts.categoriesSections?.length
+  ? pageLayouts.categoriesSections
+  : [])
+  .filter((section) => section.enabled)
+  .map((section, index) => ({
+    ...section,
+    title: section.title || categoriesSectionTitleDefaults[section.type] || `分类板块 ${index + 1}`,
+    note: section.note || categoriesSectionNoteDefaults[section.type] || "",
+    id: slugifySegment(section.anchor || `${section.type}-${index + 1}`)
+  }));
 ---
 
 <Layout title={`${categoriesPage.pageTitle} | iYuu Notes`} description={categoriesPage.pageDescription}>
@@ -163,42 +186,68 @@ const newestCategory = categories.find((category) => category.hasPosts);
     </dl>
   </section>
 
-  <section class="shell guide-grid section-block">
-    {categoriesPage.guideCards.map((card) => (
-      <article class="guide-card">
-        <p class="guide-card-label">{card.eyebrow}</p>
-        <h2>{card.title}</h2>
-        <p>{card.text}</p>
-      </article>
-    ))}
-  </section>
+  {categoriesSections.map((section) => (
+    <>
+      {
+        section.type === "guide-cards" && (
+          <section class="shell section-block" id={section.id}>
+            {(section.title || section.note) && (
+              <div class="section-head">
+                <h2>{section.title}</h2>
+                {section.note && <span class="section-note">{section.note}</span>}
+              </div>
+            )}
+            <div class="guide-grid">
+              {categoriesPage.guideCards.map((card) => (
+                <article class="guide-card">
+                  <p class="guide-card-label">{card.eyebrow}</p>
+                  <h2>{card.title}</h2>
+                  <p>{card.text}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        )
+      }
 
-  <section class="shell tag-index-grid section-block">
-    {categories.map((category) => (
-      <a class="tag-board category-board category-board-rich" href={`/categories/${category.slug}/`}>
-        <div class="tag-board-head">
-          <span class="tag-board-name">{category.name}</span>
-          <strong>{category.count}</strong>
-        </div>
-        <p class="category-board-description">{category.description}</p>
-        <p class="category-board-track">你会在这里看到：{category.writingFocus}</p>
-        <p>{categoriesPage.latestPrefix}{category.latestTitle}</p>
-        {category.exampleTopics.length > 0 && (
-          <div class="category-example-row">
-            {category.exampleTopics.slice(0, 3).map((topic) => (
-              <span class="tag-pill">{topic}</span>
-            ))}
-          </div>
-        )}
-        <div class="category-board-footer">
-          <span>{category.hasPosts ? `最近更新：${category.latestDateText}` : categoriesPage.preparingText}</span>
-          <div class="tag-row">
-            {category.topTags.map((tag) => (
-              <span class="tag-pill">{tag}</span>
-            ))}
-          </div>
-        </div>
-      </a>
-    ))}
-  </section>
+      {
+        section.type === "category-grid" && (
+          <section class="shell section-block" id={section.id}>
+            <div class="section-head">
+              <h2>{section.title}</h2>
+              {section.note && <span class="section-note">{section.note}</span>}
+            </div>
+            <div class="tag-index-grid">
+              {categories.map((category) => (
+                <a class="tag-board category-board category-board-rich" href={`/categories/${category.slug}/`}>
+                  <div class="tag-board-head">
+                    <span class="tag-board-name">{category.name}</span>
+                    <strong>{category.count}</strong>
+                  </div>
+                  <p class="category-board-description">{category.description}</p>
+                  <p class="category-board-track">你会在这里看到：{category.writingFocus}</p>
+                  <p>{categoriesPage.latestPrefix}{category.latestTitle}</p>
+                  {category.exampleTopics.length > 0 && (
+                    <div class="category-example-row">
+                      {category.exampleTopics.slice(0, 3).map((topic) => (
+                        <span class="tag-pill">{topic}</span>
+                      ))}
+                    </div>
+                  )}
+                  <div class="category-board-footer">
+                    <span>{category.hasPosts ? `最近更新：${category.latestDateText}` : categoriesPage.preparingText}</span>
+                    <div class="tag-row">
+                      {category.topTags.map((tag) => (
+                        <span class="tag-pill">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )
+      }
+    </>
+  ))}
 </Layout>

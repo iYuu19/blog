@@ -7,16 +7,22 @@ import { getSiteSettings } from "../utils/site";
 interface Props {
   title: string;
   description?: string;
+  socialImage?: string;
 }
 
 const {
   title,
-  description
+  description,
+  socialImage
 } = Astro.props;
 const site = await getSiteSettings();
 const metaDescription = description ?? site.siteDescription;
 const canonicalUrl = Astro.url.href;
-const socialImage = new URL("/avatar.jpg", Astro.url).toString();
+const resolvedSocialImage = new URL(
+  socialImage || site.defaultSocialImage || site.avatarImage || "/avatar.jpg",
+  Astro.url
+).toString();
+const faviconHref = site.faviconPath || "/favicon.svg";
 ---
 
 <!doctype html>
@@ -27,18 +33,18 @@ const socialImage = new URL("/avatar.jpg", Astro.url).toString();
     <meta name="description" content={metaDescription} />
     <meta name="theme-color" content="#f4f1eb" />
     <link rel="canonical" href={canonicalUrl} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={faviconHref} />
     <meta property="og:site_name" content={site.siteTitle} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={metaDescription} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
-    <meta property="og:image" content={socialImage} />
+    <meta property="og:image" content={resolvedSocialImage} />
     <meta property="og:locale" content="zh_CN" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={metaDescription} />
-    <meta name="twitter:image" content={socialImage} />
+    <meta name="twitter:image" content={resolvedSocialImage} />
     <title>{title}</title>
   </head>
   <body>

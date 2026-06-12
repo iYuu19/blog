@@ -1,7 +1,8 @@
 ---
 import { getCollection, getEntry } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
-import { getContestCover, getContestName, getContestSlug } from "../../utils/content";
+import { getContestCover, getContestName, getContestSlug, slugifySegment } from "../../utils/content";
+import { getPageLayouts, getSiteSettings } from "../../utils/site";
 
 const contestsPage =
   (
@@ -18,6 +19,8 @@ const contestsPage =
     latestPrefix: "最新内容：",
     emptyTracksText: "待补充"
   };
+const pageLayouts = await getPageLayouts();
+const site = await getSiteSettings();
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
@@ -69,6 +72,15 @@ const contests = Object.values(
 )
   .map((contest) => ({ ...contest, tracks: [...contest.tracks] }))
   .sort((a, b) => b.latestDate - a.latestDate || b.count - a.count);
+
+const contestsSections = (pageLayouts.contestsSections?.length ? pageLayouts.contestsSections : [])
+  .filter((section) => section.enabled)
+  .map((section, index) => ({
+    ...section,
+    title: section.title || "全部比赛",
+    note: section.note || `${contests.length} 个比赛入口`,
+    id: slugifySegment(section.anchor || `${section.type}-${index + 1}`)
+  }));
 ---
 
 <Layout title={`${contestsPage.pageTitle} | iYuu Notes`} description={contestsPage.pageDescription}>
@@ -78,22 +90,40 @@ const contests = Object.values(
     <p>{contestsPage.heroIntro}</p>
   </section>
 
-  <section class="shell contest-index-grid section-block">
-    {contests.map((contest) => (
-      <a
-        class:list={["contest-board", contest.coverImage ? "has-cover" : ""]}
-        href={`/contests/${contest.slug}/`}
-        style={contest.coverImage ? `--contest-cover: url('${contest.coverImage}')` : undefined}
-      >
-        <div class="contest-board-content">
-          <div class="contest-board-head">
-            <strong>{contest.name}</strong>
-            <span>{contest.count} {contestsPage.countSuffix}</span>
-          </div>
-          <p>{contestsPage.tracksPrefix}{contest.tracks.join(" / ") || contestsPage.emptyTracksText}</p>
-          <p>{contestsPage.latestPrefix}{contest.latestTitle}</p>
-        </div>
-      </a>
-    ))}
-  </section>
+  {contestsSections.map((section) => (
+    <>
+      {
+        section.type === "contest-grid" && (
+          <section class="shell section-block" id={section.id}>
+            <div class="section-head">
+              <h2>{section.title}</h2>
+              {section.note && <span class="section-note">{section.note}</span>}
+            </div>
+            <div class="contest-index-grid">
+              {contests.map((contest) => (
+                <a
+                  class:list={["contest-board", (contest.coverImage || site.defaultCoverImage) ? "has-cover" : ""]}
+                  href={`/contests/${contest.slug}/`}
+                  style={
+                    contest.coverImage || site.defaultCoverImage
+                      ? `--contest-cover: url('${contest.coverImage || site.defaultCoverImage}')`
+                      : undefined
+                  }
+                >
+                  <div class="contest-board-content">
+                    <div class="contest-board-head">
+                      <strong>{contest.name}</strong>
+                      <span>{contest.count} {contestsPage.countSuffix}</span>
+                    </div>
+                    <p>{contestsPage.tracksPrefix}{contest.tracks.join(" / ") || contestsPage.emptyTracksText}</p>
+                    <p>{contestsPage.latestPrefix}{contest.latestTitle}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )
+      }
+    </>
+  ))}
 </Layout>
