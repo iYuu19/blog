@@ -16,6 +16,8 @@
   --shadow: 0 16px 36px rgba(20, 24, 28, 0.05);
   --shadow-strong: 0 22px 52px rgba(20, 24, 28, 0.08);
   --shell: min(1120px, calc(100vw - 32px));
+  --sticky-header-offset: 96px;
+  --anchor-offset: calc(var(--sticky-header-offset) + 18px);
   --font-sans: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", serif;
   --font-mono: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
@@ -27,6 +29,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: var(--anchor-offset);
 }
 
 body {
@@ -471,7 +474,7 @@ h3 {
 
 .site-index {
   position: sticky;
-  top: 84px;
+  top: calc(var(--sticky-header-offset) - 12px);
   padding: 2px 0 0 18px;
   border-left: 1px solid var(--line);
 }
@@ -1063,7 +1066,7 @@ h3 {
 }
 
 .article-index {
-  top: 96px;
+  top: var(--sticky-header-offset);
   max-height: calc(100vh - 120px);
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -1328,6 +1331,7 @@ h3 {
   margin-top: 34px;
   margin-bottom: 10px;
   font-family: var(--font-serif);
+  scroll-margin-top: var(--anchor-offset);
 }
 
 .prose p,
