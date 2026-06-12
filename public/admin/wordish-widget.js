@@ -16,6 +16,49 @@
     return typeof value === "string" ? value : "";
   }
 
+  function listToArray(value) {
+    if (!value) {
+      return [];
+    }
+
+    if (Array.isArray(value)) {
+      return value;
+    }
+
+    if (typeof value.toJS === "function") {
+      const result = value.toJS();
+      return Array.isArray(result) ? result : [];
+    }
+
+    return [];
+  }
+
+  function getEntryField(entry, key) {
+    if (!entry || typeof entry.getIn !== "function") {
+      return "";
+    }
+
+    const value = entry.getIn(["data", key]);
+
+    if (typeof value === "string") {
+      return value;
+    }
+
+    if (typeof value === "number") {
+      return String(value);
+    }
+
+    return "";
+  }
+
+  function getEntryListField(entry, key) {
+    if (!entry || typeof entry.getIn !== "function") {
+      return [];
+    }
+
+    return listToArray(entry.getIn(["data", key]));
+  }
+
   function stripQuotes(value) {
     return value.replace(/^['"]|['"]$/g, "");
   }
@@ -324,7 +367,9 @@
   const WordishControl = createClass({
     getInitialState() {
       return {
-        errorMessage: ""
+        errorMessage: "",
+        previewHtml: "",
+        showReaderPreview: true
       };
     },
 
@@ -343,6 +388,9 @@
       const nextValue = toText(this.props.value);
 
       if (previousValue === nextValue) {
+        if (prevProps.entry !== this.props.entry) {
+          this.refreshPreview();
+        }
         return;
       }
 
@@ -351,6 +399,8 @@
         this.editor.setMarkdown(nextValue, false);
         this.lastKnownValue = nextValue;
       }
+
+      this.refreshPreview();
     },
 
     componentWillUnmount() {
@@ -413,6 +463,31 @@
       if (this.state.errorMessage) {
         this.setState({ errorMessage: "" });
       }
+    },
+
+    toggleReaderPreview() {
+      this.setState((state) => ({
+        showReaderPreview: !state.showReaderPreview
+      }));
+    },
+
+    refreshPreview() {
+      if (!this.editor) {
+        return;
+      }
+
+      const nextHtml = this.editor.getHTML();
+
+      if (nextHtml !== this.state.previewHtml) {
+        this.setState({
+          previewHtml: nextHtml
+        });
+      }
+    },
+
+    handleEditorChange() {
+      this.scheduleChange();
+      this.refreshPreview();
     },
 
     insertCodeBlock(language) {
@@ -493,7 +568,8 @@
           }
         });
 
-        this.editor.on("change", this.scheduleChange);
+        this.editor.on("change", this.handleEditorChange);
+        this.refreshPreview();
       } catch (error) {
         console.error(error);
         this.setState({
@@ -504,6 +580,127 @@
 
     setEditorRoot(element) {
       this.editorRoot = element;
+    },
+
+    renderReaderPreview() {
+      if (!this.state.showReaderPreview) {
+        return null;
+      }
+
+      const entry = this.props.entry;
+      const title = getEntryField(entry, "title") || "这里会显示文章标题";
+      const description =
+        getEntryField(entry, "description") || "这里会显示文章摘要，方便你边写边看前台阅读效果。";
+      const category = getEntryField(entry, "category") || "未分类";
+      const contest = getEntryField(entry, "contest") || getEntryField(entry, "oj");
+      const track = getEntryField(entry, "track");
+      const difficulty = getEntryField(entry, "difficulty") || "Notes";
+      const pubDate = getEntryField(entry, "pubDate");
+      const updatedDate = getEntryField(entry, "updatedDate");
+      const coverImage = getEntryField(entry, "coverImage");
+      const tags = getEntryListField(entry, "tags").filter(Boolean);
+      const metaItems = [contest, track, difficulty, pubDate && `发布：${pubDate}`, updatedDate && `更新：${updatedDate}`]
+        .filter(Boolean);
+
+      return h(
+        "section",
+        {
+          className: "wordish-reader-preview"
+        },
+        h(
+          "div",
+          {
+            className: "wordish-reader-preview-head"
+          },
+          h(
+            "div",
+            {
+              className: "wordish-reader-preview-copy"
+            },
+            h(
+              "p",
+              {
+                className: "wordish-reader-preview-eyebrow"
+              },
+              "Reader Preview"
+            ),
+            h(
+              "h3",
+              {
+                className: "wordish-reader-preview-title"
+              },
+              title
+            ),
+            h(
+              "p",
+              {
+                className: "wordish-reader-preview-description"
+              },
+              description
+            )
+          ),
+          coverImage
+            ? h("img", {
+                className: "wordish-reader-preview-cover",
+                src: coverImage,
+                alt: title
+              })
+            : null
+        ),
+        h(
+          "div",
+          {
+            className: "wordish-reader-preview-meta"
+          },
+          h(
+            "span",
+            {
+              className: "wordish-reader-preview-pill is-category"
+            },
+            category
+          ),
+          ...metaItems.map((item) =>
+            h(
+              "span",
+              {
+                className: "wordish-reader-preview-pill"
+              },
+              item
+            )
+          )
+        ),
+        tags.length > 0
+          ? h(
+              "div",
+              {
+                className: "wordish-reader-preview-tags"
+              },
+              ...tags.map((tag) =>
+                h(
+                  "span",
+                  {
+                    className: "wordish-reader-preview-tag"
+                  },
+                  `#${tag}`
+                )
+              )
+            )
+          : null,
+        this.state.previewHtml
+          ? h("div", {
+              className: "wordish-reader-preview-body toastui-editor-contents",
+              dangerouslySetInnerHTML: {
+                __html: this.state.previewHtml
+              }
+            })
+          : h(
+              "p",
+              {
+                className: "wordish-reader-preview-empty"
+              },
+              "正文开始输入后，这里会显示实时阅读预览。"
+            )
+      );
     },
 
     render() {
@@ -557,6 +754,15 @@
               onClick: this.insertCustomCodeBlock
             },
             "Custom"
+          ),
+          h(
+            "button",
+            {
+              type: "button",
+              className: "wordish-shortcut-button wordish-preview-toggle",
+              onClick: this.toggleReaderPreview
+            },
+            this.state.showReaderPreview ? "Hide Preview" : "Show Preview"
           )
         ),
         hint
@@ -581,6 +787,7 @@
           className: "wordish-editor-shell",
           ref: this.setEditorRoot
         }),
+        this.renderReaderPreview(),
         h(
           "p",
           {
