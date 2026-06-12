@@ -1,7 +1,11 @@
 ---
 import { getCollection, getEntry } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
-import { slugifySegment } from "../../utils/content";
+import {
+  getCategoryDefinitions,
+  getTagDefinitions,
+  slugifySegment
+} from "../../utils/content";
 import { getPageLayouts } from "../../utils/site";
 
 const tagsPage =
@@ -12,21 +16,34 @@ const tagsPage =
     pageDescription: "按标签浏览题解与总结。",
     heroEyebrow: "Tag Index",
     heroTitle: "标签",
-    heroIntro: "按标签翻会比只看日期更方便，尤其是回顾某一类题的时候。",
+    heroIntro: "按标签回看内容，会比只按日期翻文章更方便，尤其适合回顾某个知识点。",
     latestPrefix: "最新内容："
   };
 const pageLayouts = await getPageLayouts();
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
+const tagDefinitions = await getTagDefinitions();
+const categoryDefinitions = await getCategoryDefinitions();
 
-const tagMap = posts.reduce<Record<string, { count: number; latestTitle: string; latestDate: number }>>(
-  (acc, post) => {
+const tagStats = Object.values(
+  posts.reduce<
+    Record<
+      string,
+      {
+        name: string;
+        count: number;
+        latestTitle: string;
+        latestDate: number;
+      }
+    >
+  >((acc, post) => {
     for (const tag of post.data.tags) {
       const publishedAt = post.data.pubDate.valueOf();
       const previous = acc[tag];
 
       if (!previous || publishedAt > previous.latestDate) {
         acc[tag] = {
+          name: tag,
           count: (previous?.count ?? 0) + 1,
           latestTitle: post.data.title,
           latestDate: publishedAt
@@ -37,13 +54,76 @@ const tagMap = posts.reduce<Record<string, { count: number; latestTitle: string;
     }
 
     return acc;
-  },
-  {}
+  }, {})
 );
 
-const tags = Object.entries(tagMap)
-  .map(([name, meta]) => ({ name, ...meta }))
-  .sort((a, b) => b.count - a.count || b.latestDate - a.latestDate);
+const definitionMap = new Map(tagDefinitions.map((definition) => [definition.name, definition]));
+const statsMap = new Map(tagStats.map((tag) => [tag.name, tag]));
+const categoryMap = new Map(categoryDefinitions.map((category) => [category.name, category]));
+
+const tags = [
+  ...tagDefinitions.map((definition) => {
+    const stats = statsMap.get(definition.name);
+    const relatedCategory = definition.relatedCategory
+      ? categoryMap.get(definition.relatedCategory)
+      : undefined;
+
+    return {
+      name: definition.name,
+      slug: definition.slug!,
+      description: definition.description,
+      learningFocus: definition.learningFocus,
+      relatedCategory: definition.relatedCategory,
+      relatedCategoryHref: relatedCategory
+        ? `/categories/${relatedCategory.slug}/`
+        : definition.relatedCategory
+          ? `/categories/${slugifySegment(definition.relatedCategory)}/`
+          : "",
+      exampleTopics: definition.exampleTopics,
+      sortOrder: definition.sortOrder,
+      count: stats?.count ?? 0,
+      latestTitle:
+        stats?.latestTitle ?? "这个标签说明卡已经建好，后面可以继续往里补文章。",
+      latestDate: stats?.latestDate ?? 0,
+      latestDateText: stats
+        ? new Intl.DateTimeFormat("zh-CN", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+          }).format(stats.latestDate)
+        : "待补充",
+      hasPosts: Boolean(stats)
+    };
+  }),
+  ...tagStats
+    .filter((tag) => !definitionMap.has(tag.name))
+    .map((tag) => ({
+      name: tag.name,
+      slug: slugifySegment(tag.name),
+      description:
+        "这个标签已经在文章里出现了，但还没有在后台的“分类与标签”里补说明卡。",
+      learningFocus: "可以去后台补一段说明，让这个标签在前台看起来更完整。",
+      relatedCategory: "",
+      relatedCategoryHref: "",
+      exampleTopics: [],
+      sortOrder: 999,
+      count: tag.count,
+      latestTitle: tag.latestTitle,
+      latestDate: tag.latestDate,
+      latestDateText: new Intl.DateTimeFormat("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).format(tag.latestDate),
+      hasPosts: true
+    }))
+].sort(
+  (a, b) =>
+    a.sortOrder - b.sortOrder ||
+    b.count - a.count ||
+    b.latestDate - a.latestDate ||
+    a.name.localeCompare(b.name, "zh-CN")
+);
 
 const tagsSections = (pageLayouts.tagsSections?.length ? pageLayouts.tagsSections : [])
   .filter((section) => section.enabled)
@@ -73,12 +153,29 @@ const tagsSections = (pageLayouts.tagsSections?.length ? pageLayouts.tagsSection
             </div>
             <div class="tag-index-grid">
               {tags.map((tag) => (
-                <a class="tag-board" href={`/tags/${tag.name}/`}>
+                <a class="tag-board category-board category-board-rich" href={`/tags/${tag.name}/`}>
                   <div class="tag-board-head">
                     <span class="tag-board-name">#{tag.name}</span>
                     <strong>{tag.count}</strong>
                   </div>
+                  <p class="category-board-description">{tag.description}</p>
+                  <p class="category-board-track">适合从这里看：{tag.learningFocus}</p>
                   <p>{tagsPage.latestPrefix}{tag.latestTitle}</p>
+                  {tag.exampleTopics.length > 0 && (
+                    <div class="category-example-row">
+                      {tag.exampleTopics.slice(0, 3).map((topic) => (
+                        <span class="tag-pill">{topic}</span>
+                      ))}
+                    </div>
+                  )}
+                  <div class="category-board-footer">
+                    <span>{tag.hasPosts ? `最近更新：${tag.latestDateText}` : "准备中"}</span>
+                    <div class="tag-row">
+                      {tag.relatedCategory && (
+                        <span class="tag-pill">关联分类：{tag.relatedCategory}</span>
+                      )}
+                    </div>
+                  </div>
                 </a>
               ))}
             </div>

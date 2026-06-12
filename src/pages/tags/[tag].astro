@@ -2,6 +2,7 @@
 import { getCollection, getEntry } from "astro:content";
 import ArchiveRow from "../../components/ArchiveRow.astro";
 import Layout from "../../layouts/Layout.astro";
+import { getCategoryDefinitions, getTagDefinitions, slugifySegment } from "../../utils/content";
 import { getSiteSettings } from "../../utils/site";
 
 const detailPages =
@@ -10,16 +11,26 @@ const detailPages =
   )?.data ?? {
     tagPage: {
       pageEyebrow: "Tag View",
-      pageDescriptionTemplate: "标签 {{tag}} 下的所有文章。",
-      heroIntroTemplate: "这个标签下目前有 {{count}} 篇内容。"
+      pageDescriptionTemplate: "标签 {{tag}} 下面的所有文章。",
+      heroIntroTemplate: "这个标签下面目前有 {{count}} 篇内容。",
+      overviewLabel: "这个标签通常会看到什么",
+      emptyDefinitionText:
+        "这个标签已经在文章里使用了，后面可以去后台的“分类与标签”里补一段说明。",
+      relatedCategoryLabel: "关联分类",
+      emptyFeed: "这个标签说明卡已经建好，相关内容会在后续文章里逐步补充。"
     }
   };
 const tagPage = detailPages.tagPage;
 const site = await getSiteSettings();
+const tagDefinitions = await getTagDefinitions();
+const categoryDefinitions = await getCategoryDefinitions();
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
-  const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
+  const tagDefinitions = await getTagDefinitions();
+  const tags = [
+    ...new Set([...posts.flatMap((post) => post.data.tags), ...tagDefinitions.map((tag) => tag.name)])
+  ];
 
   return tags.map((tag) => ({
     params: { tag },
@@ -33,8 +44,14 @@ export async function getStaticPaths() {
 }
 
 const { tag, posts } = Astro.props;
+const definition = tagDefinitions.find((item) => item.name === tag);
+const relatedCategory = definition?.relatedCategory
+  ? categoryDefinitions.find((category) => category.name === definition.relatedCategory)
+  : undefined;
 const pageDescription = tagPage.pageDescriptionTemplate.replace("{{tag}}", tag);
 const heroIntro = tagPage.heroIntroTemplate.replace("{{count}}", String(posts.length));
+const contestCount = new Set(posts.map((post) => post.data.contest || post.data.oj).filter(Boolean)).size;
+const latestPost = posts[0];
 ---
 
 <Layout title={`${tag} | ${site.siteTitle}`} description={pageDescription}>
@@ -42,11 +59,82 @@ const heroIntro = tagPage.heroIntroTemplate.replace("{{count}}", String(posts.le
     <p class="eyebrow">{tagPage.pageEyebrow}</p>
     <h1>#{tag}</h1>
     <p>{heroIntro}</p>
+    <dl class="page-stats">
+      <div>
+        <dt>内容数</dt>
+        <dd>{posts.length}</dd>
+      </div>
+      <div>
+        <dt>比赛数</dt>
+        <dd>{contestCount}</dd>
+      </div>
+      <div>
+        <dt>{tagPage.relatedCategoryLabel}</dt>
+        <dd>{definition?.relatedCategory ?? "未设置"}</dd>
+      </div>
+    </dl>
   </section>
 
   <section class="shell section-block">
-    <div class="archive-list">
-      {posts.map((post) => <ArchiveRow post={post} />)}
+    <div class="section-head">
+      <h2>{tagPage.overviewLabel}</h2>
+      {latestPost && (
+        <span class="section-note">
+          最近更新：{latestPost.data.title}
+        </span>
+      )}
     </div>
+    <div class="guide-grid">
+      <article class="guide-card">
+        <p class="guide-card-label">标签说明</p>
+        <h2>#{tag}</h2>
+        <p>{definition?.description ?? tagPage.emptyDefinitionText}</p>
+      </article>
+      <article class="guide-card">
+        <p class="guide-card-label">适合怎么读</p>
+        <h2>{definition?.learningFocus ?? "先从文章列表进入也可以"}</h2>
+        <p>
+          {
+            definition?.learningFocus ??
+            "这个标签已经出现在文章里了，后面可以去后台补标签说明卡，让这里的前台展示更完整。"
+          }
+        </p>
+        {
+          relatedCategory && (
+            <p class="guide-card-meta">
+              {tagPage.relatedCategoryLabel}：
+              <a href={`/categories/${relatedCategory.slug ?? slugifySegment(relatedCategory.name)}/`}>
+                {relatedCategory.name}
+              </a>
+            </p>
+          )
+        }
+      </article>
+    </div>
+    {
+      definition?.exampleTopics && definition.exampleTopics.length > 0 && (
+        <div class="tag-row section-chip-row">
+          {definition.exampleTopics.map((topic) => (
+            <span class="tag-pill">{topic}</span>
+          ))}
+        </div>
+      )
+    }
+  </section>
+
+  <section class="shell section-block">
+    <div class="section-head">
+      <h2>相关文章</h2>
+      <span class="section-note">{posts.length} 篇</span>
+    </div>
+    {
+      posts.length > 0 ? (
+        <div class="archive-list">
+          {posts.map((post) => <ArchiveRow post={post} />)}
+        </div>
+      ) : (
+        <p class="empty-feed">{tagPage.emptyFeed}</p>
+      )
+    }
   </section>
 </Layout>

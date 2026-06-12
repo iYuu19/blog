@@ -15,6 +15,19 @@ media_folder: public/uploads
 public_folder: /uploads
 
 collections:
+  - name: dashboard_center
+    label: 仪表盘
+    delete: false
+    description: 先看这里，快速了解这个后台现在能改什么、建议从哪里开始改。
+    editor:
+      preview: false
+    files:
+      - name: admin_dashboard
+        label: 站点内容中枢说明
+        file: ADMIN_DASHBOARD.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }
+
   - name: blog
     label: 文章中心
     label_singular: 文章
@@ -368,6 +381,13 @@ collections:
               - { label: 标题覆盖, name: title, widget: string, required: false }
               - { label: 说明文字, name: note, widget: text, required: false }
               - { label: 锚点标识, name: anchor, widget: string, required: false }
+  - name: taxonomy_center
+    label: 分类与标签
+    delete: false
+    description: 这里维护分类卡片和标签卡片的说明、顺序、示例话题，让索引页和详情页更完整。
+    editor:
+      preview: false
+    files:
       - name: category_definitions
         label: 分类说明卡
         file: src/content/site-categories/categories.yaml
@@ -382,6 +402,29 @@ collections:
               - { label: 分类说明, name: description, widget: text }
               - { label: 适合写什么, name: writingFocus, widget: text }
               - label: 示例内容
+                name: exampleTopics
+                widget: list
+                required: false
+                field:
+                  label: 示例
+                  name: item
+                  widget: string
+              - { label: 排序, name: sortOrder, widget: number, value_type: int, default: 100, required: false }
+      - name: tag_definitions
+        label: 标签说明卡
+        file: src/content/site-tags/tags.yaml
+        fields:
+          - label: 标签列表
+            name: tags
+            widget: list
+            summary: "{{fields.name}}"
+            fields:
+              - { label: 标签名, name: name, widget: string }
+              - { label: 链接标识, name: slug, widget: string, required: false }
+              - { label: 标签说明, name: description, widget: text }
+              - { label: 学习方向, name: learningFocus, widget: text }
+              - { label: 关联分类, name: relatedCategory, widget: string, required: false }
+              - label: 示例主题
                 name: exampleTopics
                 widget: list
                 required: false
@@ -637,6 +680,10 @@ collections:
               - { label: 眉题, name: pageEyebrow, widget: string }
               - { label: 页面描述模板, name: pageDescriptionTemplate, widget: string }
               - { label: 导语模板, name: heroIntroTemplate, widget: string }
+              - { label: 概览标签, name: overviewLabel, widget: string }
+              - { label: 缺少说明时的提示, name: emptyDefinitionText, widget: text }
+              - { label: 关联分类标签, name: relatedCategoryLabel, widget: string }
+              - { label: 内容区空状态, name: emptyFeed, widget: text }
       - name: not_found_page_copy
         label: 404 页面文案
         file: src/content/site-not-found/not-found.yaml

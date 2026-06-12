@@ -1,12 +1,12 @@
 categoryPage:
   pageEyebrow: Category View
-  pageDescriptionTemplate: "{{category}} 分类下的所有文章。"
+  pageDescriptionTemplate: "{{category}} 分类下面的所有文章。"
   postsLabel: 文章数
   contestsLabel: 比赛数
   latestUpdateLabel: 最近更新
   emptyLatestUpdateText: 待补充
   overviewLabel: 这个栏目会看到什么
-  overviewBody: 这一页会把同一主题下的内容集中放在一起，方便按方向连续阅读，而不是零散地按时间翻找。
+  overviewBody: 这一页会把同一个主题下的内容集中放在一起，方便按方向连续阅读，而不是零散地按时间翻找。
   commonTagsLabel: 常见标签
   commonTagsEmpty: 相关标签会随着内容更新逐步补齐
   commonTracksLabel: 常见方向
@@ -24,5 +24,9 @@ contestPage:
 
 tagPage:
   pageEyebrow: Tag View
-  pageDescriptionTemplate: "标签 {{tag}} 下的所有文章。"
-  heroIntroTemplate: "这个标签下目前有 {{count}} 篇内容。"
+  pageDescriptionTemplate: "标签 {{tag}} 下面的所有文章。"
+  heroIntroTemplate: "这个标签下面目前有 {{count}} 篇内容。"
+  overviewLabel: 这个标签通常会看到什么
+  emptyDefinitionText: 这个标签已经在文章里使用了，后面可以去后台的“分类与标签”里补一段说明。
+  relatedCategoryLabel: 关联分类
+  emptyFeed: 这个标签说明卡已经建好，相关内容会在后续文章里逐步补充。

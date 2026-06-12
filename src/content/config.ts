@@ -284,6 +284,25 @@ const siteCategories = defineCollection({
   })
 });
 
+const siteTags = defineCollection({
+  type: "data",
+  schema: z.object({
+    tags: z
+      .array(
+        z.object({
+          name: z.string(),
+          slug: z.string().optional(),
+          description: z.string(),
+          learningFocus: z.string(),
+          relatedCategory: z.string().default(""),
+          exampleTopics: z.array(z.string()).default([]),
+          sortOrder: z.coerce.number().default(100)
+        })
+      )
+      .default([])
+  })
+});
+
 const siteComments = defineCollection({
   type: "data",
   schema: z.object({
@@ -459,7 +478,11 @@ const siteDetailPages = defineCollection({
     tagPage: z.object({
       pageEyebrow: z.string(),
       pageDescriptionTemplate: z.string(),
-      heroIntroTemplate: z.string()
+      heroIntroTemplate: z.string(),
+      overviewLabel: z.string().default(""),
+      emptyDefinitionText: z.string().default(""),
+      relatedCategoryLabel: z.string().default(""),
+      emptyFeed: z.string().default("")
     })
   })
 });
@@ -473,6 +496,7 @@ export const collections = {
   "site-about": siteAbout,
   "site-navigation": siteNavigation,
   "site-categories": siteCategories,
+  "site-tags": siteTags,
   "site-comments": siteComments,
   "site-guestbook": siteGuestbook,
   "site-archive": siteArchive,
