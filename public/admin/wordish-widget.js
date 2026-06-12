@@ -59,6 +59,14 @@
     return listToArray(entry.getIn(["data", key]));
   }
 
+  function buildStatusItem(label, ready, detail) {
+    return {
+      label,
+      ready: !!ready,
+      detail: toText(detail)
+    };
+  }
+
   function stripQuotes(value) {
     return value.replace(/^['"]|['"]$/g, "");
   }
@@ -699,7 +707,136 @@
                 className: "wordish-reader-preview-empty"
               },
               "正文开始输入后，这里会显示实时阅读预览。"
+        )
+      );
+    },
+
+    renderStatusPanel() {
+      const entry = this.props.entry;
+      const title = getEntryField(entry, "title");
+      const description = getEntryField(entry, "description");
+      const category = getEntryField(entry, "category");
+      const contest = getEntryField(entry, "contest") || getEntryField(entry, "oj");
+      const contestSlug = getEntryField(entry, "contestSlug");
+      const track = getEntryField(entry, "track");
+      const coverImage = getEntryField(entry, "coverImage");
+      const pubDate = getEntryField(entry, "pubDate");
+      const tags = getEntryListField(entry, "tags").filter(Boolean);
+      const isMatchWriteup = category === "比赛 WP";
+
+      const items = [
+        buildStatusItem("标题", Boolean(title), title || "建议先写清楚题目或文章主题"),
+        buildStatusItem("摘要", Boolean(description), description || "前台卡片和分享描述都会用到"),
+        buildStatusItem("分类", Boolean(category), category || "建议先确定这篇属于哪个内容栏目"),
+        buildStatusItem("发布日期", Boolean(pubDate), pubDate || "会影响归档和前台排序"),
+        buildStatusItem("标签", tags.length > 0, tags.length > 0 ? `${tags.length} 个标签` : "至少补 1 个更方便后面回看"),
+        buildStatusItem("方向 / Track", Boolean(track), track || "做题方向、专题方向都可以填在这里"),
+        buildStatusItem("封面图", Boolean(coverImage), coverImage ? "已设置封面" : "可选，但比赛页和分享图会更完整")
+      ];
+
+      if (isMatchWriteup) {
+        items.push(
+          buildStatusItem("比赛名", Boolean(contest), contest || "比赛 WP 建议补比赛名或 OJ"),
+          buildStatusItem(
+            "比赛标识",
+            Boolean(contestSlug),
+            contestSlug || "建议补一个英文或拼音短名，方便自动生成比赛页"
+          )
+        );
+      }
+
+      const completedCount = items.filter((item) => item.ready).length;
+      const progressText = `${completedCount} / ${items.length}`;
+
+      return h(
+        "section",
+        {
+          className: "wordish-status-panel"
+        },
+        h(
+          "div",
+          {
+            className: "wordish-status-panel-head"
+          },
+          h(
+            "div",
+            {
+              className: "wordish-status-panel-copy"
+            },
+            h(
+              "p",
+              {
+                className: "wordish-status-panel-eyebrow"
+              },
+              "Writing Status"
+            ),
+            h(
+              "h3",
+              {
+                className: "wordish-status-panel-title"
+              },
+              "这篇文章现在还缺什么"
+            ),
+            h(
+              "p",
+              {
+                className: "wordish-status-panel-note"
+              },
+              isMatchWriteup
+                ? "当前分类是比赛 WP，所以比赛信息会一起纳入检查。"
+                : "这个面板会帮你快速检查常用文章字段有没有漏。"
             )
+          ),
+          h(
+            "div",
+            {
+              className: "wordish-status-panel-score"
+            },
+            h("strong", {}, progressText),
+            h("span", {}, "已完成")
+          )
+        ),
+        h(
+          "div",
+          {
+            className: "wordish-status-grid"
+          },
+          ...items.map((item) =>
+            h(
+              "article",
+              {
+                className: `wordish-status-card ${item.ready ? "is-ready" : "is-pending"}`
+              },
+              h(
+                "div",
+                {
+                  className: "wordish-status-card-head"
+                },
+                h(
+                  "span",
+                  {
+                    className: "wordish-status-card-label"
+                  },
+                  item.label
+                ),
+                h(
+                  "span",
+                  {
+                    className: `wordish-status-badge ${item.ready ? "is-ready" : "is-pending"}`
+                  },
+                  item.ready ? "已填写" : "待补充"
+                )
+              ),
+              h(
+                "p",
+                {
+                  className: "wordish-status-card-detail"
+                },
+                item.detail
+              )
+            )
+          )
+        )
       );
     },
 
@@ -787,6 +924,7 @@
           className: "wordish-editor-shell",
           ref: this.setEditorRoot
         }),
+        this.renderStatusPanel(),
         this.renderReaderPreview(),
         h(
           "p",
