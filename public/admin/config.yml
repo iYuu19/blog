@@ -166,10 +166,10 @@ collections:
         widget: wordish
         hint: 支持直接粘贴截图、拖拽图片和插入代码块。默认是可视化编辑，也可以切到 Markdown 看源码。
 
-  - name: structure_center
-    label: 结构与导航
+  - name: navigation_center
+    label: 导航
     delete: false
-    description: 这里控制站点结构，不只是改字，还能决定首页板块顺序、侧栏内容和导航。
+    description: 这里专门维护顶部导航和站内主要入口名称。
     editor:
       preview: false
     files:
@@ -184,8 +184,16 @@ collections:
             fields:
               - { label: 名称, name: label, widget: string }
               - { label: 路径, name: href, widget: string }
+
+  - name: block_center
+    label: 板块
+    delete: false
+    description: 这里控制首页和各索引页长什么样、有哪些区块、顺序怎么排。
+    editor:
+      preview: false
+    files:
       - name: home_layout
-        label: 首页结构与全站公共区
+        label: 首页板块与公共区
         file: src/content/site-layout/layout.yaml
         fields:
           - { label: 头部按钮文案, name: headerCtaLabel, widget: string, required: false }
@@ -257,7 +265,7 @@ collections:
                 required: false
                 hint: 用于首页左侧索引跳转，建议用英文或短横线，例如 featured / update-method。
       - name: page_layouts
-        label: 关于页与留言板结构
+        label: 索引页与固定页板块
         file: src/content/site-page-layouts/page-layouts.yaml
         fields:
           - label: 关于页板块
@@ -277,21 +285,9 @@ collections:
                   - { label: 最近内容列表, value: latest-posts }
                   - { label: 浏览引导卡片, value: browse-guides }
               - { label: 是否显示, name: enabled, widget: boolean, default: true }
-              - label: 标题覆盖
-                name: title
-                widget: string
-                required: false
-                hint: 不填就用系统默认标题。
-              - label: 说明文字
-                name: note
-                widget: text
-                required: false
-                hint: 可覆盖默认副说明或卡片文案。
-              - label: 锚点标识
-                name: anchor
-                widget: string
-                required: false
-                hint: 建议用英文短横线，例如 about-focus。
+              - { label: 标题覆盖, name: title, widget: string, required: false }
+              - { label: 说明文字, name: note, widget: text, required: false }
+              - { label: 锚点标识, name: anchor, widget: string, required: false }
           - label: 留言板板块
             name: guestbookSections
             widget: list
@@ -306,19 +302,9 @@ collections:
                   - { label: 登录说明卡片, value: login-note }
                   - { label: 评论区, value: comments }
               - { label: 是否显示, name: enabled, widget: boolean, default: true }
-              - label: 标题覆盖
-                name: title
-                widget: string
-                required: false
-              - label: 说明文字
-                name: note
-                widget: text
-                required: false
-              - label: 锚点标识
-                name: anchor
-                widget: string
-                required: false
-                hint: 建议用英文短横线，例如 guestbook-comments。
+              - { label: 标题覆盖, name: title, widget: string, required: false }
+              - { label: 说明文字, name: note, widget: text, required: false }
+              - { label: 锚点标识, name: anchor, widget: string, required: false }
           - label: 归档页板块
             name: archiveSections
             widget: list
@@ -761,6 +747,56 @@ collections:
               - { label: 深色, value: dark }
               - { label: 跟随系统, value: preferred_color_scheme }
           - { label: 评论区语言, name: giscusLang, widget: string, default: zh-CN }
+
+  - name: media_center
+    label: 媒体库
+    delete: false
+    description: 这里统一说明图片目录、命名方式和上传建议，方便后面管理截图和封面。
+    editor:
+      preview: false
+    files:
+      - name: media_library_guide
+        label: 媒体库使用说明
+        file: MEDIA_LIBRARY.md
+        fields:
+          - { label: 内容, name: body, widget: markdown }
+      - name: media_settings
+        label: 媒体目录与命名规则
+        file: src/content/site-media/media.yaml
+        fields:
+          - label: 媒体目录
+            name: uploadFolders
+            widget: list
+            summary: "{{fields.name}}"
+            fields:
+              - { label: 名称, name: name, widget: string }
+              - { label: 前台路径, name: publicPath, widget: string }
+              - { label: 主要用途, name: usage, widget: text }
+              - label: 推荐格式
+                name: recommendedFormats
+                widget: list
+                required: false
+                field:
+                  label: 格式
+                  name: item
+                  widget: string
+              - { label: 备注, name: notes, widget: text, required: false }
+          - label: 命名建议
+            name: namingRules
+            widget: list
+            required: false
+            field:
+              label: 规则
+              name: item
+              widget: string
+          - label: 上传建议
+            name: editorTips
+            widget: list
+            required: false
+            field:
+              label: 建议
+              name: item
+              widget: string
 
   - name: template_center
     label: 写作模板

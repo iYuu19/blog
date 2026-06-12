@@ -1,0 +1,27 @@
+uploadFolders:
+  - name: 文章配图
+    publicPath: /uploads
+    usage: 用于正文里粘贴截图、插入说明图、流程图和普通文章配图。
+    recommendedFormats:
+      - png
+      - webp
+      - jpg
+    notes: 直接在正文编辑器里粘贴截图，通常就会自动进入这个目录。
+  - name: 比赛封面
+    publicPath: /contest-covers
+    usage: 用于比赛索引卡片、比赛详情页头图和首页比赛入口封面。
+    recommendedFormats:
+      - svg
+      - png
+      - webp
+    notes: 适合放一张更概括比赛主题的封面，不建议和正文截图混在一起。
+
+namingRules:
+  - 文章内截图可以保留自动命名，但专题内容建议按文章 slug 分目录整理。
+  - 比赛封面建议直接用比赛标识命名，比如 yellow-river-police-2026.svg。
+  - 如果一篇长文截图很多，优先放到同名子目录里，后面回看会更清楚。
+
+editorTips:
+  - 先写正文再粘贴截图，编辑器会比先批量上传图片更顺手。
+  - 图片过大时优先转成 webp，前台加载会更轻。
+  - 封面图和正文截图分开管理，后面做索引页和社交分享图会更稳定。

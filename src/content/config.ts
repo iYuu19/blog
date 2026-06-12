@@ -303,6 +303,25 @@ const siteTags = defineCollection({
   })
 });
 
+const siteMedia = defineCollection({
+  type: "data",
+  schema: z.object({
+    uploadFolders: z
+      .array(
+        z.object({
+          name: z.string(),
+          publicPath: z.string(),
+          usage: z.string(),
+          recommendedFormats: z.array(z.string()).default([]),
+          notes: z.string().default("")
+        })
+      )
+      .default([]),
+    namingRules: z.array(z.string()).default([]),
+    editorTips: z.array(z.string()).default([])
+  })
+});
+
 const siteComments = defineCollection({
   type: "data",
   schema: z.object({
@@ -497,6 +516,7 @@ export const collections = {
   "site-navigation": siteNavigation,
   "site-categories": siteCategories,
   "site-tags": siteTags,
+  "site-media": siteMedia,
   "site-comments": siteComments,
   "site-guestbook": siteGuestbook,
   "site-archive": siteArchive,
