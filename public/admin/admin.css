@@ -424,3 +424,30 @@ a {
     padding: 0 12px;
   }
 }
+
+#nc-root ul:has(> li > a[href*="/entries/"]) {
+  grid-auto-rows: minmax(248px, auto) !important;
+}
+
+#nc-root li:has(> a[href*="/entries/"]) > a[href*="/entries/"] {
+  justify-content: flex-start !important;
+  gap: 14px !important;
+  min-height: 248px !important;
+  padding: 24px 24px 20px !important;
+}
+
+#nc-root li:has(> a[href*="/entries/"]) > a[href*="/entries/"]::after {
+  margin-top: auto;
+}
+
+#nc-root li:has(> a[href*="/entries/"]) > a[href*="/entries/"] h2,
+#nc-root li:has(> a[href*="/entries/"]) > a[href*="/entries/"] h3 {
+  font-size: clamp(22px, 1.65vw, 32px) !important;
+  line-height: 1.28 !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 4 !important;
+  overflow: hidden !important;
+}

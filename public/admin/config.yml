@@ -119,7 +119,7 @@ collections:
     extension: md
     format: frontmatter
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    summary: "{{title}} - {{category}} - {{pubDate}}"
+    summary: "{{title}}"
     sortable_fields:
       - pubDate
       - updatedDate
