@@ -1,0 +1,48 @@
+aboutSections:
+  - type: focus
+    enabled: true
+    title: ""
+    note: ""
+    anchor: about-focus
+  - type: writing
+    enabled: true
+    title: ""
+    note: ""
+    anchor: about-writing
+  - type: note
+    enabled: true
+    title: ""
+    note: ""
+    anchor: about-note
+  - type: contests
+    enabled: true
+    title: ""
+    note: ""
+    anchor: about-contests
+  - type: latest-posts
+    enabled: true
+    title: ""
+    note: ""
+    anchor: about-latest
+  - type: browse-guides
+    enabled: true
+    title: ""
+    note: ""
+    anchor: about-guides
+
+guestbookSections:
+  - type: message-ideas
+    enabled: true
+    title: ""
+    note: ""
+    anchor: guestbook-ideas
+  - type: login-note
+    enabled: true
+    title: ""
+    note: ""
+    anchor: guestbook-login
+  - type: comments
+    enabled: true
+    title: ""
+    note: ""
+    anchor: guestbook-comments

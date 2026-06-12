@@ -232,6 +232,69 @@ collections:
                 widget: string
                 required: false
                 hint: 用于首页左侧索引跳转，建议用英文或短横线，例如 featured / update-method。
+      - name: page_layouts
+        label: 关于页与留言板结构
+        file: src/content/site-page-layouts/page-layouts.yaml
+        fields:
+          - label: 关于页板块
+            name: aboutSections
+            widget: list
+            summary: "{{fields.type}} / {{fields.title}}"
+            hint: 这里控制关于页主内容区的顺序和显示。文案本身仍在“页面文案 -> 关于页文案”里维护。
+            fields:
+              - label: 板块类型
+                name: type
+                widget: select
+                options:
+                  - { label: 主要内容列表, value: focus }
+                  - { label: 写作方式列表, value: writing }
+                  - { label: 说明卡片, value: note }
+                  - { label: 比赛汇总卡片, value: contests }
+                  - { label: 最近内容列表, value: latest-posts }
+                  - { label: 浏览引导卡片, value: browse-guides }
+              - { label: 是否显示, name: enabled, widget: boolean, default: true }
+              - label: 标题覆盖
+                name: title
+                widget: string
+                required: false
+                hint: 不填就用系统默认标题。
+              - label: 说明文字
+                name: note
+                widget: text
+                required: false
+                hint: 可覆盖默认副说明或卡片文案。
+              - label: 锚点标识
+                name: anchor
+                widget: string
+                required: false
+                hint: 建议用英文短横线，例如 about-focus。
+          - label: 留言板板块
+            name: guestbookSections
+            widget: list
+            summary: "{{fields.type}} / {{fields.title}}"
+            hint: 这里控制留言板下半部分各区块的顺序和显示。
+            fields:
+              - label: 板块类型
+                name: type
+                widget: select
+                options:
+                  - { label: 留言灵感卡片, value: message-ideas }
+                  - { label: 登录说明卡片, value: login-note }
+                  - { label: 评论区, value: comments }
+              - { label: 是否显示, name: enabled, widget: boolean, default: true }
+              - label: 标题覆盖
+                name: title
+                widget: string
+                required: false
+              - label: 说明文字
+                name: note
+                widget: text
+                required: false
+              - label: 锚点标识
+                name: anchor
+                widget: string
+                required: false
+                hint: 建议用英文短横线，例如 guestbook-comments。
       - name: category_definitions
         label: 分类说明卡
         file: src/content/site-categories/categories.yaml

@@ -1303,6 +1303,10 @@ h3 {
   gap: 16px;
 }
 
+.guestbook-section-head {
+  grid-column: 1 / -1;
+}
+
 .guestbook-card,
 .guestbook-note-panel {
   padding: 22px;

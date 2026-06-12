@@ -2,10 +2,11 @@
 import { getCollection } from "astro:content";
 import TagPill from "../components/TagPill.astro";
 import Layout from "../layouts/Layout.astro";
-import { getCategoryName, getCategorySlug, getContestName, getContestSlug } from "../utils/content";
-import { getSiteSettings } from "../utils/site";
+import { getCategoryName, getCategorySlug, getContestName, getContestSlug, slugifySegment } from "../utils/content";
+import { getPageLayouts, getSiteSettings } from "../utils/site";
 
 const site = await getSiteSettings();
+const pageLayouts = await getPageLayouts();
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
@@ -78,6 +79,35 @@ const latestPosts = posts.slice(0, 3).map((post) => ({
   }).format(post.data.pubDate)
 }));
 const contestsMetaText = site.contestsMeta.replace("{{count}}", String(totalContests));
+
+const aboutSectionTitleDefaults = {
+  focus: site.focusTitle,
+  writing: site.writingTitle,
+  note: site.noteTitle,
+  contests: site.contestsLabel,
+  "latest-posts": site.latestContentHeading,
+  "browse-guides": site.browseGuideLabel
+};
+
+const aboutSectionNoteDefaults = {
+  focus: "",
+  writing: "",
+  note: site.aboutNote,
+  contests: site.contestsMeta,
+  "latest-posts": site.latestContentNote,
+  "browse-guides": ""
+};
+
+const aboutSections = (pageLayouts.aboutSections?.length
+  ? pageLayouts.aboutSections
+  : [])
+  .filter((section) => section.enabled)
+  .map((section, index) => ({
+    ...section,
+    title: section.title || aboutSectionTitleDefaults[section.type] || `关于板块 ${index + 1}`,
+    note: section.note || aboutSectionNoteDefaults[section.type] || "",
+    id: slugifySegment(section.anchor || `${section.type}-${index + 1}`)
+  }));
 ---
 
 <Layout title={`关于 | ${site.siteTitle}`} description={site.siteDescription}>
@@ -131,76 +161,111 @@ const contestsMetaText = site.contestsMeta.replace("{{count}}", String(totalCont
     </div>
   </section>
 
-  <section class="shell guide-grid section-block">
-    <article class="guide-card focus-list-card">
-      <p class="guide-card-label">{site.focusLabel}</p>
-      <h2>{site.focusTitle}</h2>
-      <ul class="plain-list">
-        {site.aboutFocusAreas.map((item) => <li>{item}</li>)}
-      </ul>
-    </article>
+  {aboutSections.map((section) => (
+    <>
+      {
+        section.type === "focus" && (
+          <section class="shell guide-grid section-block" id={section.id}>
+            <article class="guide-card focus-list-card">
+              <p class="guide-card-label">{site.focusLabel}</p>
+              <h2>{section.title}</h2>
+              {section.note && <p class="guide-card-meta">{section.note}</p>}
+              <ul class="plain-list">
+                {site.aboutFocusAreas.map((item) => <li>{item}</li>)}
+              </ul>
+            </article>
+          </section>
+        )
+      }
 
-    <article class="guide-card focus-list-card">
-      <p class="guide-card-label">{site.writingLabel}</p>
-      <h2>{site.writingTitle}</h2>
-      <ul class="plain-list">
-        {site.aboutWritingApproach.map((item) => <li>{item}</li>)}
-      </ul>
-    </article>
-  </section>
+      {
+        section.type === "writing" && (
+          <section class="shell guide-grid section-block" id={section.id}>
+            <article class="guide-card focus-list-card">
+              <p class="guide-card-label">{site.writingLabel}</p>
+              <h2>{section.title}</h2>
+              {section.note && <p class="guide-card-meta">{section.note}</p>}
+              <ul class="plain-list">
+                {site.aboutWritingApproach.map((item) => <li>{item}</li>)}
+              </ul>
+            </article>
+          </section>
+        )
+      }
 
-  <section class="shell about-panel-grid section-block">
-    <article class="guide-card">
-      <p class="guide-card-label">{site.noteLabel}</p>
-      <h2>{site.noteTitle}</h2>
-      <p>{site.aboutNote}</p>
-    </article>
+      {
+        section.type === "note" && (
+          <section class="shell about-panel-grid section-block" id={section.id}>
+            <article class="guide-card">
+              <p class="guide-card-label">{site.noteLabel}</p>
+              <h2>{section.title}</h2>
+              <p>{section.note || site.aboutNote}</p>
+            </article>
+          </section>
+        )
+      }
 
-    <article class="guide-card">
-      <p class="guide-card-label">{site.contestsLabel}</p>
-      <div class="mini-link-list">
-        {contests.length > 0 ? (
-          contests.map((contest) => (
-            <a class="mini-link-row" href={`/contests/${contest.slug}/`}>
-              <span>{contest.name}</span>
-              <strong>{contest.count}</strong>
-            </a>
-          ))
-        ) : (
-          <p class="empty-inline">{site.contestsEmpty}</p>
-        )}
-      </div>
-      <p class="guide-card-meta">{contestsMetaText}</p>
-    </article>
-  </section>
+      {
+        section.type === "contests" && (
+          <section class="shell about-panel-grid section-block" id={section.id}>
+            <article class="guide-card">
+              <p class="guide-card-label">{site.contestsLabel}</p>
+              <h2>{section.title}</h2>
+              <div class="mini-link-list">
+                {contests.length > 0 ? (
+                  contests.map((contest) => (
+                    <a class="mini-link-row" href={`/contests/${contest.slug}/`}>
+                      <span>{contest.name}</span>
+                      <strong>{contest.count}</strong>
+                    </a>
+                  ))
+                ) : (
+                  <p class="empty-inline">{site.contestsEmpty}</p>
+                )}
+              </div>
+              <p class="guide-card-meta">{section.note || contestsMetaText}</p>
+            </article>
+          </section>
+        )
+      }
 
-  <section class="shell section-block">
-    <div class="section-head">
-      <h2>{site.latestContentHeading}</h2>
-      <span class="section-note">{site.latestContentNote}</span>
-    </div>
-    <div class="signal-grid">
-      {latestPosts.map((post) => (
-        <a class="signal-card" href={`/blog/${post.slug}/`}>
-          <p class="signal-label">{[post.data.category, post.data.contest || post.data.oj].filter(Boolean).join(" / ")}</p>
-          <h3>{post.data.title}</h3>
-          <p>{post.data.description}</p>
-          <div class="signal-card-footer">
-            <span>{post.dateText}</span>
-            <span>{post.data.track || post.data.language}</span>
-          </div>
-        </a>
-      ))}
-    </div>
-  </section>
+      {
+        section.type === "latest-posts" && (
+          <section class="shell section-block" id={section.id}>
+            <div class="section-head">
+              <h2>{section.title}</h2>
+              <span class="section-note">{section.note}</span>
+            </div>
+            <div class="signal-grid">
+              {latestPosts.map((post) => (
+                <a class="signal-card" href={`/blog/${post.slug}/`}>
+                  <p class="signal-label">{[post.data.category, post.data.contest || post.data.oj].filter(Boolean).join(" / ")}</p>
+                  <h3>{post.data.title}</h3>
+                  <p>{post.data.description}</p>
+                  <div class="signal-card-footer">
+                    <span>{post.dateText}</span>
+                    <span>{post.data.track || post.data.language}</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )
+      }
 
-  <section class="shell guide-grid section-block">
-    {site.browseGuides.map((guide) => (
-      <article class="guide-card">
-        <p class="guide-card-label">{site.browseGuideLabel}</p>
-        <h2>{guide.title}</h2>
-        <p>{guide.description}</p>
-      </article>
-    ))}
-  </section>
+      {
+        section.type === "browse-guides" && (
+          <section class="shell guide-grid section-block" id={section.id}>
+            {site.browseGuides.map((guide) => (
+              <article class="guide-card">
+                <p class="guide-card-label">{section.title}</p>
+                <h2>{guide.title}</h2>
+                <p>{guide.description}</p>
+              </article>
+            ))}
+          </section>
+        )
+      }
+    </>
+  ))}
 </Layout>

@@ -120,6 +120,41 @@ const siteLayout = defineCollection({
   })
 });
 
+const sitePageLayouts = defineCollection({
+  type: "data",
+  schema: z.object({
+    aboutSections: z
+      .array(
+        z.object({
+          type: z.enum([
+            "focus",
+            "writing",
+            "note",
+            "contests",
+            "latest-posts",
+            "browse-guides"
+          ]),
+          enabled: z.boolean().default(true),
+          title: z.string().default(""),
+          note: z.string().default(""),
+          anchor: z.string().default("")
+        })
+      )
+      .default([]),
+    guestbookSections: z
+      .array(
+        z.object({
+          type: z.enum(["message-ideas", "login-note", "comments"]),
+          enabled: z.boolean().default(true),
+          title: z.string().default(""),
+          note: z.string().default(""),
+          anchor: z.string().default("")
+        })
+      )
+      .default([])
+  })
+});
+
 const siteAbout = defineCollection({
   type: "data",
   schema: z.object({
@@ -375,6 +410,7 @@ export const collections = {
   "site-brand": siteBrand,
   "site-home": siteHome,
   "site-layout": siteLayout,
+  "site-page-layouts": sitePageLayouts,
   "site-about": siteAbout,
   "site-navigation": siteNavigation,
   "site-categories": siteCategories,

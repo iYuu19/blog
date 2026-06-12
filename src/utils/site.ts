@@ -286,3 +286,82 @@ export async function getSiteSettings() {
     ...(commentsEntry?.data ?? {})
   };
 }
+
+export const defaultPageLayouts = {
+  aboutSections: [
+    {
+      type: "focus",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "about-focus"
+    },
+    {
+      type: "writing",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "about-writing"
+    },
+    {
+      type: "note",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "about-note"
+    },
+    {
+      type: "contests",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "about-contests"
+    },
+    {
+      type: "latest-posts",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "about-latest"
+    },
+    {
+      type: "browse-guides",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "about-guides"
+    }
+  ],
+  guestbookSections: [
+    {
+      type: "message-ideas",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "guestbook-ideas"
+    },
+    {
+      type: "login-note",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "guestbook-login"
+    },
+    {
+      type: "comments",
+      enabled: true,
+      title: "",
+      note: "",
+      anchor: "guestbook-comments"
+    }
+  ]
+};
+
+export async function getPageLayouts() {
+  const entry = await getEntry("site-page-layouts", "page-layouts");
+
+  return {
+    ...defaultPageLayouts,
+    ...(entry?.data ?? {})
+  };
+}

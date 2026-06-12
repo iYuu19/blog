@@ -2,9 +2,11 @@
 import { getEntry } from "astro:content";
 import GiscusComments from "../components/GiscusComments.astro";
 import Layout from "../layouts/Layout.astro";
-import { getSiteSettings } from "../utils/site";
+import { slugifySegment } from "../utils/content";
+import { getPageLayouts, getSiteSettings } from "../utils/site";
 
 const site = await getSiteSettings();
+const pageLayouts = await getPageLayouts();
 const guestbook =
   (
     await getEntry("site-guestbook", "guestbook")
@@ -60,6 +62,29 @@ const guestbook =
     commentsTitle: "给我留言",
     commentsDescription: "欢迎在这里留言、交流、提建议，也欢迎告诉我你最想看到哪类内容。"
   };
+
+const guestbookSectionTitleDefaults = {
+  "message-ideas": "聊聊这些也很好",
+  "login-note": guestbook.loginPanelTitle,
+  comments: guestbook.commentsTitle
+};
+
+const guestbookSectionNoteDefaults = {
+  "message-ideas": "",
+  "login-note": guestbook.loginPanelText,
+  comments: guestbook.commentsDescription
+};
+
+const guestbookSections = (pageLayouts.guestbookSections?.length
+  ? pageLayouts.guestbookSections
+  : [])
+  .filter((section) => section.enabled)
+  .map((section, index) => ({
+    ...section,
+    title: section.title || guestbookSectionTitleDefaults[section.type] || `留言板块 ${index + 1}`,
+    note: section.note || guestbookSectionNoteDefaults[section.type] || "",
+    id: slugifySegment(section.anchor || `${section.type}-${index + 1}`)
+  }));
 ---
 
 <Layout title={`${guestbook.heroTitle} | ${site.siteTitle}`} description={guestbook.pageDescription}>
@@ -100,29 +125,51 @@ const guestbook =
     </div>
   </section>
 
-  <section class="shell guestbook-grid section-block">
-    {guestbook.messageIdeas.map((idea) => (
-      <article class="guestbook-card">
-        <p class="guestbook-card-label">{idea.eyebrow}</p>
-        <h2>{idea.title}</h2>
-        <p>{idea.text}</p>
-      </article>
-    ))}
-  </section>
+  {guestbookSections.map((section) => (
+    <>
+      {
+        section.type === "message-ideas" && (
+          <section class="shell guestbook-grid section-block" id={section.id}>
+            {(section.title || section.note) && (
+              <div class="section-head guestbook-section-head">
+                <h2>{section.title}</h2>
+                {section.note && <span class="section-note">{section.note}</span>}
+              </div>
+            )}
+            {guestbook.messageIdeas.map((idea) => (
+              <article class="guestbook-card">
+                <p class="guestbook-card-label">{idea.eyebrow}</p>
+                <h2>{idea.title}</h2>
+                <p>{idea.text}</p>
+              </article>
+            ))}
+          </section>
+        )
+      }
 
-  <section class="shell guestbook-note-wrap section-block">
-    <div class="guestbook-note-panel">
-      <p class="guestbook-note-label">{guestbook.loginPanelEyebrow}</p>
-      <h2>{guestbook.loginPanelTitle}</h2>
-      <p>{guestbook.loginPanelText}</p>
-    </div>
-  </section>
+      {
+        section.type === "login-note" && (
+          <section class="shell guestbook-note-wrap section-block" id={section.id}>
+            <div class="guestbook-note-panel">
+              <p class="guestbook-note-label">{guestbook.loginPanelEyebrow}</p>
+              <h2>{section.title}</h2>
+              <p>{section.note}</p>
+            </div>
+          </section>
+        )
+      }
 
-  <section class="shell article-shell">
-    <GiscusComments
-      eyebrow={guestbook.commentsEyebrow}
-      title={guestbook.commentsTitle}
-      description={guestbook.commentsDescription}
-    />
-  </section>
+      {
+        section.type === "comments" && (
+          <section class="shell article-shell" id={section.id}>
+            <GiscusComments
+              eyebrow={guestbook.commentsEyebrow}
+              title={section.title}
+              description={section.note}
+            />
+          </section>
+        )
+      }
+    </>
+  ))}
 </Layout>
