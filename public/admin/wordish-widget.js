@@ -3,8 +3,8 @@
   const DEFAULT_MEDIA_FOLDER = "public/uploads";
   const DEFAULT_PUBLIC_FOLDER = "/uploads";
   const CHANGE_DEBOUNCE_MS = 180;
-  const MAX_IMAGE_EDGE = 2200;
-  const WEBP_QUALITY = 0.86;
+  const MAX_IMAGE_EDGE = 3200;
+  const JPEG_QUALITY = 0.92;
 
   function ensureGlobals() {
     if (!window.CMS || !window.toastui || !window.toastui.Editor || !window.createClass || !window.h) {
@@ -228,9 +228,8 @@
     const image = await blobToImage(blob);
     const longestEdge = Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height);
     const shouldResize = longestEdge > MAX_IMAGE_EDGE;
-    const shouldReencode = (blob.size || 0) > 350 * 1024 || shouldResize;
 
-    if (!shouldReencode) {
+    if (!shouldResize) {
       return {
         blob,
         extension: extFromMimeType(blob.type)
@@ -254,10 +253,17 @@
     canvas.height = height;
     context.drawImage(image, 0, 0, width, height);
 
-    const optimizedBlob = await canvasToBlob(canvas, "image/webp", WEBP_QUALITY);
+    const outputMimeType = /^image\/jpe?g$/i.test(blob.type || "")
+      ? "image/jpeg"
+      : /^image\/webp$/i.test(blob.type || "")
+        ? "image/webp"
+        : "image/png";
+    const outputQuality = outputMimeType === "image/png" ? undefined : JPEG_QUALITY;
+    const optimizedBlob = await canvasToBlob(canvas, outputMimeType, outputQuality);
+
     return {
       blob: optimizedBlob,
-      extension: "webp"
+      extension: extFromMimeType(outputMimeType)
     };
   }
 
@@ -1087,7 +1093,7 @@
           h(
             "span",
             {},
-            "Paste screenshots, drag images, and keep inline code or fenced code blocks without stuffing base64 into the article body."
+            "Paste screenshots, drag images, and keep inline code or fenced code blocks without stuffing base64 into the article body. Uploaded images now keep their original clarity unless they are extremely large."
           )
         ),
         h(
@@ -1162,7 +1168,7 @@
           {
             className: "wordish-footnote"
           },
-          "Pasted images are uploaded into the repo and stored as normal file paths. That keeps long posts much lighter and makes later typing noticeably smoother."
+          "Pasted images are uploaded into the repo as normal file paths. The editor now keeps the original image format and quality by default, and only scales down images whose longest edge is over 3200px."
         )
       );
     }
