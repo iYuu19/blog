@@ -1673,8 +1673,27 @@ h3 {
 }
 
 .image-lightbox-stage {
-  overflow: auto;
+  overflow: hidden;
   display: grid;
+  place-items: center;
+  min-height: 0;
+  touch-action: none;
+  cursor: default;
+}
+
+.image-lightbox-stage.is-zoomed {
+  cursor: grab;
+}
+
+.image-lightbox-stage.is-dragging {
+  cursor: grabbing;
+}
+
+.image-lightbox-canvas {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
   place-items: center;
 }
 
@@ -1685,6 +1704,14 @@ h3 {
   height: auto;
   border-radius: 16px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+  transform-origin: center center;
+  transition: transform 120ms ease-out;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.image-lightbox-image.is-zoomed {
+  transition: none;
 }
 
 .image-lightbox-close {
