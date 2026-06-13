@@ -149,8 +149,8 @@ const readingMinutes = estimateReadMinutes(post.body);
           const scrollRoot = document.documentElement;
           const tocNodes = Array.from(document.querySelectorAll("[data-toc-node]"));
           let activeId = "";
-          let scrollAnimationFrame = 0;
           let scrollingTargetId = "";
+          let scrollStateTimer = 0;
 
           const headingEntries = tocLinks
             .map((link) => {
@@ -186,7 +186,6 @@ const readingMinutes = estimateReadMinutes(post.body);
               entry.link.classList.toggle("is-trail", isTrail);
               if (isActive) {
                 entry.link.scrollIntoView({
-                  behavior: "smooth",
                   block: "nearest",
                   inline: "nearest"
                 });
@@ -209,10 +208,15 @@ const readingMinutes = estimateReadMinutes(post.body);
           };
 
           const stopSmoothScroll = () => {
-            if (scrollAnimationFrame) {
-              cancelAnimationFrame(scrollAnimationFrame);
-              scrollAnimationFrame = 0;
+            if (scrollStateTimer) {
+              clearTimeout(scrollStateTimer);
+              scrollStateTimer = 0;
             }
+
+            window.scrollTo({
+              top: window.scrollY,
+              behavior: "auto"
+            });
             scrollingTargetId = "";
           };
 
@@ -222,32 +226,39 @@ const readingMinutes = estimateReadMinutes(post.body);
             const startTop = window.scrollY;
             const distance = targetTop - startTop;
             if (Math.abs(distance) < 2) {
-              window.scrollTo(0, targetTop);
+              window.scrollTo({
+                top: targetTop,
+                behavior: "auto"
+              });
               scrollingTargetId = "";
               return;
             }
 
             scrollingTargetId = targetId;
-            const duration = Math.max(160, Math.min(280, Math.abs(distance) * 0.18));
-            const startTime = performance.now();
-            const easeOutCubic = (progress) => 1 - Math.pow(1 - progress, 3);
+            const duration = Math.max(260, Math.min(720, Math.abs(distance) * 0.16));
+            window.scrollTo({
+              top: targetTop,
+              behavior: "smooth"
+            });
 
-            const step = (now) => {
-              const elapsed = now - startTime;
-              const progress = Math.min(1, elapsed / duration);
-              const eased = easeOutCubic(progress);
-              window.scrollTo(0, Math.round(startTop + distance * eased));
-
-              if (progress < 1) {
-                scrollAnimationFrame = requestAnimationFrame(step);
-              } else {
-                scrollAnimationFrame = 0;
-                scrollingTargetId = "";
-                setActive(targetId);
+            const settleScrollState = () => {
+              if (scrollStateTimer) {
+                clearTimeout(scrollStateTimer);
+                scrollStateTimer = 0;
               }
+
+              const targetEntry = headingEntries.find((entry) => entry.id === targetId);
+              const targetRectTop = targetEntry ? targetEntry.heading.getBoundingClientRect().top : 0;
+              if (targetEntry && targetRectTop > 180) {
+                scrollStateTimer = window.setTimeout(settleScrollState, 120);
+                return;
+              }
+
+              scrollingTargetId = "";
+              setActive(targetId);
             };
 
-            scrollAnimationFrame = requestAnimationFrame(step);
+            scrollStateTimer = window.setTimeout(settleScrollState, duration);
           };
 
           const jumpToHeading = (entry) => {
@@ -291,7 +302,7 @@ const readingMinutes = estimateReadMinutes(post.body);
           window.addEventListener(
             "wheel",
             () => {
-              if (scrollAnimationFrame) {
+              if (scrollingTargetId) {
                 stopSmoothScroll();
               }
             },
@@ -300,7 +311,7 @@ const readingMinutes = estimateReadMinutes(post.body);
 
           window.addEventListener("touchstart", stopSmoothScroll, { passive: true });
           window.addEventListener("keydown", (event) => {
-            if (scrollAnimationFrame && ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", "Space"].includes(event.code)) {
+            if (scrollingTargetId && ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", "Space"].includes(event.code)) {
               stopSmoothScroll();
             }
           });
