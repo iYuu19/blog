@@ -1,10 +1,18 @@
 ---
 import { getCollection, render } from "astro:content";
+import ArticleTocTree from "../../components/ArticleTocTree.astro";
 import GiscusComments from "../../components/GiscusComments.astro";
 import Layout from "../../layouts/Layout.astro";
 import TagPill from "../../components/TagPill.astro";
 import { getContestSlug } from "../../utils/content";
 import { getSiteSettings } from "../../utils/site";
+
+interface TocNode {
+  depth: number;
+  slug: string;
+  text: string;
+  children: TocNode[];
+}
 
 function estimateReadMinutes(markdown: string) {
   const plainText = markdown
@@ -16,6 +24,32 @@ function estimateReadMinutes(markdown: string) {
     .replace(/\s+/g, "");
 
   return Math.max(1, Math.round(plainText.length / 480));
+}
+
+function buildTocTree(items: Array<{ depth: number; slug: string; text: string }>) {
+  const root: TocNode[] = [];
+  const stack: TocNode[] = [];
+
+  for (const item of items) {
+    const node: TocNode = {
+      ...item,
+      children: []
+    };
+
+    while (stack.length > 0 && stack[stack.length - 1].depth >= item.depth) {
+      stack.pop();
+    }
+
+    if (stack.length === 0) {
+      root.push(node);
+    } else {
+      stack[stack.length - 1].children.push(node);
+    }
+
+    stack.push(node);
+  }
+
+  return root;
 }
 
 export async function getStaticPaths() {
@@ -52,6 +86,7 @@ const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-
 const contestLabel = post.data.contest || post.data.oj || null;
 const contestHref = contestLabel ? `/contests/${getContestSlug(post)}/` : null;
 const tocItems = headings.filter(({ depth, slug, text }) => depth >= 2 && depth <= 4 && slug && text);
+const tocTree = buildTocTree(tocItems);
 const readingMinutes = estimateReadMinutes(post.body);
 ---
 
@@ -67,15 +102,7 @@ const readingMinutes = estimateReadMinutes(post.body);
           <div class="site-index article-index">
             <p class="index-title">本文目录</p>
             <p class="article-index-meta">{tocItems.length} sections · {readingMinutes} min read</p>
-            <ul class="index-list article-index-list">
-              {tocItems.map((item) => (
-                <li class:list={["article-index-item", `article-index-depth-${item.depth}`]} data-depth={item.depth}>
-                  <a href={`#${item.slug}`} data-toc-link={item.slug} title={item.text}>
-                    {item.text}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <ArticleTocTree nodes={tocTree} />
           </div>
         </aside>
       )
@@ -120,6 +147,7 @@ const readingMinutes = estimateReadMinutes(post.body);
           const tocLinks = Array.from(document.querySelectorAll("[data-toc-link]"));
           if (tocLinks.length === 0) return;
           const scrollRoot = document.documentElement;
+          const tocNodes = Array.from(document.querySelectorAll("[data-toc-node]"));
           let activeId = "";
 
           const headingEntries = tocLinks
@@ -133,17 +161,46 @@ const readingMinutes = estimateReadMinutes(post.body);
           if (headingEntries.length === 0) return;
 
           const setActive = (id) => {
-            if (!id || activeId === id) return;
+            if (!id) return;
+            const currentEntry = headingEntries.find((entry) => entry.id === id);
+            if (!currentEntry) return;
             activeId = id;
+
+            const activeTrailIds = new Set();
+            let currentNode = currentEntry.link.closest("[data-toc-node]");
+            while (currentNode instanceof HTMLElement) {
+              const nodeId = currentNode.dataset.tocNode;
+              if (nodeId) {
+                activeTrailIds.add(nodeId);
+              }
+
+              currentNode = currentNode.parentElement?.closest("[data-toc-node]") ?? null;
+            }
 
             for (const entry of headingEntries) {
               const isActive = entry.id === id;
+              const isTrail = activeTrailIds.has(entry.id);
               entry.link.classList.toggle("is-active", isActive);
+              entry.link.classList.toggle("is-trail", isTrail);
               if (isActive) {
                 entry.link.scrollIntoView({
                   block: "nearest",
                   inline: "nearest"
                 });
+              }
+            }
+
+            for (const node of tocNodes) {
+              if (!(node instanceof HTMLElement)) continue;
+              const nodeId = node.dataset.tocNode || "";
+              const branch = node.querySelector(":scope > [data-toc-branch]");
+              const isCurrent = nodeId === id;
+              const isTrail = activeTrailIds.has(nodeId);
+
+              node.classList.toggle("is-current", isCurrent);
+              node.classList.toggle("is-trail", isTrail);
+              if (branch instanceof HTMLElement) {
+                branch.classList.toggle("is-open", isTrail);
               }
             }
           };
