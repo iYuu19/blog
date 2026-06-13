@@ -226,6 +226,14 @@ a {
   font-size: 13px;
 }
 
+.wordish-draft-note {
+  padding: 10px 14px;
+  border: 1px solid rgba(31, 92, 87, 0.14);
+  border-radius: 12px;
+  background: rgba(233, 243, 241, 0.56);
+  color: var(--admin-accent-strong);
+}
+
 .wordish-error {
   padding: 12px 14px;
   border: 1px solid rgba(178, 70, 57, 0.2);

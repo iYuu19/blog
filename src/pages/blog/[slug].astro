@@ -119,6 +119,8 @@ const readingMinutes = estimateReadMinutes(post.body);
         (() => {
           const tocLinks = Array.from(document.querySelectorAll("[data-toc-link]"));
           if (tocLinks.length === 0) return;
+          const scrollRoot = document.documentElement;
+          let activeId = "";
 
           const headingEntries = tocLinks
             .map((link) => {
@@ -131,6 +133,9 @@ const readingMinutes = estimateReadMinutes(post.body);
           if (headingEntries.length === 0) return;
 
           const setActive = (id) => {
+            if (!id || activeId === id) return;
+            activeId = id;
+
             for (const entry of headingEntries) {
               const isActive = entry.id === id;
               entry.link.classList.toggle("is-active", isActive);
@@ -141,6 +146,24 @@ const readingMinutes = estimateReadMinutes(post.body);
                 });
               }
             }
+          };
+
+          const jumpToHeading = (entry) => {
+            const scrollPaddingTop = Number.parseFloat(getComputedStyle(scrollRoot).scrollPaddingTop) || 0;
+            const targetTop = Math.max(0, window.scrollY + entry.heading.getBoundingClientRect().top - scrollPaddingTop);
+            const nextHash = entry.link.getAttribute("href") || `#${entry.id}`;
+
+            setActive(entry.id);
+            scrollRoot.style.scrollBehavior = "auto";
+            window.scrollTo({
+              top: targetTop,
+              behavior: "auto"
+            });
+            history.replaceState(null, "", nextHash);
+
+            requestAnimationFrame(() => {
+              scrollRoot.style.removeProperty("scroll-behavior");
+            });
           };
 
           const observer = new IntersectionObserver(
@@ -161,6 +184,10 @@ const readingMinutes = estimateReadMinutes(post.body);
 
           for (const entry of headingEntries) {
             observer.observe(entry.heading);
+            entry.link.addEventListener("click", (event) => {
+              event.preventDefault();
+              jumpToHeading(entry);
+            });
           }
 
           setActive(headingEntries[0].id);

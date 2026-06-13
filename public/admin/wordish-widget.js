@@ -3,8 +3,10 @@
   const DEFAULT_MEDIA_FOLDER = "public/uploads";
   const DEFAULT_PUBLIC_FOLDER = "/uploads";
   const CHANGE_DEBOUNCE_MS = 180;
+  const LOCAL_DRAFT_SAVE_MS = 900;
   const MAX_IMAGE_EDGE = 3200;
   const JPEG_QUALITY = 0.92;
+  const LOCAL_DRAFT_STORAGE_PREFIX = "wordish-local-draft";
 
   function ensureGlobals() {
     if (!window.CMS || !window.toastui || !window.toastui.Editor || !window.createClass || !window.h) {
@@ -120,6 +122,15 @@
 
   function trimTrailingSlash(value) {
     return normalizeSlashes(value).replace(/\/+$/, "");
+  }
+
+  function sanitizeStorageToken(value) {
+    return toText(value)
+      .trim()
+      .replace(/[^\w-]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+      .toLowerCase();
   }
 
   function sanitizeFileStem(value) {
@@ -307,6 +318,112 @@
     }
   }
 
+  function getEntryMeta(entry, key) {
+    if (!entry || typeof entry.get !== "function") {
+      return "";
+    }
+
+    const value = entry.get(key);
+    if (typeof value === "string") {
+      return value;
+    }
+
+    if (typeof value === "number") {
+      return String(value);
+    }
+
+    return "";
+  }
+
+  function buildLocalDraftKey(entry, forID) {
+    const parts = [
+      getEntryMeta(entry, "collection"),
+      getEntryMeta(entry, "slug"),
+      getEntryMeta(entry, "path"),
+      getEntryField(entry, "title"),
+      window.location.hash,
+      forID
+    ]
+      .map(sanitizeStorageToken)
+      .filter(Boolean);
+
+    return `${LOCAL_DRAFT_STORAGE_PREFIX}:${parts.join(":") || "editor"}`;
+  }
+
+  function readLocalDraftSnapshot(key) {
+    if (!key) {
+      return null;
+    }
+
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) {
+        return null;
+      }
+
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed.value !== "string") {
+        return null;
+      }
+
+      return {
+        value: parsed.value,
+        savedAt: toText(parsed.savedAt)
+      };
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  function writeLocalDraftSnapshot(key, value, savedAt) {
+    if (!key) {
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(
+        key,
+        JSON.stringify({
+          value,
+          savedAt
+        })
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  function clearLocalDraftSnapshot(key) {
+    if (!key) {
+      return;
+    }
+
+    try {
+      window.localStorage.removeItem(key);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  function formatLocalDraftTime(savedAt) {
+    if (!savedAt) {
+      return "";
+    }
+
+    try {
+      return new Intl.DateTimeFormat("zh-CN", {
+        month: "numeric",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(new Date(savedAt));
+    } catch (error) {
+      console.error(error);
+      return "";
+    }
+  }
+
   function buildUploadFileName(originalName, extension) {
     const timestamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
     const randomPart = Math.random().toString(36).slice(2, 8);
@@ -427,6 +544,7 @@
         errorMessage: "",
         previewHtml: "",
         showReaderPreview: true,
+        draftNotice: "Local backup is ready once you start writing.",
         writingInsights: analyzeMarkdown(toText(this.props.value))
       };
     },
@@ -434,12 +552,19 @@
     componentDidMount() {
       this.lastKnownValue = toText(this.props.value);
       this.changeTimer = null;
+      this.localDraftTimer = null;
+      this.localDraftKey = buildLocalDraftKey(this.props.entry, this.props.forID);
       this.mountEditor();
     },
 
     componentDidUpdate(prevProps) {
       if (!this.editor) {
         return;
+      }
+
+      const nextDraftKey = buildLocalDraftKey(this.props.entry, this.props.forID);
+      if (nextDraftKey !== this.localDraftKey) {
+        this.localDraftKey = nextDraftKey;
       }
 
       const previousValue = toText(prevProps.value);
@@ -462,6 +587,7 @@
     },
 
     componentWillUnmount() {
+      this.flushLocalDraft();
       this.flushPendingChange();
 
       if (this.editor) {
@@ -486,6 +612,89 @@
         });
         return false;
       }
+    },
+
+    queueLocalDraftSave(markdown) {
+      if (this.localDraftTimer) {
+        window.clearTimeout(this.localDraftTimer);
+      }
+
+      const nextValue = typeof markdown === "string" ? markdown : this.editor ? this.editor.getMarkdown() : "";
+      this.localDraftTimer = window.setTimeout(() => {
+        this.localDraftTimer = null;
+        this.persistLocalDraft(nextValue);
+      }, LOCAL_DRAFT_SAVE_MS);
+    },
+
+    flushLocalDraft() {
+      if (this.localDraftTimer) {
+        window.clearTimeout(this.localDraftTimer);
+        this.localDraftTimer = null;
+      }
+
+      if (!this.editor) {
+        return;
+      }
+
+      this.persistLocalDraft(this.editor.getMarkdown());
+    },
+
+    persistLocalDraft(markdown) {
+      if (!this.localDraftKey) {
+        return;
+      }
+
+      const nextValue = toText(markdown);
+      if (!nextValue.trim()) {
+        clearLocalDraftSnapshot(this.localDraftKey);
+        this.setDraftNotice("Local backup is ready once you start writing.");
+        return;
+      }
+
+      const savedAt = new Date().toISOString();
+      writeLocalDraftSnapshot(this.localDraftKey, nextValue, savedAt);
+      const label = formatLocalDraftTime(savedAt);
+      this.setDraftNotice(label ? `Local backup saved ${label}.` : "Local backup saved just now.");
+    },
+
+    setDraftNotice(message) {
+      if (this.state.draftNotice === message) {
+        return;
+      }
+
+      this.setState({
+        draftNotice: message
+      });
+    },
+
+    resolveInitialEditorValue() {
+      const baseValue = toText(this.props.value);
+      const snapshot = readLocalDraftSnapshot(this.localDraftKey);
+
+      if (!snapshot || !snapshot.value || snapshot.value === baseValue) {
+        if (snapshot && snapshot.savedAt) {
+          const label = formatLocalDraftTime(snapshot.savedAt);
+          this.setDraftNotice(label ? `Local backup saved ${label}.` : "Local backup is ready.");
+        }
+
+        return baseValue;
+      }
+
+      const savedAtLabel = formatLocalDraftTime(snapshot.savedAt);
+      const shouldRestore = window.confirm(
+        savedAtLabel
+          ? `Found an unsaved local backup from ${savedAtLabel}. Restore it into the editor?`
+          : "Found an unsaved local backup for this article. Restore it into the editor?"
+      );
+
+      if (shouldRestore) {
+        this.restoredLocalDraft = true;
+        this.setDraftNotice(savedAtLabel ? `Recovered local backup from ${savedAtLabel}.` : "Recovered a local backup.");
+        return snapshot.value;
+      }
+
+      this.setDraftNotice(savedAtLabel ? `Kept an older local backup from ${savedAtLabel}.` : "Kept an older local backup.");
+      return baseValue;
     },
 
     scheduleChange() {
@@ -553,7 +762,9 @@
     },
 
     handleEditorChange() {
+      const nextMarkdown = this.editor ? this.editor.getMarkdown() : "";
       this.scheduleChange();
+      this.queueLocalDraftSave(nextMarkdown);
       this.refreshPreview();
     },
 
@@ -617,11 +828,12 @@
       }
 
       try {
+        const initialValue = this.resolveInitialEditorValue();
         this.editor = new Editor({
           el: this.editorRoot,
           height: "720px",
           minHeight: "520px",
-          initialValue: toText(this.props.value),
+          initialValue,
           initialEditType: "wysiwyg",
           previewStyle: "tab",
           hideModeSwitch: false,
@@ -635,8 +847,14 @@
           }
         });
 
+        this.lastKnownValue = initialValue;
         this.editor.on("change", this.handleEditorChange);
         this.refreshPreview();
+
+        if (this.restoredLocalDraft && initialValue !== toText(this.props.value)) {
+          this.restoredLocalDraft = false;
+          this.props.onChange(initialValue);
+        }
       } catch (error) {
         console.error(error);
         this.setState({
@@ -1145,6 +1363,15 @@
                 className: "wordish-hint"
               },
               hint
+            )
+          : null,
+        this.state.draftNotice
+          ? h(
+              "p",
+              {
+                className: "wordish-hint wordish-draft-note"
+              },
+              this.state.draftNotice
             )
           : null,
         this.state.errorMessage
