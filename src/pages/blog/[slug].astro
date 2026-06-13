@@ -14,7 +14,7 @@ interface TocNode {
   children: TocNode[];
 }
 
-function estimateReadMinutes(markdown: string) {
+function analyzeArticleContent(markdown: string) {
   const plainText = markdown
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/`[^`]*`/g, " ")
@@ -23,7 +23,15 @@ function estimateReadMinutes(markdown: string) {
     .replace(/[#>*_\-\n\r]/g, " ")
     .replace(/\s+/g, "");
 
-  return Math.max(1, Math.round(plainText.length / 480));
+  return {
+    readingMinutes: Math.max(1, Math.round(plainText.length / 480)),
+    headingCount: (markdown.match(/^#{2,4}\s+.+$/gm) || []).length,
+    imageCount: (markdown.match(/!\[[^\]]*\]\([^)]+\)/g) || []).length,
+    codeBlockCount: Math.floor((markdown.match(/```/g) || []).length / 2),
+    linkCount: (
+      markdown.replace(/!\[[^\]]*\]\([^)]+\)/g, "").match(/\[[^\]]+\]\([^)]+\)/g) || []
+    ).length
+  };
 }
 
 function buildTocTree(items: Array<{ depth: number; slug: string; text: string }>) {
@@ -87,7 +95,8 @@ const contestLabel = post.data.contest || post.data.oj || null;
 const contestHref = contestLabel ? `/contests/${getContestSlug(post)}/` : null;
 const tocItems = headings.filter(({ depth, slug, text }) => depth >= 2 && depth <= 4 && slug && text);
 const tocTree = buildTocTree(tocItems);
-const readingMinutes = estimateReadMinutes(post.body);
+const articleSignals = analyzeArticleContent(post.body);
+const readingMinutes = articleSignals.readingMinutes;
 ---
 
 <Layout
@@ -96,19 +105,81 @@ const readingMinutes = estimateReadMinutes(post.body);
   socialImage={post.data.coverImage || site.defaultCoverImage || site.defaultSocialImage}
 >
   <section class="shell article-layout fade-up">
-    {
-      tocItems.length > 0 && (
-        <aside class="index-column article-index-column">
-          <div class="site-index article-index">
-            <p class="index-title">本文目录</p>
-            <p class="article-index-meta">{tocItems.length} sections · {readingMinutes} min read</p>
-            <ArticleTocTree nodes={tocTree} />
-          </div>
-        </aside>
-      )
-    }
+    <aside class="index-column article-index-column">
+      <div class="article-rail">
+        {
+          tocItems.length > 0 && (
+            <div class="site-index article-index">
+              <p class="index-title">本文目录</p>
+              <p class="article-index-meta">{tocItems.length} sections · {readingMinutes} min read</p>
+              <ArticleTocTree nodes={tocTree} />
+            </div>
+          )
+        }
 
-    <article class="article-shell">
+        <section class="article-rail-card article-overview-card">
+          <div class="article-overview-head">
+            <div>
+              <p class="index-title">阅读概览</p>
+              <p class="article-overview-current-label">当前章节</p>
+            </div>
+            <span class="article-overview-progress-value" data-reading-progress-value>0%</span>
+          </div>
+
+          <div class="article-overview-progress" aria-hidden="true">
+            <span data-reading-progress-bar></span>
+          </div>
+
+          <p class="article-overview-current" data-reading-current-title data-default-title={post.data.title}>
+            {tocItems[0]?.text ?? post.data.title}
+          </p>
+
+          <div class="article-overview-pills">
+            <span>{post.data.category}</span>
+            {post.data.track && <span>{post.data.track}</span>}
+            {contestLabel && <span>{contestLabel}</span>}
+          </div>
+
+          <div class="article-overview-grid">
+            <div class="article-overview-stat">
+              <span>阅读</span>
+              <strong>{readingMinutes}</strong>
+              <small>分钟</small>
+            </div>
+            <div class="article-overview-stat">
+              <span>小节</span>
+              <strong>{articleSignals.headingCount}</strong>
+              <small>sections</small>
+            </div>
+            <div class="article-overview-stat">
+              <span>图片</span>
+              <strong>{articleSignals.imageCount}</strong>
+              <small>images</small>
+            </div>
+            <div class="article-overview-stat">
+              <span>代码</span>
+              <strong>{articleSignals.codeBlockCount}</strong>
+              <small>blocks</small>
+            </div>
+          </div>
+
+          <p class="article-overview-note">
+            标签 {post.data.tags.length} 个，链接 {articleSignals.linkCount} 个。左侧现在更像阅读工具区，不再只是一个占地方的目录卡片。
+          </p>
+
+          <div class="article-rail-actions">
+            <button type="button" class="article-rail-button" data-scroll-top>
+              回到顶部
+            </button>
+            <button type="button" class="article-rail-button is-soft" data-scroll-comments>
+              跳到评论区
+            </button>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <article class="article-shell" data-article-content>
       <header class="article-header">
         <p class="article-back">
           <a href="/blog">返回文章列表</a>
@@ -136,7 +207,9 @@ const readingMinutes = estimateReadMinutes(post.body);
         <Content />
       </div>
 
-      <GiscusComments />
+      <div data-comments-anchor>
+        <GiscusComments />
+      </div>
     </article>
   </section>
 
@@ -321,6 +394,100 @@ const readingMinutes = estimateReadMinutes(post.body);
       </script>
     )
   }
+
+  <script is:inline>
+    (() => {
+      const article = document.querySelector("[data-article-content]");
+      const currentTitle = document.querySelector("[data-reading-current-title]");
+      const progressValue = document.querySelector("[data-reading-progress-value]");
+      const progressBar = document.querySelector("[data-reading-progress-bar]");
+      const scrollTopButton = document.querySelector("[data-scroll-top]");
+      const scrollCommentsButton = document.querySelector("[data-scroll-comments]");
+      const commentsAnchor = document.querySelector("[data-comments-anchor]");
+
+      if (!(article instanceof HTMLElement) || !(progressBar instanceof HTMLElement)) {
+        return;
+      }
+
+      const headings = Array.from(article.querySelectorAll("h2[id], h3[id], h4[id]"));
+      const scrollRoot = document.documentElement;
+      const defaultTitle =
+        currentTitle instanceof HTMLElement ? currentTitle.getAttribute("data-default-title") || "" : "";
+      let frameId = 0;
+
+      const getScrollPaddingTop = () =>
+        Number.parseFloat(getComputedStyle(scrollRoot).scrollPaddingTop) || 0;
+
+      const updateCurrentTitle = () => {
+        if (!(currentTitle instanceof HTMLElement)) return;
+
+        let nextTitle = defaultTitle;
+        for (const heading of headings) {
+          if (!(heading instanceof HTMLElement)) continue;
+          if (heading.getBoundingClientRect().top - getScrollPaddingTop() <= 40) {
+            nextTitle = heading.textContent?.trim() || defaultTitle;
+            continue;
+          }
+          break;
+        }
+
+        currentTitle.textContent = nextTitle || defaultTitle;
+      };
+
+      const updateProgress = () => {
+        const scrollPaddingTop = getScrollPaddingTop();
+        const start = Math.max(0, article.offsetTop - scrollPaddingTop);
+        const endAnchor = commentsAnchor instanceof HTMLElement ? commentsAnchor.offsetTop : article.offsetTop + article.offsetHeight;
+        const total = Math.max(1, endAnchor - start - window.innerHeight * 0.4);
+        const travelled = Math.min(total, Math.max(0, window.scrollY - start));
+        const percent = Math.max(0, Math.min(100, Math.round((travelled / total) * 100)));
+
+        progressBar.style.width = `${percent}%`;
+        if (progressValue instanceof HTMLElement) {
+          progressValue.textContent = `${percent}%`;
+        }
+      };
+
+      const syncRail = () => {
+        frameId = 0;
+        updateProgress();
+        updateCurrentTitle();
+      };
+
+      const requestSync = () => {
+        if (frameId) return;
+        frameId = window.requestAnimationFrame(syncRail);
+      };
+
+      if (scrollTopButton instanceof HTMLButtonElement) {
+        scrollTopButton.addEventListener("click", () => {
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+        });
+      }
+
+      if (scrollCommentsButton instanceof HTMLButtonElement) {
+        if (commentsAnchor instanceof HTMLElement) {
+          scrollCommentsButton.addEventListener("click", () => {
+            const scrollPaddingTop = getScrollPaddingTop();
+            const targetTop = Math.max(0, commentsAnchor.offsetTop - scrollPaddingTop);
+            window.scrollTo({
+              top: targetTop,
+              behavior: "smooth"
+            });
+          });
+        } else {
+          scrollCommentsButton.disabled = true;
+        }
+      }
+
+      window.addEventListener("scroll", requestSync, { passive: true });
+      window.addEventListener("resize", requestSync);
+      requestSync();
+    })();
+  </script>
 
   <script is:inline>
     (() => {
