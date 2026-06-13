@@ -149,6 +149,7 @@ const readingMinutes = estimateReadMinutes(post.body);
           const scrollRoot = document.documentElement;
           const tocNodes = Array.from(document.querySelectorAll("[data-toc-node]"));
           let activeId = "";
+          let scrollAnimationFrame = 0;
 
           const headingEntries = tocLinks
             .map((link) => {
@@ -206,22 +207,50 @@ const readingMinutes = estimateReadMinutes(post.body);
             }
           };
 
+          const smoothScrollTo = (targetTop) => {
+            if (scrollAnimationFrame) {
+              cancelAnimationFrame(scrollAnimationFrame);
+              scrollAnimationFrame = 0;
+            }
+
+            const startTop = window.scrollY;
+            const distance = targetTop - startTop;
+            if (Math.abs(distance) < 2) {
+              window.scrollTo(0, targetTop);
+              return;
+            }
+
+            const duration = 420;
+            const startTime = performance.now();
+            const easeInOutCubic = (progress) =>
+              progress < 0.5
+                ? 4 * progress * progress * progress
+                : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+            const step = (now) => {
+              const elapsed = now - startTime;
+              const progress = Math.min(1, elapsed / duration);
+              const eased = easeInOutCubic(progress);
+              window.scrollTo(0, Math.round(startTop + distance * eased));
+
+              if (progress < 1) {
+                scrollAnimationFrame = requestAnimationFrame(step);
+              } else {
+                scrollAnimationFrame = 0;
+              }
+            };
+
+            scrollAnimationFrame = requestAnimationFrame(step);
+          };
+
           const jumpToHeading = (entry) => {
             const scrollPaddingTop = Number.parseFloat(getComputedStyle(scrollRoot).scrollPaddingTop) || 0;
             const targetTop = Math.max(0, window.scrollY + entry.heading.getBoundingClientRect().top - scrollPaddingTop);
             const nextHash = entry.link.getAttribute("href") || `#${entry.id}`;
 
             setActive(entry.id);
-            scrollRoot.style.scrollBehavior = "auto";
-            window.scrollTo({
-              top: targetTop,
-              behavior: "auto"
-            });
             history.replaceState(null, "", nextHash);
-
-            requestAnimationFrame(() => {
-              scrollRoot.style.removeProperty("scroll-behavior");
-            });
+            smoothScrollTo(targetTop);
           };
 
           const observer = new IntersectionObserver(
