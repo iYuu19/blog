@@ -1214,7 +1214,8 @@ h3 {
   max-height: calc(100vh - 120px);
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-width: thin;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
   border-left: 0;
   padding: 18px 14px 18px 12px;
   border: 1px solid rgba(222, 215, 203, 0.7);
@@ -1224,6 +1225,10 @@ h3 {
     linear-gradient(180deg, rgba(255, 253, 249, 0.84), rgba(247, 242, 234, 0.7));
   box-shadow: 0 14px 30px rgba(20, 24, 28, 0.05);
   backdrop-filter: blur(10px);
+}
+
+.article-index::-webkit-scrollbar {
+  display: none;
 }
 
 .article-rail-card {
