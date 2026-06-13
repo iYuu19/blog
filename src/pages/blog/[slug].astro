@@ -150,6 +150,7 @@ const readingMinutes = estimateReadMinutes(post.body);
           const tocNodes = Array.from(document.querySelectorAll("[data-toc-node]"));
           let activeId = "";
           let scrollAnimationFrame = 0;
+          let scrollingTargetId = "";
 
           const headingEntries = tocLinks
             .map((link) => {
@@ -207,36 +208,42 @@ const readingMinutes = estimateReadMinutes(post.body);
             }
           };
 
-          const smoothScrollTo = (targetTop) => {
+          const stopSmoothScroll = () => {
             if (scrollAnimationFrame) {
               cancelAnimationFrame(scrollAnimationFrame);
               scrollAnimationFrame = 0;
             }
+            scrollingTargetId = "";
+          };
+
+          const smoothScrollTo = (targetTop, targetId) => {
+            stopSmoothScroll();
 
             const startTop = window.scrollY;
             const distance = targetTop - startTop;
             if (Math.abs(distance) < 2) {
               window.scrollTo(0, targetTop);
+              scrollingTargetId = "";
               return;
             }
 
-            const duration = 420;
+            scrollingTargetId = targetId;
+            const duration = Math.max(160, Math.min(280, Math.abs(distance) * 0.18));
             const startTime = performance.now();
-            const easeInOutCubic = (progress) =>
-              progress < 0.5
-                ? 4 * progress * progress * progress
-                : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+            const easeOutCubic = (progress) => 1 - Math.pow(1 - progress, 3);
 
             const step = (now) => {
               const elapsed = now - startTime;
               const progress = Math.min(1, elapsed / duration);
-              const eased = easeInOutCubic(progress);
+              const eased = easeOutCubic(progress);
               window.scrollTo(0, Math.round(startTop + distance * eased));
 
               if (progress < 1) {
                 scrollAnimationFrame = requestAnimationFrame(step);
               } else {
                 scrollAnimationFrame = 0;
+                scrollingTargetId = "";
+                setActive(targetId);
               }
             };
 
@@ -250,7 +257,7 @@ const readingMinutes = estimateReadMinutes(post.body);
 
             setActive(entry.id);
             history.replaceState(null, "", nextHash);
-            smoothScrollTo(targetTop);
+            smoothScrollTo(targetTop, entry.id);
           };
 
           const observer = new IntersectionObserver(
@@ -258,6 +265,10 @@ const readingMinutes = estimateReadMinutes(post.body);
               const visible = entries
                 .filter((entry) => entry.isIntersecting)
                 .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+              if (scrollingTargetId) {
+                return;
+              }
 
               if (visible.length > 0) {
                 setActive(visible[0].target.id);
@@ -276,6 +287,23 @@ const readingMinutes = estimateReadMinutes(post.body);
               jumpToHeading(entry);
             });
           }
+
+          window.addEventListener(
+            "wheel",
+            () => {
+              if (scrollAnimationFrame) {
+                stopSmoothScroll();
+              }
+            },
+            { passive: true }
+          );
+
+          window.addEventListener("touchstart", stopSmoothScroll, { passive: true });
+          window.addEventListener("keydown", (event) => {
+            if (scrollAnimationFrame && ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", "Space"].includes(event.code)) {
+              stopSmoothScroll();
+            }
+          });
 
           setActive(headingEntries[0].id);
         })();
