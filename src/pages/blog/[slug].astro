@@ -184,6 +184,7 @@ const readingMinutes = estimateReadMinutes(post.body);
               entry.link.classList.toggle("is-trail", isTrail);
               if (isActive) {
                 entry.link.scrollIntoView({
+                  behavior: "smooth",
                   block: "nearest",
                   inline: "nearest"
                 });
