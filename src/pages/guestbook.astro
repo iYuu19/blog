@@ -212,30 +212,6 @@ const guestbookQuickLinks = Array.isArray(guestbook.quickLinks) ? guestbook.quic
     </>
   ))}
 
-  <script is:inline>
-    (() => {
-      const pad = (value) => String(value).padStart(2, "0");
-
-      const updateGuestbookClock = () => {
-        const now = new Date();
-        const dateText = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())}`;
-        const timeText = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-
-        document.querySelectorAll("[data-guestbook-live-date]").forEach((node) => {
-          node.textContent = dateText;
-        });
-
-        document.querySelectorAll("[data-guestbook-live-time]").forEach((node) => {
-          node.textContent = timeText;
-        });
-      };
-
-      updateGuestbookClock();
-      const timer = window.setInterval(updateGuestbookClock, 15000);
-      window.addEventListener("pagehide", () => window.clearInterval(timer), { once: true });
-    })();
-  </script>
-
   <style>
     :global(body.theme-shinchan) {
       background:

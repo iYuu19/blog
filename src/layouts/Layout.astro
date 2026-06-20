@@ -110,325 +110,94 @@ const bodyClass = [
     </main>
     <Footer />
     <script is:inline>
-      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const root = document.documentElement;
-      const body = document.body;
-      const isHomePage = body?.dataset.homePage === "true";
+      const siteState = window.__iyuuSiteState ??= {
+        lifecycleBound: false,
+        pageCleanup: undefined,
+        persistentReady: false,
+        themeReady: false
+      };
 
-      const initWelcomeVoice = () => {
-        if (!isHomePage) {
-          return;
-        }
-
-        const sessionKey = "iyuu-home-welcome-played";
-
-        try {
-          if (window.sessionStorage.getItem(sessionKey) === "1") {
-            return;
+      const cleanupPageEnhancements = () => {
+        if (typeof siteState.pageCleanup === "function") {
+          try {
+            siteState.pageCleanup();
+          } catch (error) {
+            // Ignore cleanup failures so the next init still runs.
           }
-        } catch (error) {
-          // Ignore storage failures and continue with a best-effort greeting.
         }
+
+        siteState.pageCleanup = undefined;
+      };
+
+      const applyThemePreference = (isDark) => {
+        document.documentElement.classList.toggle("is-dark-mode", isDark);
+        document.getElementById("theme-toggle")?.classList.toggle("is-dark", isDark);
 
         try {
-          const welcomeAudio = new Audio("/theme/audio/welcome-home.mp3");
-          welcomeAudio.preload = "auto";
-          welcomeAudio.volume = 0.96;
-          welcomeAudio.load();
-
-          let hasPlayed = false;
-
-          const fallbackEvents = [
-            ["wheel", { passive: true }],
-            ["touchmove", { passive: true }],
-            ["touchstart", { passive: true }],
-            ["pointerdown", { passive: true }],
-            ["keydown", false]
-          ];
-
-          const cleanup = () => {
-            fallbackEvents.forEach(([eventName, options]) => {
-              window.removeEventListener(eventName, playWelcomeLine, options);
-            });
-          };
-
-          const markPlayed = () => {
-            if (hasPlayed) {
-              return;
-            }
-
-            hasPlayed = true;
-
-            try {
-              window.sessionStorage.setItem(sessionKey, "1");
-            } catch (error) {
-              // Ignore storage failures.
-            }
-
-            cleanup();
-          };
-
-          const playWelcomeLine = () => {
-            if (hasPlayed) {
-              return;
-            }
-
-            try {
-              welcomeAudio.currentTime = 0;
-              const playback = welcomeAudio.play();
-
-              if (playback && typeof playback.then === "function") {
-                playback.then(markPlayed).catch(() => {
-                  // Wait for a user gesture and try again.
-                });
-              } else {
-                markPlayed();
-              }
-            } catch (error) {
-              // Ignore playback failures and wait for the next gesture.
-            }
-          };
-
-          welcomeAudio.addEventListener("play", markPlayed, { once: true });
-          window.setTimeout(playWelcomeLine, 320);
-          fallbackEvents.forEach(([eventName, options]) => {
-            window.addEventListener(eventName, playWelcomeLine, options);
-          });
+          window.localStorage.setItem("theme-preference", isDark ? "dark" : "light");
         } catch (error) {
-          // Ignore welcome voice failures so they never affect page rendering.
+          // Ignore storage failures.
         }
       };
 
-      const updateScrollProgress = () => {
-        const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const progress = scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0;
-        root.style.setProperty("--scroll-progress", progress.toFixed(4));
+      const syncThemeToggle = () => {
+        document
+          .getElementById("theme-toggle")
+          ?.classList.toggle("is-dark", document.documentElement.classList.contains("is-dark-mode"));
       };
 
-      const heroCard = document.querySelector(".hero-card-illustrated");
-      const motionPointer = window.matchMedia("(pointer: fine)").matches;
-
-      if (heroCard && !prefersReducedMotion && motionPointer) {
-        heroCard.addEventListener("pointermove", (event) => {
-          const rect = heroCard.getBoundingClientRect();
-          const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
-          const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
-
-          heroCard.style.setProperty("--hero-x", x.toFixed(3));
-          heroCard.style.setProperty("--hero-y", y.toFixed(3));
-        });
-
-        heroCard.addEventListener("pointerleave", () => {
-          heroCard.style.setProperty("--hero-x", "0");
-          heroCard.style.setProperty("--hero-y", "0");
-        });
-      }
-
-      const playfulCards = Array.from(
-        document.querySelectorAll(
-          ".hero-note-card, .overview-panel, .shinchan-cast-card, .signal-card, .route-card, .track-board, .tag-board, .featured-card, .rich-section-card"
-        )
-      );
-
-      if (!prefersReducedMotion && motionPointer) {
-        playfulCards.forEach((card) => {
-          card.addEventListener("pointermove", (event) => {
-            const rect = card.getBoundingClientRect();
-            const x = ((event.clientX - rect.left) / rect.width) * 100;
-            const y = ((event.clientY - rect.top) / rect.height) * 100;
-
-            card.style.setProperty("--spot-x", `${x.toFixed(1)}%`);
-            card.style.setProperty("--spot-y", `${y.toFixed(1)}%`);
-          });
-        });
-      }
-
-      const revealTargets = Array.from(
-        document.querySelectorAll(
-          ".hero-card, .home-overview, .overview-panel, .shinchan-speech, .shinchan-showcase, .shinchan-cast-card, .section, .route-card, .signal-card, .track-board, .tag-board, .rich-section-card, .featured-card"
-        )
-      );
-
-      const showRevealTargets = () => {
-        revealTargets.forEach((element) => element.classList.add("is-visible"));
-      };
-
-      const initRevealTargets = () => {
-        if (prefersReducedMotion || !("IntersectionObserver" in window)) {
-          showRevealTargets();
+      const initThemePreference = () => {
+        if (siteState.themeReady) {
+          syncThemeToggle();
           return;
         }
 
+        siteState.themeReady = true;
+
+        let savedTheme = null;
         try {
-          revealTargets.forEach((element, index) => {
-            element.style.setProperty("--reveal-delay", `${Math.min(index * 28, 220)}ms`);
-          });
+          savedTheme = window.localStorage.getItem("theme-preference");
+        } catch (error) {
+          savedTheme = null;
+        }
 
-          const revealObserver = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                if (!entry.isIntersecting) {
-                  return;
-                }
-
-                entry.target.classList.add("is-visible");
-                revealObserver.unobserve(entry.target);
-              });
-            },
-            {
-              threshold: 0.14,
-              rootMargin: "0px 0px -48px 0px"
-            }
+        if (savedTheme === "dark") {
+          applyThemePreference(true);
+        } else if (savedTheme === "light") {
+          applyThemePreference(false);
+        } else {
+          document.documentElement.classList.toggle(
+            "is-dark-mode",
+            window.matchMedia("(prefers-color-scheme: dark)").matches
           );
-
-          revealTargets.forEach((element) => revealObserver.observe(element));
-
-          window.setTimeout(() => {
-            revealTargets.forEach((element) => {
-              const rect = element.getBoundingClientRect();
-              if (rect.top < window.innerHeight * 1.1) {
-                element.classList.add("is-visible");
-              }
-            });
-          }, 180);
-
-          window.setTimeout(showRevealTargets, 1400);
-        } catch (error) {
-          showRevealTargets();
+          syncThemeToggle();
         }
+
+        const colorSchemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        colorSchemeQuery.addEventListener("change", (event) => {
+          let storedTheme = null;
+
+          try {
+            storedTheme = window.localStorage.getItem("theme-preference");
+          } catch (error) {
+            storedTheme = null;
+          }
+
+          if (!storedTheme) {
+            document.documentElement.classList.toggle("is-dark-mode", event.matches);
+            syncThemeToggle();
+          }
+        });
       };
 
-      initRevealTargets();
-
-      updateScrollProgress();
-      window.addEventListener("scroll", updateScrollProgress, { passive: true });
-      window.addEventListener("resize", updateScrollProgress);
-      try {
-        initWelcomeVoice();
-      } catch (error) {
-        // Ignore welcome voice failures so content rendering still works.
-      }
-
-      /* ===== 瑙掕壊鍔ㄧ敾鑴氭湰 ===== */
-      (function initCharacterAnimations() {
-        if (prefersReducedMotion) return;
-
-        const walker = document.getElementById("shinchan-walker");
-        const shiro = document.getElementById("shiro-corner");
-        const actionFlyer = document.getElementById("action-flyer");
-
-        if (walker) {
-          let walkerVisible = false;
-          function triggerWalker() {
-            if (walkerVisible) return;
-            walkerVisible = true;
-            const direction = Math.random() > 0.5 ? 1 : -1;
-            const startX = direction === 1 ? -120 : window.innerWidth + 120;
-            const endX = direction === 1 ? window.innerWidth + 120 : -120;
-            walker.style.transform = `scaleX(${direction})`;
-            walker.style.left = startX + "px";
-            walker.classList.add("is-walking");
-
-            const duration = 12000 + Math.random() * 8000;
-            const startTime = performance.now();
-
-            function animateWalker(now) {
-              const elapsed = now - startTime;
-              const progress = Math.min(elapsed / duration, 1);
-              const currentX = startX + (endX - startX) * progress;
-              walker.style.left = currentX + "px";
-
-              const bounce = Math.sin(elapsed / 180) * 3;
-              walker.style.bottom = (16 + bounce) + "px";
-
-              if (progress < 1) {
-                requestAnimationFrame(animateWalker);
-              } else {
-                walker.classList.remove("is-walking");
-                walkerVisible = false;
-                setTimeout(triggerWalker, 8000 + Math.random() * 20000);
-              }
-            }
-            requestAnimationFrame(animateWalker);
-          }
-          // 棣栨寤惰繜鍑虹幇
-          setTimeout(triggerWalker, 3000 + Math.random() * 5000);
-        }
-
-        // 灏忕櫧鎺㈠ご鍔ㄧ敾 - 婊氬姩鏃跺伓灏斾粠瑙掕惤鎺㈠ご
-        if (shiro) {
-          let shiroPeeking = false;
-          function triggerShiroPeek() {
-            if (shiroPeeking) return;
-            shiroPeeking = true;
-            shiro.classList.add("is-peeking");
-            setTimeout(() => {
-              shiro.classList.remove("is-peeking");
-              shiroPeeking = false;
-            }, 3000 + Math.random() * 2000);
-          }
-          let scrollCount = 0;
-          window.addEventListener("scroll", () => {
-            scrollCount++;
-            if (scrollCount % 12 === 0 && Math.random() > 0.6) {
-              triggerShiroPeek();
-            }
-          }, { passive: true });
-          setInterval(() => {
-            if (Math.random() > 0.65) triggerShiroPeek();
-          }, 15000);
-        }
-
-        if (actionFlyer) {
-          function triggerActionFly() {
-            const direction = Math.random() > 0.5 ? 1 : -1;
-            const startY = 80 + Math.random() * (window.innerHeight * 0.4);
-            actionFlyer.style.top = startY + "px";
-            actionFlyer.style.transform = `scaleX(${direction})`;
-            actionFlyer.classList.add("is-flying");
-
-            const startX = direction === 1 ? -160 : window.innerWidth + 160;
-            const endX = direction === 1 ? window.innerWidth + 160 : -160;
-            const duration = 2500 + Math.random() * 1500;
-            const startTime = performance.now();
-
-            function animateFly(now) {
-              const elapsed = now - startTime;
-              const progress = Math.min(elapsed / duration, 1);
-              const eased = 1 - Math.pow(1 - progress, 2);
-              const currentX = startX + (endX - startX) * eased;
-              const wobble = Math.sin(elapsed / 200) * 8;
-              actionFlyer.style.left = currentX + "px";
-              actionFlyer.style.top = (startY + wobble) + "px";
-
-              if (progress < 1) {
-                requestAnimationFrame(animateFly);
-              } else {
-                actionFlyer.classList.remove("is-flying");
-              }
-            }
-            actionFlyer.style.left = startX + "px";
-            requestAnimationFrame(animateFly);
-          }
-          // 闅忔満闂撮殧瑙﹀彂
-          function scheduleActionFly() {
-            setTimeout(() => {
-              triggerActionFly();
-              scheduleActionFly();
-            }, 20000 + Math.random() * 40000);
-          }
-          setTimeout(scheduleActionFly, 10000 + Math.random() * 10000);
-        }
-      })();
-
-      /* ===== 鍔ㄦ€佸寮鸿剼鏈細鐐瑰嚮鐖嗗紑銆佺鍚搞€丷adio銆佹棩/澶滃垏鎹?===== */
-      (function initShinchanDynamics() {
-        if (prefersReducedMotion || !motionPointer) {
+      const initPersistentEnhancements = () => {
+        if (siteState.persistentReady) {
+          syncThemeToggle();
           return;
         }
 
-        const radio = document.getElementById("shinchan-radio");
-        const themeToggle = document.getElementById("theme-toggle");
+        siteState.persistentReady = true;
+        initThemePreference();
 
         const burstStickers = [
           { text: "CTF", tone: "red" },
@@ -438,18 +207,20 @@ const bodyClass = [
           { text: "NEW", tone: "peach" },
           { text: "GO", tone: "sky" }
         ];
-        function spawnClickBurst(x, y) {
+
+        const spawnClickBurst = (x, y) => {
           const burst = document.createElement("span");
           burst.className = "click-burst";
           burst.style.left = `${x}px`;
           burst.style.top = `${y}px`;
           const count = 6 + Math.floor(Math.random() * 4);
 
-          for (let i = 0; i < count; i++) {
-            const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+          for (let index = 0; index < count; index += 1) {
+            const angle = (Math.PI * 2 * index) / count + Math.random() * 0.5;
             const distance = 34 + Math.random() * 42;
             const token = burstStickers[Math.floor(Math.random() * burstStickers.length)];
             const span = document.createElement("span");
+
             span.textContent = token.text;
             span.dataset.tone = token.tone;
             span.style.setProperty("--burst-x", `${Math.cos(angle) * distance}px`);
@@ -459,83 +230,494 @@ const bodyClass = [
           }
 
           document.body.appendChild(burst);
-          setTimeout(() => burst.remove(), 820);
+          window.setTimeout(() => burst.remove(), 820);
+        };
+
+        document.addEventListener(
+          "click",
+          (event) => {
+            const target = event.target;
+
+            if (!(target instanceof Element)) {
+              return;
+            }
+
+            const themeToggle = target.closest("#theme-toggle");
+            if (themeToggle) {
+              event.preventDefault();
+              applyThemePreference(!document.documentElement.classList.contains("is-dark-mode"));
+              return;
+            }
+
+            const radio = target.closest("#shinchan-radio");
+            if (radio) {
+              radio.classList.toggle("is-paused");
+              const small = radio.querySelector(".shinchan-radio-text small");
+              if (small) {
+                small.textContent = radio.classList.contains("is-paused")
+                  ? "欢迎语音已暂停"
+                  : "欢迎你回家";
+              }
+              return;
+            }
+
+            spawnClickBurst(event.clientX, event.clientY);
+          },
+          { passive: false }
+        );
+
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (prefersReducedMotion) {
+          return;
         }
 
-        // 鐐瑰嚮鐖嗗紑
-        document.addEventListener("click", (event) => {
-          const target = event.target;
-          if (target && target.closest && target.closest(".shinchan-radio")) {
+        const walker = document.getElementById("shinchan-walker");
+        const shiro = document.getElementById("shiro-corner");
+        const actionFlyer = document.getElementById("action-flyer");
+
+        if (walker) {
+          let walkerVisible = false;
+
+          const triggerWalker = () => {
+            if (walkerVisible) {
+              return;
+            }
+
+            walkerVisible = true;
+            const direction = Math.random() > 0.5 ? 1 : -1;
+            const startX = direction === 1 ? -120 : window.innerWidth + 120;
+            const endX = direction === 1 ? window.innerWidth + 120 : -120;
+
+            walker.style.transform = `scaleX(${direction})`;
+            walker.style.left = `${startX}px`;
+            walker.classList.add("is-walking");
+
+            const duration = 12000 + Math.random() * 8000;
+            const startTime = performance.now();
+
+            const animateWalker = (now) => {
+              const elapsed = now - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const currentX = startX + (endX - startX) * progress;
+              const bounce = Math.sin(elapsed / 180) * 3;
+
+              walker.style.left = `${currentX}px`;
+              walker.style.bottom = `${16 + bounce}px`;
+
+              if (progress < 1) {
+                requestAnimationFrame(animateWalker);
+                return;
+              }
+
+              walker.classList.remove("is-walking");
+              walkerVisible = false;
+              window.setTimeout(triggerWalker, 8000 + Math.random() * 20000);
+            };
+
+            requestAnimationFrame(animateWalker);
+          };
+
+          window.setTimeout(triggerWalker, 3000 + Math.random() * 5000);
+        }
+
+        if (shiro) {
+          let shiroPeeking = false;
+          let scrollCount = 0;
+
+          const triggerShiroPeek = () => {
+            if (shiroPeeking) {
+              return;
+            }
+
+            shiroPeeking = true;
+            shiro.classList.add("is-peeking");
+            window.setTimeout(() => {
+              shiro.classList.remove("is-peeking");
+              shiroPeeking = false;
+            }, 3000 + Math.random() * 2000);
+          };
+
+          window.addEventListener(
+            "scroll",
+            () => {
+              scrollCount += 1;
+              if (scrollCount % 12 === 0 && Math.random() > 0.6) {
+                triggerShiroPeek();
+              }
+            },
+            { passive: true }
+          );
+
+          window.setInterval(() => {
+            if (Math.random() > 0.65) {
+              triggerShiroPeek();
+            }
+          }, 15000);
+        }
+
+        if (actionFlyer) {
+          const triggerActionFly = () => {
+            const direction = Math.random() > 0.5 ? 1 : -1;
+            const startY = 80 + Math.random() * (window.innerHeight * 0.4);
+            const startX = direction === 1 ? -160 : window.innerWidth + 160;
+            const endX = direction === 1 ? window.innerWidth + 160 : -160;
+            const duration = 2500 + Math.random() * 1500;
+            const startTime = performance.now();
+
+            actionFlyer.style.top = `${startY}px`;
+            actionFlyer.style.left = `${startX}px`;
+            actionFlyer.style.transform = `scaleX(${direction})`;
+            actionFlyer.classList.add("is-flying");
+
+            const animateFly = (now) => {
+              const elapsed = now - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const eased = 1 - Math.pow(1 - progress, 2);
+              const currentX = startX + (endX - startX) * eased;
+              const wobble = Math.sin(elapsed / 200) * 8;
+
+              actionFlyer.style.left = `${currentX}px`;
+              actionFlyer.style.top = `${startY + wobble}px`;
+
+              if (progress < 1) {
+                requestAnimationFrame(animateFly);
+                return;
+              }
+
+              actionFlyer.classList.remove("is-flying");
+            };
+
+            requestAnimationFrame(animateFly);
+          };
+
+          const scheduleActionFly = () => {
+            window.setTimeout(() => {
+              triggerActionFly();
+              scheduleActionFly();
+            }, 20000 + Math.random() * 40000);
+          };
+
+          window.setTimeout(scheduleActionFly, 10000 + Math.random() * 10000);
+        }
+      };
+
+      const initPageEnhancements = () => {
+        cleanupPageEnhancements();
+        syncThemeToggle();
+
+        const cleanups = [];
+        const registerCleanup = (cleanup) => {
+          cleanups.push(cleanup);
+        };
+        const registerEvent = (target, eventName, listener, options) => {
+          target.addEventListener(eventName, listener, options);
+          registerCleanup(() => target.removeEventListener(eventName, listener, options));
+        };
+        const registerTimeout = (callback, delay) => {
+          const timeoutId = window.setTimeout(callback, delay);
+          registerCleanup(() => window.clearTimeout(timeoutId));
+          return timeoutId;
+        };
+        const registerInterval = (callback, delay) => {
+          const intervalId = window.setInterval(callback, delay);
+          registerCleanup(() => window.clearInterval(intervalId));
+          return intervalId;
+        };
+
+        const root = document.documentElement;
+        const body = document.body;
+        const isHomePage = body?.dataset.homePage === "true";
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const motionPointer = window.matchMedia("(pointer: fine)").matches;
+
+        const updateScrollProgress = () => {
+          const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+          const progress = scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0;
+          root.style.setProperty("--scroll-progress", progress.toFixed(4));
+        };
+
+        updateScrollProgress();
+        registerEvent(window, "scroll", updateScrollProgress, { passive: true });
+        registerEvent(window, "resize", updateScrollProgress);
+
+        const initWelcomeVoice = () => {
+          if (!isHomePage) {
             return;
           }
-          spawnClickBurst(event.clientX, event.clientY);
-        }, { passive: true });
 
-        // 纾佸惛鏁堟灉
-        const magneticTargets = document.querySelectorAll(
-          ".nav-link, .footer-link-pill, .hero-links-strong a, .overview-links a, .shinchan-cast-link, .section-link"
+          const sessionKey = "iyuu-home-welcome-played";
+
+          try {
+            if (window.sessionStorage.getItem(sessionKey) === "1") {
+              return;
+            }
+          } catch (error) {
+            // Ignore storage failures and continue with a best-effort greeting.
+          }
+
+          try {
+            const welcomeAudio = new Audio("/theme/audio/welcome-home.mp3");
+            welcomeAudio.preload = "auto";
+            welcomeAudio.volume = 0.96;
+            welcomeAudio.load();
+
+            let hasPlayed = false;
+            const fallbackEvents = [
+              ["wheel", { passive: true }],
+              ["touchmove", { passive: true }],
+              ["touchstart", { passive: true }],
+              ["pointerdown", { passive: true }],
+              ["keydown", false]
+            ];
+
+            const cleanupFallbackEvents = () => {
+              fallbackEvents.forEach(([eventName, options]) => {
+                window.removeEventListener(eventName, playWelcomeLine, options);
+              });
+            };
+
+            const markPlayed = () => {
+              if (hasPlayed) {
+                return;
+              }
+
+              hasPlayed = true;
+
+              try {
+                window.sessionStorage.setItem(sessionKey, "1");
+              } catch (error) {
+                // Ignore storage failures.
+              }
+
+              cleanupFallbackEvents();
+            };
+
+            const playWelcomeLine = () => {
+              if (hasPlayed) {
+                return;
+              }
+
+              try {
+                welcomeAudio.currentTime = 0;
+                const playback = welcomeAudio.play();
+
+                if (playback && typeof playback.then === "function") {
+                  playback.then(markPlayed).catch(() => {
+                    // Wait for a user gesture and try again.
+                  });
+                } else {
+                  markPlayed();
+                }
+              } catch (error) {
+                // Ignore playback failures and wait for the next gesture.
+              }
+            };
+
+            welcomeAudio.addEventListener("play", markPlayed, { once: true });
+            registerCleanup(() => {
+              cleanupFallbackEvents();
+              try {
+                welcomeAudio.pause();
+              } catch (error) {
+                // Ignore audio cleanup failures.
+              }
+            });
+
+            registerTimeout(playWelcomeLine, 320);
+            fallbackEvents.forEach(([eventName, options]) => {
+              registerEvent(window, eventName, playWelcomeLine, options);
+            });
+          } catch (error) {
+            // Ignore welcome voice failures so content rendering still works.
+          }
+        };
+
+        const heroCard = document.querySelector(".hero-card-illustrated");
+        if (heroCard && !prefersReducedMotion && motionPointer) {
+          const handleHeroPointerMove = (event) => {
+            const rect = heroCard.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+            const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+
+            heroCard.style.setProperty("--hero-x", x.toFixed(3));
+            heroCard.style.setProperty("--hero-y", y.toFixed(3));
+          };
+
+          const resetHeroPointer = () => {
+            heroCard.style.setProperty("--hero-x", "0");
+            heroCard.style.setProperty("--hero-y", "0");
+          };
+
+          registerEvent(heroCard, "pointermove", handleHeroPointerMove);
+          registerEvent(heroCard, "pointerleave", resetHeroPointer);
+        }
+
+        const playfulCards = Array.from(
+          document.querySelectorAll(
+            ".hero-note-card, .overview-panel, .shinchan-cast-card, .signal-card, .route-card, .track-board, .tag-board, .featured-card, .rich-section-card, .guide-card, .guestbook-card, .guestbook-note-panel"
+          )
         );
-        magneticTargets.forEach((target) => {
-          target.addEventListener("mousemove", (event) => {
-            const rect = target.getBoundingClientRect();
-            const x = event.clientX - rect.left - rect.width / 2;
-            const y = event.clientY - rect.top - rect.height / 2;
-            target.style.transform = `translate(${x * 0.12}px, ${y * 0.12}px)`;
+
+        if (!prefersReducedMotion && motionPointer) {
+          playfulCards.forEach((card) => {
+            const handleCardPointerMove = (event) => {
+              const rect = card.getBoundingClientRect();
+              const x = ((event.clientX - rect.left) / rect.width) * 100;
+              const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+              card.style.setProperty("--spot-x", `${x.toFixed(1)}%`);
+              card.style.setProperty("--spot-y", `${y.toFixed(1)}%`);
+            };
+
+            registerEvent(card, "pointermove", handleCardPointerMove);
           });
-          target.addEventListener("mouseleave", () => {
-            target.style.transform = "";
+        }
+
+        const magneticTargets = Array.from(
+          document.querySelectorAll(
+            ".nav-link, .footer-link-pill, .hero-links-strong a, .overview-links a, .shinchan-cast-link, .section-link"
+          )
+        );
+
+        if (!prefersReducedMotion && motionPointer) {
+          magneticTargets.forEach((target) => {
+            const handleMouseMove = (event) => {
+              const rect = target.getBoundingClientRect();
+              const x = event.clientX - rect.left - rect.width / 2;
+              const y = event.clientY - rect.top - rect.height / 2;
+
+              target.style.transform = `translate(${x * 0.12}px, ${y * 0.12}px)`;
+            };
+
+            const resetTransform = () => {
+              target.style.transform = "";
+            };
+
+            registerEvent(target, "mousemove", handleMouseMove);
+            registerEvent(target, "mouseleave", resetTransform);
           });
+        }
+
+        const revealTargets = Array.from(
+          document.querySelectorAll(
+            ".hero-card, .home-overview, .overview-panel, .shinchan-speech, .shinchan-showcase, .shinchan-cast-card, .section, .section-block, .about-overview-grid, .about-summary-grid, .guide-card, .route-card, .signal-card, .track-board, .tag-board, .rich-section-card, .featured-card, .guestbook-card, .guestbook-note-panel"
+          )
+        );
+
+        const showRevealTargets = () => {
+          revealTargets.forEach((element) => element.classList.add("is-visible"));
+        };
+
+        const initRevealTargets = () => {
+          if (revealTargets.length === 0) {
+            return;
+          }
+
+          if (prefersReducedMotion || !("IntersectionObserver" in window)) {
+            showRevealTargets();
+            return;
+          }
+
+          try {
+            revealTargets.forEach((element, index) => {
+              element.style.setProperty("--reveal-delay", `${Math.min(index * 28, 220)}ms`);
+            });
+
+            const revealObserver = new IntersectionObserver(
+              (entries) => {
+                entries.forEach((entry) => {
+                  if (!entry.isIntersecting) {
+                    return;
+                  }
+
+                  entry.target.classList.add("is-visible");
+                  revealObserver.unobserve(entry.target);
+                });
+              },
+              {
+                threshold: 0.14,
+                rootMargin: "0px 0px -48px 0px"
+              }
+            );
+
+            revealTargets.forEach((element) => revealObserver.observe(element));
+            registerCleanup(() => revealObserver.disconnect());
+
+            registerTimeout(() => {
+              revealTargets.forEach((element) => {
+                const rect = element.getBoundingClientRect();
+                if (rect.top < window.innerHeight * 1.1) {
+                  element.classList.add("is-visible");
+                }
+              });
+            }, 180);
+
+            registerTimeout(showRevealTargets, 1400);
+          } catch (error) {
+            showRevealTargets();
+          }
+        };
+
+        const initGuestbookClock = () => {
+          const dateNodes = Array.from(document.querySelectorAll("[data-guestbook-live-date]"));
+          const timeNodes = Array.from(document.querySelectorAll("[data-guestbook-live-time]"));
+
+          if (dateNodes.length === 0 && timeNodes.length === 0) {
+            return;
+          }
+
+          const pad = (value) => String(value).padStart(2, "0");
+          const updateGuestbookClock = () => {
+            const now = new Date();
+            const dateText = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())}`;
+            const timeText = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+            dateNodes.forEach((node) => {
+              node.textContent = dateText;
+            });
+
+            timeNodes.forEach((node) => {
+              node.textContent = timeText;
+            });
+          };
+
+          updateGuestbookClock();
+          registerInterval(updateGuestbookClock, 15000);
+        };
+
+        initRevealTargets();
+        initGuestbookClock();
+
+        try {
+          initWelcomeVoice();
+        } catch (error) {
+          // Ignore welcome voice failures so content rendering still works.
+        }
+
+        siteState.pageCleanup = () => {
+          while (cleanups.length > 0) {
+            const cleanup = cleanups.pop();
+            try {
+              cleanup?.();
+            } catch (error) {
+              // Ignore cleanup failures.
+            }
+          }
+        };
+      };
+
+      initPersistentEnhancements();
+      initPageEnhancements();
+
+      if (!siteState.lifecycleBound) {
+        siteState.lifecycleBound = true;
+        document.addEventListener("astro:page-load", initPageEnhancements);
+        window.addEventListener("pageshow", (event) => {
+          if (event.persisted) {
+            initPageEnhancements();
+          }
         });
-
-        // Radio 鎾斁/鏆傚仠鍒囨崲
-        if (radio) {
-          radio.addEventListener("click", () => {
-            radio.classList.toggle("is-paused");
-            const isPaused = radio.classList.contains("is-paused");
-            const small = radio.querySelector(".shinchan-radio-text small");
-            if (small) {
-              small.textContent = isPaused ? "欢迎语音已暂停" : "欢迎你回家";
-            }
-          });
-        }
-
-        // ===== 鏃?澶滄ā寮忓垏鎹?=====
-        if (themeToggle) {
-          function applyTheme(isDark) {
-            document.documentElement.classList.toggle("is-dark-mode", isDark);
-            themeToggle.classList.toggle("is-dark", isDark);
-            // 瀛樺偍鍋忓ソ鍒?localStorage
-            try { localStorage.setItem("theme-preference", isDark ? "dark" : "light"); } catch(e) {}
-          }
-
-          // 鍒濆鍖栵細璇诲彇瀛樺偍鐨勫亸濂芥垨璺熼殢绯荤粺
-          const savedTheme = (() => {
-            try { return localStorage.getItem("theme-preference"); } catch(e) { return null; }
-          })();
-
-          if (savedTheme === "dark") {
-            applyTheme(true);
-          } else if (savedTheme === "light") {
-            applyTheme(false);
-          } else {
-            // 璺熼殢绯荤粺
-            applyTheme(window.matchMedia("(prefers-color-scheme: dark)").matches);
-          }
-
-          themeToggle.addEventListener("click", () => {
-            const isCurrentlyDark = document.documentElement.classList.contains("is-dark-mode");
-            applyTheme(!isCurrentlyDark);
-          });
-
-          // 鐩戝惉绯荤粺涓婚鍙樺寲锛堝綋鐢ㄦ埛娌℃湁鎵嬪姩璁剧疆鏃讹級
-          window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
-            const saved = (() => { try { return localStorage.getItem("theme-preference"); } catch(e) {} })();
-            if (!saved) {
-              applyTheme(e.matches);
-            }
-          });
-        }
-      })();
+      }
     </script>
   </body>
 </html>

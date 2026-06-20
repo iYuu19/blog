@@ -4113,23 +4113,35 @@ body::after {
 
 .home-overview,
 .section,
+.section-block,
+.about-overview-grid,
+.about-summary-grid,
+.guide-card,
 .route-card,
 .signal-card,
 .track-board,
 .tag-board,
 .rich-section-card,
-.featured-card {
+.featured-card,
+.guestbook-card,
+.guestbook-note-panel {
   animation: none;
 }
 
 .home-overview,
 .section,
+.section-block,
+.about-overview-grid,
+.about-summary-grid,
+.guide-card,
 .route-card,
 .signal-card,
 .track-board,
 .tag-board,
 .rich-section-card,
-.featured-card {
+.featured-card,
+.guestbook-card,
+.guestbook-note-panel {
   opacity: 0;
   transform: translateY(24px);
   transition:
@@ -4141,12 +4153,18 @@ body::after {
 
 .home-overview.is-visible,
 .section.is-visible,
+.section-block.is-visible,
+.about-overview-grid.is-visible,
+.about-summary-grid.is-visible,
+.guide-card.is-visible,
 .route-card.is-visible,
 .signal-card.is-visible,
 .track-board.is-visible,
 .tag-board.is-visible,
 .rich-section-card.is-visible,
-.featured-card.is-visible {
+.featured-card.is-visible,
+.guestbook-card.is-visible,
+.guestbook-note-panel.is-visible {
   opacity: 1;
   transform: translateY(0);
 }
@@ -5349,6 +5367,12 @@ body.theme-shinchan .track-board.is-visible,
 body.theme-shinchan .tag-board.is-visible,
 body.theme-shinchan .featured-card.is-visible,
 body.theme-shinchan .rich-section-card.is-visible,
+body.theme-shinchan .section-block.is-visible,
+body.theme-shinchan .about-overview-grid.is-visible,
+body.theme-shinchan .about-summary-grid.is-visible,
+body.theme-shinchan .guide-card.is-visible,
+body.theme-shinchan .guestbook-card.is-visible,
+body.theme-shinchan .guestbook-note-panel.is-visible,
 body.theme-shinchan .overview-panel.is-visible {
   animation: crayon-pop 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
