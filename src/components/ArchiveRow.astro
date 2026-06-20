@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import DifficultyStars from "./DifficultyStars.astro";
 import TagPill from "./TagPill.astro";
 
 interface Props {
@@ -15,16 +16,9 @@ const yearText = new Intl.DateTimeFormat("zh-CN", {
   year: "numeric"
 }).format(post.data.pubDate);
 
-const difficultyClassMap: Record<string, string> = {
-  Easy: "difficulty-easy",
-  Medium: "difficulty-medium",
-  Hard: "difficulty-hard",
-  Notes: "difficulty-notes"
-};
-
-const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-notes";
 const contestLabel = post.data.contest || post.data.oj || "未命名比赛";
 const kickerParts = [post.data.category, contestLabel, post.data.track].filter(Boolean);
+
 ---
 
 <article class="archive-row">
@@ -34,7 +28,9 @@ const kickerParts = [post.data.category, contestLabel, post.data.track].filter(B
   </div>
 
   <div class="archive-body">
-    <p class="archive-kicker">{kickerParts.join(" / ")}</p>
+    <p class="archive-kicker">
+      {kickerParts.join(" / ")}
+    </p>
     <div class="archive-title-line">
       <h3>
         <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
@@ -44,7 +40,7 @@ const kickerParts = [post.data.category, contestLabel, post.data.track].filter(B
     <p class="archive-summary">{post.data.description}</p>
     <div class="archive-meta">
       {post.data.track && <span>{post.data.track}</span>}
-      <span class:list={["difficulty-pill", difficultyClass]}>{post.data.difficulty}</span>
+      <DifficultyStars difficulty={post.data.difficulty} compact />
       <span>{post.data.language}</span>
       <span>{post.data.tags.length} 个标签</span>
     </div>

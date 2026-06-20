@@ -1,0 +1,55 @@
+---
+interface Props {
+  difficulty: string;
+  compact?: boolean;
+}
+
+const { difficulty, compact = false } = Astro.props;
+
+const difficultyMap: Record<
+  string,
+  { score: number; label: string; note: string }
+> = {
+  Easy: {
+    score: 2,
+    label: "轻量",
+    note: "适合快速回看"
+  },
+  Medium: {
+    score: 3,
+    label: "进阶",
+    note: "需要完整复盘"
+  },
+  Hard: {
+    score: 4,
+    label: "高压",
+    note: "更适合做专题积累"
+  },
+  Notes: {
+    score: 1,
+    label: "记录",
+    note: "偏线索整理与补充"
+  }
+};
+
+const resolved = difficultyMap[difficulty] ?? {
+  score: 1,
+  label: difficulty,
+  note: "当前文章难度"
+};
+
+const stars = Array.from({ length: 5 }, (_, index) => index < resolved.score);
+---
+
+<span
+  class:list={["difficulty-stars", compact ? "is-compact" : ""]}
+  aria-label={`${resolved.label}，${resolved.score} 星`}
+  title={resolved.note}
+>
+  <span class="difficulty-stars-track" aria-hidden="true">
+    {stars.map((active, index) => (
+      <span class:list={["difficulty-star", active ? "is-active" : "", index === 4 ? "is-last" : ""]}></span>
+    ))}
+  </span>
+  <span class="difficulty-stars-label">{resolved.label}</span>
+</span>

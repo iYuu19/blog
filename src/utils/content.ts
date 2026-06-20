@@ -13,7 +13,7 @@ const defaultCategoryDefinitions: CategoryDefinition[] = [
   {
     name: "比赛 WP",
     slug: "比赛-wp",
-    description: "适合收单题解法、关键 payload、脚本和截图记录。",
+    description: "适合收录单题解法、关键 payload、脚本和截图记录。",
     writingFocus: "更偏单题过程和解题细节，适合快速回看当时是怎么打出来的。",
     exampleTopics: ["Web 题解", "Misc 题解", "电子取证单题"],
     sortOrder: 10
@@ -21,7 +21,7 @@ const defaultCategoryDefinitions: CategoryDefinition[] = [
   {
     name: "赛后复盘",
     slug: "赛后复盘",
-    description: "适合写一整场比赛的总结，不只是单题。",
+    description: "适合记录一整场比赛的总结，而不只是单题。",
     writingFocus: "更偏整场节奏、失误点、团队配合、赛后回看和后续补题计划。",
     exampleTopics: ["整场比赛总结", "赛中失误记录", "复盘清单"],
     sortOrder: 20
@@ -94,6 +94,14 @@ const defaultTagDefinitions: TagDefinition[] = [
   }
 ];
 
+const categoryAccentMap: Record<string, string> = {
+  "比赛 WP": "#4ECDC4",
+  "赛后复盘": "#FF6B9D",
+  "专题总结": "#95A5A6",
+  "专题整理": "#95A5A6",
+  "学习笔记": "#C8963E"
+};
+
 export function slugifySegment(value: string): string {
   return value
     .trim()
@@ -111,7 +119,23 @@ export function getContestSlug(post: CollectionEntry<"blog">): string {
 }
 
 export function getContestCover(post: CollectionEntry<"blog">): string {
-  return post.data.coverImage || "";
+  const coverImage = post.data.coverImage || "";
+
+  if (!coverImage) {
+    return "";
+  }
+
+  // Ignore template placeholder covers so cards don't switch into "has-cover"
+  // mode with unreadable light-on-light text.
+  if (
+    coverImage.includes("这里放") ||
+    coverImage.toLowerCase().includes("placeholder") ||
+    coverImage.toLowerCase().includes("example")
+  ) {
+    return "";
+  }
+
+  return coverImage;
 }
 
 export function getCategoryName(post: CollectionEntry<"blog">): string {
@@ -120,6 +144,22 @@ export function getCategoryName(post: CollectionEntry<"blog">): string {
 
 export function getCategorySlug(post: CollectionEntry<"blog">): string {
   return slugifySegment(getCategoryName(post));
+}
+
+export function getCategoryAccent(categoryName?: string): string {
+  if (!categoryName) {
+    return "#E85C4A";
+  }
+
+  return categoryAccentMap[categoryName] ?? "#E85C4A";
+}
+
+export function getCaseCode(slug: string, date: Date): string {
+  const normalized = slug.trim().toUpperCase();
+  const serialSeed = [...normalized].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const serial = String((serialSeed % 900) + 100).padStart(3, "0");
+
+  return `KSK-${date.getFullYear()}-${serial}`;
 }
 
 export async function getCategoryDefinitions(): Promise<CategoryDefinition[]> {

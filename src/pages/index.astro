@@ -136,7 +136,6 @@ const featuredDate = featuredPost
       day: "numeric"
     }).format(featuredPost.data.pubDate)
   : "";
-const heroCategoryLinks = categoryCards.slice(0, 3);
 const routeSourceMap = new Map([
   ["比赛 WP", wpPosts],
   ["赛后复盘", reviewPosts],
@@ -194,12 +193,6 @@ const sectionLinkDefaults: Record<string, { label: string; href: string }> = {
   rich: { label: "", href: "" }
 };
 
-const applyTemplate = (template: string, replacements: Record<string, string>) =>
-  Object.entries(replacements).reduce(
-    (result, [key, value]) => result.replaceAll(`{{${key}}}`, value),
-    template
-  );
-
 const baseHomeSections = site.homeSections?.length ? site.homeSections : [];
 const homeSections = (
   await Promise.all(
@@ -247,25 +240,50 @@ const homeSections = (
 
 const mainSections = homeSections.filter((section) => section.placement !== "side");
 const sideSections = homeSections.filter((section) => section.placement === "side");
-const indexMetaText = applyTemplate(site.homeIndexMetaTemplate, {
-  count: String(posts.length),
-  date: latestDate || "最近"
-});
+const heroTitle = "欢迎来到 iYuu 的博客";
+const heroTitleChars = [...heroTitle];
+const heroImage = "/theme/home-hero-investigation.png";
+const heroInsetImage = "/theme/home-hero-shinchan-id.jpg";
+const shinchanSpeech = latest
+  ? `小新说：先看《${latest.data.title}》！`
+  : "小新说：今天也要认真补题。";
 ---
 
 <Layout title={site.siteTitle} description={site.siteDescription}>
   <section class="shell intro">
-    <div class="hero-card">
+    <div class="hero-card hero-card-illustrated">
+      <img
+        class="hero-scene"
+        src={heroImage}
+        alt=""
+        aria-hidden="true"
+        loading="eager"
+        decoding="async"
+      />
+      <div class="hero-scene-mask" aria-hidden="true"></div>
       <div class="hero-copy">
         <div class="hero-topline">
-          <img class="intro-avatar" src={site.avatarImage || "/avatar.jpg"} alt="iYuu 的头像" />
           <div>
-            <p class="eyebrow">{site.homeEyebrow}</p>
-            <h1>{site.homeTitle}</h1>
+            <p class="eyebrow">春日部数字侦探社</p>
+            <h1 class="hero-title" aria-label={heroTitle}>
+              {heroTitleChars.map((char, index) => (
+                <span
+                  class:list={["hero-title-char", char === " " ? "is-space" : ""]}
+                  style={`--char-delay: ${index * 48}ms`}
+                  aria-hidden="true"
+                >
+                  {char === " " ? "\u00A0" : char}
+                </span>
+              ))}
+            </h1>
           </div>
         </div>
-        <p class="intro-lead">{site.homeLead}</p>
-        {site.homeIntro.map((paragraph) => <p>{paragraph}</p>)}
+        <p class="intro-lead">把 CTF 和电子取证，写成一集集春日部事件档案。</p>
+        {site.homeIntro.slice(0, 2).map((paragraph) => <p>{paragraph}</p>)}
+        <div class="shinchan-speech">
+          <span class="shinchan-speech-label">今日台词</span>
+          <p>{shinchanSpeech}</p>
+        </div>
         <div class="hero-links hero-links-strong">
           {site.heroLinks.map((link) => (
             <a href={link.href}>{link.label}</a>
@@ -295,45 +313,51 @@ const indexMetaText = applyTemplate(site.homeIndexMetaTemplate, {
       </div>
 
       <aside class="hero-aside">
+        <section class="hero-note-card detective-id-card">
+          <div class="detective-id-photo">
+            <img src={site.avatarImage || "/avatar.jpg"} alt={site.siteTitle} width="80" height="80" loading="eager" decoding="async" />
+          </div>
+          <div class="detective-id-info">
+            <p class="detective-id-badge">春日部数字侦探社</p>
+            <strong class="detective-id-name">{site.brandMark}</strong>
+            <p class="detective-id-meta">特别调查员 · 案件归档中</p>
+          </div>
+          <dl class="detective-id-stats">
+            <div>
+              <dt>已归档</dt>
+              <dd>{posts.length}</dd>
+            </div>
+            <div>
+              <dt>涉及案件</dt>
+              <dd>{contestCount}</dd>
+            </div>
+            <div>
+              <dt>分类卷宗</dt>
+              <dd>{categoryCount}</dd>
+            </div>
+          </dl>
+        </section>
+
         <section class="hero-note-card">
-          <p class="hero-note-label">{site.browseTitle}</p>
+          <figure class="hero-route-photo">
+            <img
+              src={heroInsetImage}
+              alt="小新与伙伴展示证件的图片"
+              loading="eager"
+              decoding="async"
+            />
+          </figure>
+          <p class="hero-note-label">行动路线</p>
           <ul class="hero-note-list">
             {site.browseTips.map((tip) => <li>{tip}</li>)}
           </ul>
         </section>
 
-        <section class="hero-note-card accent-card">
-          <p class="hero-note-label">{site.commonEntryTitle}</p>
-          <div class="hero-chip-stack">
-            {heroCategoryLinks.map((category) => (
-              <a class="hero-chip" href={`/categories/${category.slug}/`}>
-                <span>{category.name}</span>
-                <strong>{category.count}</strong>
-              </a>
-            ))}
-          </div>
-        </section>
       </aside>
     </div>
   </section>
 
   <section class="shell home-layout">
-    <aside class="index-column">
-      <div class="site-index">
-        <p class="index-title">{site.homeIndexTitle}</p>
-        <ul class="index-list">
-          {homeSections.map((section) => (
-            <li><a href={`#${section.id}`}>{section.title}</a></li>
-          ))}
-        </ul>
-        <p class="index-meta">{indexMetaText}</p>
-        <div class="index-block">
-          <p class="index-label">{site.homeIndexFocusLabel}</p>
-          <p class="index-text">{site.homeIndexFocusText}</p>
-        </div>
-      </div>
-    </aside>
-
     <div class="home-grid">
       <div class="main-column">
         {mainSections.map((section) => (

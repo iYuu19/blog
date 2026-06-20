@@ -14,19 +14,16 @@ export const defaultSiteSettings = {
     "希望这些记录既方便自己回顾，也能给后来看到的人一点参考，欢迎交流和讨论。"
   ],
   heroLinks: [
-    { label: "看比赛分类", href: "/contests" },
-    { label: "看内容分类", href: "/categories" },
+    { label: "看比赛", href: "/contests" },
     { label: "看全部文章", href: "/blog" },
-    { label: "看标签", href: "/tags" },
-    { label: "看看这个站在写什么", href: "/about" }
+    { label: "关于", href: "/about" }
   ],
   headerCtaLabel: "",
   headerCtaHref: "",
   browseTitle: "浏览方式",
   browseTips: [
     "比赛页适合按赛事集中查看一整场记录",
-    "分类页适合按主题浏览不同方向的内容",
-    "标签页适合快速定位具体知识点"
+    "归档页适合按时间浏览全部文章"
   ],
   commonEntryTitle: "常用入口",
   featuredHeading: "先看这一篇",
@@ -320,10 +317,8 @@ export const defaultSiteSettings = {
   navLinks: [
     { label: "首页", href: "/" },
     { label: "比赛", href: "/contests" },
-    { label: "分类", href: "/categories" },
     { label: "留言板", href: "/guestbook" },
     { label: "归档", href: "/blog" },
-    { label: "标签", href: "/tags" },
     { label: "关于", href: "/about" }
   ]
 };

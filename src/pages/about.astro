@@ -2,7 +2,13 @@
 import { getCollection } from "astro:content";
 import TagPill from "../components/TagPill.astro";
 import Layout from "../layouts/Layout.astro";
-import { getCategoryName, getCategorySlug, getContestName, getContestSlug, slugifySegment } from "../utils/content";
+import {
+  getCategoryName,
+  getCategorySlug,
+  getContestName,
+  getContestSlug,
+  slugifySegment
+} from "../utils/content";
 import { getPageLayouts, getSiteSettings } from "../utils/site";
 
 const site = await getSiteSettings();
@@ -79,6 +85,9 @@ const latestPosts = posts.slice(0, 3).map((post) => ({
   }).format(post.data.pubDate)
 }));
 const contestsMetaText = site.contestsMeta.replace("{{count}}", String(totalContests));
+const aboutSummerPartyImage = "/theme/about-summer-party.jpg";
+const aboutHeroLead = site.aboutIntro[0] || site.siteDescription;
+const aboutCardIntro = site.aboutIntro.length > 1 ? site.aboutIntro.slice(1) : site.aboutIntro;
 
 const aboutSectionTitleDefaults = {
   focus: site.focusTitle,
@@ -98,9 +107,7 @@ const aboutSectionNoteDefaults = {
   "browse-guides": ""
 };
 
-const aboutSections = (pageLayouts.aboutSections?.length
-  ? pageLayouts.aboutSections
-  : [])
+const aboutSections = (pageLayouts.aboutSections?.length ? pageLayouts.aboutSections : [])
   .filter((section) => section.enabled)
   .map((section, index) => ({
     ...section,
@@ -108,164 +115,374 @@ const aboutSections = (pageLayouts.aboutSections?.length
     note: section.note || aboutSectionNoteDefaults[section.type] || "",
     id: slugifySegment(section.anchor || `${section.type}-${index + 1}`)
   }));
+
+const aboutSummarySections = aboutSections.filter((section) =>
+  ["focus", "writing", "note", "contests"].includes(section.type)
+);
+const aboutFlowSections = aboutSections.filter((section) =>
+  !["focus", "writing", "note", "contests"].includes(section.type)
+);
 ---
 
 <Layout title={`关于 | ${site.siteTitle}`} description={site.siteDescription}>
-  <section class="shell intro about-intro">
-    <div class="hero-card about-hero-card">
-      <div class="hero-copy">
-        <div class="hero-topline">
-          <img class="intro-avatar" src={site.avatarImage || "/avatar.jpg"} alt={site.aboutAvatarAlt} />
-          <div>
-            <p class="eyebrow">{site.aboutEyebrow}</p>
-            <h1>{site.aboutTitle}</h1>
-          </div>
-        </div>
-        {site.aboutIntro.map((paragraph) => <p>{paragraph}</p>)}
-        <dl class="page-stats">
-          <div>
-            <dt>{site.aboutPostsLabel}</dt>
-            <dd>{posts.length}</dd>
-          </div>
-          <div>
-            <dt>{site.aboutCategoriesLabel}</dt>
-            <dd>{totalCategories}</dd>
-          </div>
-          <div>
-            <dt>{site.aboutTagsLabel}</dt>
-            <dd>{totalTags}</dd>
-          </div>
-        </dl>
+  <section class="about-intro-stage">
+    <div class="shell about-hero-shell">
+      <div class="about-hero-copy">
+        <p class="about-hero-kicker">{site.aboutEyebrow}</p>
+        <h1>{site.aboutTitle}</h1>
+        <p class="about-hero-lead">{aboutHeroLead}</p>
+        <span class="about-scroll-cue">向下滑进入内容</span>
       </div>
-
-      <aside class="hero-aside">
-        <section class="hero-note-card accent-card">
-          <p class="hero-note-label">{site.contentMapLabel}</p>
-          <div class="hero-chip-stack">
-            {categories.map((category) => (
-              <a class="hero-chip" href={`/categories/${category.slug}/`}>
-                <span>{category.name}</span>
-                <strong>{category.count}</strong>
-              </a>
-            ))}
-          </div>
-        </section>
-
-        <section class="hero-note-card">
-          <p class="hero-note-label">{site.commonTagsLabel}</p>
-          <div class="tag-cloud">
-            {tagHighlights.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
-          </div>
-        </section>
-      </aside>
     </div>
   </section>
 
-  {aboutSections.map((section) => (
-    <>
-      {
-        section.type === "focus" && (
-          <section class="shell guide-grid section-block" id={section.id}>
-            <article class="guide-card focus-list-card">
-              <p class="guide-card-label">{site.focusLabel}</p>
-              <h2>{section.title}</h2>
-              {section.note && <p class="guide-card-meta">{section.note}</p>}
-              <ul class="plain-list">
-                {site.aboutFocusAreas.map((item) => <li>{item}</li>)}
-              </ul>
-            </article>
-          </section>
-        )
-      }
-
-      {
-        section.type === "writing" && (
-          <section class="shell guide-grid section-block" id={section.id}>
-            <article class="guide-card focus-list-card">
-              <p class="guide-card-label">{site.writingLabel}</p>
-              <h2>{section.title}</h2>
-              {section.note && <p class="guide-card-meta">{section.note}</p>}
-              <ul class="plain-list">
-                {site.aboutWritingApproach.map((item) => <li>{item}</li>)}
-              </ul>
-            </article>
-          </section>
-        )
-      }
-
-      {
-        section.type === "note" && (
-          <section class="shell about-panel-grid section-block" id={section.id}>
-            <article class="guide-card">
-              <p class="guide-card-label">{site.noteLabel}</p>
-              <h2>{section.title}</h2>
-              <p>{section.note || site.aboutNote}</p>
-            </article>
-          </section>
-        )
-      }
-
-      {
-        section.type === "contests" && (
-          <section class="shell about-panel-grid section-block" id={section.id}>
-            <article class="guide-card">
-              <p class="guide-card-label">{site.contestsLabel}</p>
-              <h2>{section.title}</h2>
-              <div class="mini-link-list">
-                {contests.length > 0 ? (
-                  contests.map((contest) => (
-                    <a class="mini-link-row" href={`/contests/${contest.slug}/`}>
-                      <span>{contest.name}</span>
-                      <strong>{contest.count}</strong>
-                    </a>
-                  ))
-                ) : (
-                  <p class="empty-inline">{site.contestsEmpty}</p>
-                )}
-              </div>
-              <p class="guide-card-meta">{section.note || contestsMetaText}</p>
-            </article>
-          </section>
-        )
-      }
-
-      {
-        section.type === "latest-posts" && (
-          <section class="shell section-block" id={section.id}>
-            <div class="section-head">
-              <h2>{section.title}</h2>
-              <span class="section-note">{section.note}</span>
+  <div class="about-content-flow">
+    <section class="shell about-entry-block">
+      <div class="hero-card about-entry-card">
+        <div class="hero-copy">
+          <div class="hero-topline">
+            <img class="intro-avatar" src={site.avatarImage || "/avatar.jpg"} alt={site.aboutAvatarAlt} />
+            <div>
+              <p class="eyebrow">About</p>
+              <h2>关于这个博客</h2>
             </div>
-            <div class="signal-grid">
-              {latestPosts.map((post) => (
-                <a class="signal-card" href={`/blog/${post.slug}/`}>
-                  <p class="signal-label">{[post.data.category, post.data.contest || post.data.oj].filter(Boolean).join(" / ")}</p>
-                  <h3>{post.data.title}</h3>
-                  <p>{post.data.description}</p>
-                  <div class="signal-card-footer">
-                    <span>{post.dateText}</span>
-                    <span>{post.data.track || post.data.language}</span>
+          </div>
+          {aboutCardIntro.map((paragraph) => <p>{paragraph}</p>)}
+          <dl class="page-stats">
+            <div>
+              <dt>{site.aboutPostsLabel}</dt>
+              <dd>{posts.length}</dd>
+            </div>
+            <div>
+              <dt>{site.aboutCategoriesLabel}</dt>
+              <dd>{totalCategories}</dd>
+            </div>
+            <div>
+              <dt>{site.aboutTagsLabel}</dt>
+              <dd>{totalTags}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <aside class="hero-aside">
+          <figure class="hero-note-card about-scene-card">
+            <img
+              class="about-scene-image"
+              src={aboutSummerPartyImage}
+              alt="夏日街景里的蜡笔小新角色群像"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption class="about-scene-caption">
+              <p class="hero-note-label">Life Slice</p>
+              <strong>留一张轻松一点的夏日场景</strong>
+            </figcaption>
+          </figure>
+        </aside>
+      </div>
+    </section>
+
+    <section class="shell about-overview-grid section-block">
+      <article class="guide-card accent-card">
+        <p class="guide-card-label">{site.contentMapLabel}</p>
+        <h2>目前内容地图</h2>
+        <div class="hero-chip-stack">
+          {categories.map((category) => (
+            <a class="hero-chip" href={`/categories/${category.slug}/`}>
+              <span>{category.name}</span>
+              <strong>{category.count}</strong>
+            </a>
+          ))}
+        </div>
+      </article>
+
+      <article class="guide-card">
+        <p class="guide-card-label">{site.commonTagsLabel}</p>
+        <h2>常见标签</h2>
+        <div class="tag-cloud">
+          {tagHighlights.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
+        </div>
+      </article>
+    </section>
+
+    {aboutSummarySections.length > 0 && (
+      <section class="shell about-summary-grid section-block">
+        {aboutSummarySections.map((section) => (
+          <>
+            {
+              section.type === "focus" && (
+                <article class="guide-card focus-list-card">
+                  <p class="guide-card-label">{site.focusLabel}</p>
+                  <h2>{section.title}</h2>
+                  {section.note && <p class="guide-card-meta">{section.note}</p>}
+                  <ul class="plain-list">
+                    {site.aboutFocusAreas.map((item) => <li>{item}</li>)}
+                  </ul>
+                </article>
+              )
+            }
+
+            {
+              section.type === "writing" && (
+                <article class="guide-card focus-list-card">
+                  <p class="guide-card-label">{site.writingLabel}</p>
+                  <h2>{section.title}</h2>
+                  {section.note && <p class="guide-card-meta">{section.note}</p>}
+                  <ul class="plain-list">
+                    {site.aboutWritingApproach.map((item) => <li>{item}</li>)}
+                  </ul>
+                </article>
+              )
+            }
+
+            {
+              section.type === "note" && (
+                <article class="guide-card">
+                  <p class="guide-card-label">{site.noteLabel}</p>
+                  <h2>{section.title}</h2>
+                  <p>{section.note || site.aboutNote}</p>
+                </article>
+              )
+            }
+
+            {
+              section.type === "contests" && (
+                <article class="guide-card">
+                  <p class="guide-card-label">{site.contestsLabel}</p>
+                  <h2>{section.title}</h2>
+                  <div class="mini-link-list">
+                    {contests.length > 0 ? (
+                      contests.map((contest) => (
+                        <a class="mini-link-row" href={`/contests/${contest.slug}/`}>
+                          <span>{contest.name}</span>
+                          <strong>{contest.count}</strong>
+                        </a>
+                      ))
+                    ) : (
+                      <p class="empty-inline">{site.contestsEmpty}</p>
+                    )}
                   </div>
-                </a>
+                  <p class="guide-card-meta">{section.note || contestsMetaText}</p>
+                </article>
+              )
+            }
+          </>
+        ))}
+      </section>
+    )}
+
+    {aboutFlowSections.map((section) => (
+      <>
+        {
+          section.type === "latest-posts" && (
+            <section class="shell section-block" id={section.id}>
+              <div class="section-head">
+                <h2>{section.title}</h2>
+                <span class="section-note">{section.note}</span>
+              </div>
+              <div class="signal-grid">
+                {latestPosts.map((post) => (
+                  <a class="signal-card" href={`/blog/${post.slug}/`}>
+                    <p class="signal-label">
+                      {[post.data.category, post.data.contest || post.data.oj].filter(Boolean).join(" / ")}
+                    </p>
+                    <h3>{post.data.title}</h3>
+                    <p>{post.data.description}</p>
+                    <div class="signal-card-footer">
+                      <span>{post.dateText}</span>
+                      <span>{post.data.track || post.data.language}</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </section>
+          )
+        }
+
+        {
+          section.type === "browse-guides" && (
+            <section class="shell guide-grid section-block" id={section.id}>
+              {site.browseGuides.map((guide) => (
+                <article class="guide-card">
+                  <p class="guide-card-label">{section.title}</p>
+                  <h2>{guide.title}</h2>
+                  <p>{guide.description}</p>
+                </article>
               ))}
-            </div>
-          </section>
-        )
+            </section>
+          )
+        }
+      </>
+    ))}
+  </div>
+
+  <style>
+    .about-intro-stage {
+      position: relative;
+      min-height: min(980px, calc(100svh - 8px));
+      overflow: hidden;
+    }
+
+    .about-intro-stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.24), transparent 18%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02) 35%, rgba(244, 241, 235, 0.12));
+    }
+
+    .about-hero-shell {
+      position: relative;
+      z-index: 1;
+      min-height: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(72px, 14vh, 128px) 0 clamp(200px, 28vh, 280px);
+    }
+
+    .about-hero-copy {
+      display: grid;
+      justify-items: center;
+      gap: 14px;
+      width: min(760px, 100%);
+      text-align: center;
+      color: #2f2940;
+      text-shadow: 0 2px 18px rgba(255, 255, 255, 0.36);
+    }
+
+    .about-hero-kicker {
+      margin: 0;
+      padding: 8px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      color: #7f4561;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .about-hero-copy h1 {
+      margin: 0;
+      font-size: clamp(42px, 7vw, 82px);
+      line-height: 1.04;
+      letter-spacing: 0.02em;
+    }
+
+    .about-hero-lead {
+      margin: 0;
+      max-width: 34rem;
+      color: rgba(47, 41, 64, 0.9);
+      font-size: clamp(16px, 2vw, 20px);
+      line-height: 1.8;
+      font-weight: 600;
+    }
+
+    .about-scroll-cue {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 18px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(10px);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      box-shadow: 0 12px 28px rgba(113, 78, 94, 0.14);
+    }
+
+    .about-content-flow {
+      position: relative;
+      margin-top: -148px;
+      padding-bottom: 8px;
+    }
+
+    .about-entry-block {
+      padding-top: 0;
+    }
+
+    .about-entry-card {
+      width: 100%;
+      align-items: start;
+      background:
+        linear-gradient(180deg, rgba(255, 252, 253, 0.62), rgba(255, 247, 250, 0.48));
+      backdrop-filter: blur(14px);
+    }
+
+    .about-entry-card::before,
+    .about-entry-card::after {
+      display: none;
+    }
+
+    .about-scene-card {
+      overflow: hidden;
+      padding: 0;
+      background: rgba(255, 253, 249, 0.72);
+    }
+
+    .about-scene-image {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .about-scene-caption {
+      display: grid;
+      gap: 4px;
+      padding: 14px 16px 16px;
+    }
+
+    .about-scene-caption strong {
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .about-overview-grid,
+    .about-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .about-intro-stage {
+        min-height: calc(100svh - 4px);
       }
 
-      {
-        section.type === "browse-guides" && (
-          <section class="shell guide-grid section-block" id={section.id}>
-            {site.browseGuides.map((guide) => (
-              <article class="guide-card">
-                <p class="guide-card-label">{section.title}</p>
-                <h2>{guide.title}</h2>
-                <p>{guide.description}</p>
-              </article>
-            ))}
-          </section>
-        )
+      .about-hero-shell {
+        padding-top: 72px;
+        padding-bottom: 180px;
       }
-    </>
-  ))}
+
+      .about-hero-copy h1 {
+        font-size: clamp(34px, 11vw, 54px);
+      }
+
+      .about-hero-lead {
+        max-width: 30rem;
+      }
+
+      .about-content-flow {
+        margin-top: -120px;
+      }
+
+      .about-overview-grid,
+      .about-summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </Layout>

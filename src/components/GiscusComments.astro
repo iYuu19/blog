@@ -5,13 +5,15 @@ interface Props {
   eyebrow?: string;
   title?: string;
   description?: string;
+  minimal?: boolean;
 }
 
 const site = await getSiteSettings();
 const {
   eyebrow = "Discussion",
   title = site.commentsTitle,
-  description = site.commentsDescription
+  description = site.commentsDescription,
+  minimal = false
 } = Astro.props;
 
 const isConfigured = Boolean(
@@ -32,24 +34,35 @@ const isConfigured = Boolean(
         <p>{description}</p>
       </div>
 
-      <div class="article-comments-shell">
-        <script
-          src="https://giscus.app/client.js"
-          data-repo={site.giscusRepo}
-          data-repo-id={site.giscusRepoId}
-          data-category={site.giscusCategory}
-          data-category-id={site.giscusCategoryId}
-          data-mapping={site.giscusMapping}
-          data-strict={site.giscusStrict ? "1" : "0"}
-          data-reactions-enabled={site.giscusReactionsEnabled ? "1" : "0"}
-          data-emit-metadata="0"
-          data-input-position={site.giscusInputPosition}
-          data-theme={site.giscusTheme}
-          data-lang={site.giscusLang}
-          data-loading="lazy"
-          crossorigin="anonymous"
-          async
-        ></script>
+      <div class:list={["article-comments-shell", { "is-minimal": minimal }]}>
+        {
+          !minimal && (
+            <div class="article-comments-shell-head">
+              <span>留言接线板</span>
+              <span>现场回执</span>
+              <span>补充线索</span>
+            </div>
+          )
+        }
+        <div class="article-comments-embed">
+          <script
+            src="https://giscus.app/client.js"
+            data-repo={site.giscusRepo}
+            data-repo-id={site.giscusRepoId}
+            data-category={site.giscusCategory}
+            data-category-id={site.giscusCategoryId}
+            data-mapping={site.giscusMapping}
+            data-strict={site.giscusStrict ? "1" : "0"}
+            data-reactions-enabled={site.giscusReactionsEnabled ? "1" : "0"}
+            data-emit-metadata="0"
+            data-input-position={site.giscusInputPosition}
+            data-theme={site.giscusTheme}
+            data-lang={site.giscusLang}
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async
+          ></script>
+        </div>
       </div>
     </section>
   )

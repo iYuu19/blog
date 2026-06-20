@@ -16,8 +16,8 @@ const guestbook =
     heroTitle: "留言板",
     heroLead: "如果你路过这里，欢迎留下你的想法。",
     heroIntro: [
-      "这里是博客的公共留言区。你可以聊文章感受、提小建议、分享最近在关注的题目，也可以单纯打个招呼，让这块空间更有一点来往和回声。",
-      "文章页底部的评论更适合围绕单篇内容讨论；这里则更适合聊整个博客本身，比如结构、更新方向、阅读体验，或者你最想看到的后续内容。"
+      "这里是博客的公共留言区。你可以聊文章感受、提小建议、分享最近在关注的话题，也可以单纯打个招呼，让这块空间有一点来往和回声。",
+      "这里适合聊整个博客本身，比如结构、更新方向、阅读体验，或者你最想看到的后续内容。"
     ],
     pillBadges: ["欢迎留言", "支持回复讨论", "支持表情反应"],
     quickLinks: [
@@ -85,43 +85,81 @@ const guestbookSections = (pageLayouts.guestbookSections?.length
     note: section.note || guestbookSectionNoteDefaults[section.type] || "",
     id: slugifySegment(section.anchor || `${section.type}-${index + 1}`)
   }));
+
+const guestbookWallpaperBase = "/theme/guestbook-police-group.jpg";
+const guestbookWallpaperStem = "/theme/guestbook-water-stem.webp";
+const guestbookWallpaperLily = "/theme/guestbook-water-lily.webp";
+const guestbookHeroSnapshot = "/theme/guestbook/guestbook-detective-badge.jpg";
+const guestbookHeroIntro = Array.isArray(guestbook.heroIntro) ? guestbook.heroIntro.slice(0, 1) : [];
+const guestbookPillBadges = Array.isArray(guestbook.pillBadges) ? guestbook.pillBadges : [];
+const guestbookQuickLinks = Array.isArray(guestbook.quickLinks) ? guestbook.quickLinks : [];
 ---
 
 <Layout title={`${guestbook.heroTitle} | ${site.siteTitle}`} description={guestbook.pageDescription}>
   <section class="shell intro about-intro">
-    <div class="hero-card about-hero-card guestbook-hero-card">
-      <div class="hero-copy">
-        <p class="eyebrow">{guestbook.heroEyebrow}</p>
-        <h1>{guestbook.heroTitle}</h1>
-        <p class="intro-lead">{guestbook.heroLead}</p>
-        {guestbook.heroIntro.map((paragraph) => <p>{paragraph}</p>)}
-
-        <div class="guestbook-pill-row">
-          {guestbook.pillBadges.map((badge) => <span class="entry-badge">{badge}</span>)}
+    <div class="hero-card about-hero-card hero-card-illustrated guestbook-hero-card">
+      <div class="guestbook-wallpaper-scene" aria-hidden="true">
+        <img
+          class="guestbook-wallpaper-layer guestbook-wallpaper-base"
+          src={guestbookWallpaperBase}
+          alt=""
+          loading="eager"
+          decoding="async"
+        />
+        <img
+          class="guestbook-wallpaper-layer guestbook-wallpaper-stem"
+          src={guestbookWallpaperStem}
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+        <img
+          class="guestbook-wallpaper-layer guestbook-wallpaper-lily"
+          src={guestbookWallpaperLily}
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+        <div class="guestbook-wallpaper-vignette"></div>
+        <div class="guestbook-wallpaper-clock">
+          <p class="guestbook-wallpaper-time" data-guestbook-live-time>00:00</p>
+          <p class="guestbook-wallpaper-date" data-guestbook-live-date>0000.00.00</p>
         </div>
-
-        <div class="hero-links hero-links-strong">
-          {guestbook.quickLinks.map((link) => (
-            <a href={link.href}>{link.label}</a>
-          ))}
-        </div>
+        <figure class="guestbook-spotlight-card">
+          <img
+            class="guestbook-spotlight-image"
+            src={guestbookHeroSnapshot}
+            alt="小新举着证件的侦探场景"
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption class="guestbook-spotlight-caption">
+            <p>Guestbook File</p>
+            <strong>留言调查现场</strong>
+          </figcaption>
+        </figure>
       </div>
 
-      <aside class="hero-aside">
-        <section class="hero-note-card accent-card">
-          <p class="hero-note-label">{guestbook.reminderTitle}</p>
-          <ul class="hero-note-list">
-            {guestbook.reminders.map((item) => <li>{item}</li>)}
-          </ul>
-        </section>
+      <div class="hero-copy guestbook-copy-panel">
+        <p class="eyebrow guestbook-secret-eyebrow">Guestbook / 留言板</p>
+        <h1 class="guestbook-secret-title">{guestbook.heroTitle}</h1>
+        <p class="intro-lead">{guestbook.heroLead}</p>
+        {guestbookHeroIntro.map((paragraph) => <p>{paragraph}</p>)}
 
-        <section class="hero-note-card">
-          <p class="hero-note-label">{guestbook.chatGuideTitle}</p>
-          <ul class="hero-note-list">
-            {guestbook.chatGuides.map((item) => <li>{item}</li>)}
-          </ul>
-        </section>
-      </aside>
+        {guestbookPillBadges.length > 0 && (
+          <div class="guestbook-pill-row">
+            {guestbookPillBadges.map((badge) => <span class="entry-badge guestbook-secret-badge">{badge}</span>)}
+          </div>
+        )}
+
+        {guestbookQuickLinks.length > 0 && (
+          <div class="hero-links hero-links-strong">
+            {guestbookQuickLinks.map((link) => (
+              <a href={link.href}>{link.label}</a>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   </section>
 
@@ -137,8 +175,8 @@ const guestbookSections = (pageLayouts.guestbookSections?.length
               </div>
             )}
             {guestbook.messageIdeas.map((idea) => (
-              <article class="guestbook-card">
-                <p class="guestbook-card-label">{idea.eyebrow}</p>
+              <article class="guestbook-card guestbook-mission-card">
+                <p class="guestbook-card-label guestbook-mission-label">{idea.eyebrow}</p>
                 <h2>{idea.title}</h2>
                 <p>{idea.text}</p>
               </article>
@@ -150,8 +188,8 @@ const guestbookSections = (pageLayouts.guestbookSections?.length
       {
         section.type === "login-note" && (
           <section class="shell guestbook-note-wrap section-block" id={section.id}>
-            <div class="guestbook-note-panel">
-              <p class="guestbook-note-label">{guestbook.loginPanelEyebrow}</p>
+            <div class="guestbook-note-panel guestbook-secret-panel">
+              <p class="guestbook-note-label">留言说明</p>
               <h2>{section.title}</h2>
               <p>{section.note}</p>
             </div>
@@ -161,15 +199,468 @@ const guestbookSections = (pageLayouts.guestbookSections?.length
 
       {
         section.type === "comments" && (
-          <section class="shell article-shell" id={section.id}>
+          <section class="shell guestbook-comments-section" id={section.id}>
             <GiscusComments
               eyebrow={guestbook.commentsEyebrow}
               title={section.title}
               description={section.note}
+              minimal={true}
             />
           </section>
         )
       }
     </>
   ))}
+
+  <script is:inline>
+    (() => {
+      const pad = (value) => String(value).padStart(2, "0");
+
+      const updateGuestbookClock = () => {
+        const now = new Date();
+        const dateText = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())}`;
+        const timeText = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+        document.querySelectorAll("[data-guestbook-live-date]").forEach((node) => {
+          node.textContent = dateText;
+        });
+
+        document.querySelectorAll("[data-guestbook-live-time]").forEach((node) => {
+          node.textContent = timeText;
+        });
+      };
+
+      updateGuestbookClock();
+      const timer = window.setInterval(updateGuestbookClock, 15000);
+      window.addEventListener("pagehide", () => window.clearInterval(timer), { once: true });
+    })();
+  </script>
+
+  <style>
+    :global(body.theme-shinchan) {
+      background:
+        url("/theme/guestbook-water-base.webp") center top / cover fixed no-repeat,
+        var(--bg);
+    }
+
+    :global(body.theme-shinchan)::before,
+    :global(body.theme-shinchan)::after {
+      display: none;
+    }
+
+    :global(body.theme-shinchan .site-header),
+    :global(body.theme-shinchan main),
+    :global(body.theme-shinchan .site-footer) {
+      position: relative;
+      z-index: 1;
+    }
+
+    :global(body.theme-shinchan main)::before,
+    :global(body.theme-shinchan main)::after {
+      content: "";
+      position: fixed;
+      pointer-events: none;
+    }
+
+    :global(body.theme-shinchan main)::before {
+      left: clamp(18px, 3vw, 54px);
+      bottom: clamp(72px, 10vh, 150px);
+      z-index: 0;
+      width: clamp(280px, 24vw, 380px);
+      height: clamp(280px, 24vw, 380px);
+      border-radius: 0;
+      background: url("/theme/guestbook-water-lily.webp") center / contain no-repeat;
+      opacity: 0.96;
+      filter: drop-shadow(0 20px 34px rgba(10, 32, 58, 0.16));
+      animation: guestbook-page-lily-float 7.6s ease-in-out infinite;
+    }
+
+    :global(body.theme-shinchan main)::after {
+      display: none;
+    }
+
+    .guestbook-hero-card {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      min-height: 920px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+      padding: 30px;
+      border-radius: 38px;
+      background: rgba(221, 234, 245, 0.9);
+    }
+
+    .guestbook-hero-card::before,
+    .guestbook-hero-card::after {
+      display: none;
+    }
+
+    .guestbook-wallpaper-scene {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .guestbook-wallpaper-layer,
+    .guestbook-wallpaper-vignette,
+    .guestbook-wallpaper-clock {
+      position: absolute;
+    }
+
+    .guestbook-wallpaper-base {
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 38%;
+      transform: scale(1.02);
+      filter: saturate(0.96) contrast(1.03) brightness(0.92);
+      animation: none;
+    }
+
+    .guestbook-wallpaper-stem {
+      display: none;
+    }
+
+    .guestbook-wallpaper-lily {
+      display: none;
+    }
+
+    .guestbook-wallpaper-vignette {
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(245, 248, 252, 0.26) 0%, rgba(245, 248, 252, 0.1) 28%, rgba(12, 18, 28, 0.22) 100%),
+        linear-gradient(90deg, rgba(244, 248, 252, 0.82) 0%, rgba(244, 248, 252, 0.36) 24%, rgba(255, 255, 255, 0.04) 48%, rgba(18, 24, 36, 0.14) 100%);
+    }
+
+    .guestbook-wallpaper-clock {
+      left: 58%;
+      top: clamp(92px, 7.4vw, 130px);
+      z-index: 3;
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      transform: translateX(-50%);
+      color: rgba(245, 251, 255, 0.98);
+      text-align: center;
+      text-shadow:
+        0 10px 28px rgba(17, 42, 71, 0.36),
+        0 2px 6px rgba(17, 42, 71, 0.28);
+      animation: guestbook-clock-breathe 5.5s ease-in-out infinite;
+    }
+
+    .guestbook-wallpaper-date,
+    .guestbook-wallpaper-time {
+      margin: 0;
+    }
+
+    .guestbook-wallpaper-time {
+      font-family: "Arial", "Helvetica Neue", var(--font-sans);
+      font-size: clamp(72px, 6.6vw, 108px);
+      font-weight: 300;
+      letter-spacing: 0.02em;
+      line-height: 0.92;
+    }
+
+    .guestbook-wallpaper-date {
+      font-family: var(--font-mono);
+      font-size: clamp(18px, 1.35vw, 26px);
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      opacity: 0.94;
+    }
+
+    .guestbook-spotlight-card {
+      position: absolute;
+      right: clamp(26px, 3.4vw, 42px);
+      bottom: clamp(28px, 4.2vw, 48px);
+      z-index: 3;
+      display: grid;
+      gap: 10px;
+      width: min(280px, 26vw);
+      margin: 0;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.44);
+      border-radius: 28px 22px 28px 20px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.14)),
+        rgba(228, 238, 248, 0.14);
+      backdrop-filter: blur(16px) saturate(1.05);
+      box-shadow:
+        0 22px 40px rgba(17, 42, 71, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.42);
+      transform: rotate(-2deg);
+    }
+
+    .guestbook-spotlight-image {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      object-position: center;
+      border-radius: 20px 16px 20px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.36);
+      box-shadow: 0 14px 28px rgba(17, 42, 71, 0.16);
+    }
+
+    .guestbook-spotlight-caption {
+      display: grid;
+      gap: 4px;
+      padding: 0 4px 2px;
+      color: #eef6ff;
+      text-shadow: 0 4px 14px rgba(17, 42, 71, 0.28);
+    }
+
+    .guestbook-spotlight-caption p,
+    .guestbook-spotlight-caption strong {
+      margin: 0;
+    }
+
+    .guestbook-spotlight-caption p {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.86;
+    }
+
+    .guestbook-spotlight-caption strong {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .guestbook-hero-card .hero-copy {
+      position: relative;
+      z-index: 2;
+    }
+
+    .guestbook-copy-panel {
+      align-self: start;
+      max-width: 404px;
+      margin-top: 6px;
+      padding: 20px 22px 24px;
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      border-radius: 30px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08)),
+        rgba(233, 243, 251, 0.04);
+      backdrop-filter: blur(12px) saturate(1.03);
+      box-shadow:
+        0 16px 36px rgba(17, 42, 71, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.34);
+    }
+
+    .guestbook-secret-eyebrow {
+      color: rgba(34, 60, 92, 0.78);
+      letter-spacing: 0.16em;
+    }
+
+    .guestbook-secret-title {
+      position: relative;
+      margin-bottom: 10px;
+      color: #24314f;
+      font-size: clamp(54px, 4.8vw, 76px);
+      line-height: 0.95;
+    }
+
+    .guestbook-copy-panel .intro-lead {
+      color: #2d3c5e;
+      font-size: clamp(20px, 1.7vw, 28px);
+      line-height: 1.45;
+    }
+
+    .guestbook-copy-panel p:not(.eyebrow):not(.intro-lead) {
+      color: rgba(39, 56, 85, 0.88);
+      font-size: clamp(14px, 1vw, 17px);
+      line-height: 1.76;
+    }
+
+    .guestbook-pill-row {
+      margin-top: 18px;
+    }
+
+    .guestbook-secret-badge {
+      background: rgba(255, 248, 228, 0.92) !important;
+      border-color: rgba(203, 171, 102, 0.42) !important;
+      color: #725624 !important;
+    }
+
+    .guestbook-copy-panel .hero-links {
+      margin-top: 18px;
+    }
+
+    .guestbook-mission-card {
+      position: relative;
+      border: 1px solid rgba(211, 224, 236, 0.92) !important;
+      box-shadow: 0 18px 34px rgba(33, 59, 92, 0.06);
+    }
+
+    .guestbook-mission-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(122, 177, 228, 0.72), rgba(226, 241, 255, 0.12));
+      border-radius: 18px 18px 0 0;
+      opacity: 0.9;
+    }
+
+    .guestbook-mission-label {
+      color: #53759f !important;
+    }
+
+    .guestbook-secret-panel {
+      position: relative;
+      border: 1px solid rgba(206, 222, 236, 0.92) !important;
+      box-shadow: 0 18px 34px rgba(33, 59, 92, 0.06);
+    }
+
+    .guestbook-secret-panel::after {
+      content: "";
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 28px;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(126, 176, 223, 0.24), rgba(214, 236, 255, 0.16));
+      transform: rotate(12deg);
+      opacity: 0.9;
+    }
+
+    .guestbook-comments-section .article-comments {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    @keyframes guestbook-water-drift {
+      0% {
+        transform: scale(1.03) translate3d(0, 0, 0);
+      }
+
+      100% {
+        transform: scale(1.06) translate3d(-0.8%, 0.4%, 0);
+      }
+    }
+
+    @keyframes guestbook-stem-sway {
+      0%,
+      100% {
+        transform: rotate(-1.8deg) translateY(0);
+      }
+
+      50% {
+        transform: rotate(2.2deg) translateY(6px);
+      }
+    }
+
+    @keyframes guestbook-lily-float {
+      0%,
+      100% {
+        transform: translateX(-50%) translateY(0) rotate(-0.4deg);
+      }
+
+      50% {
+        transform: translateX(-50%) translateY(-10px) rotate(0.5deg);
+      }
+    }
+
+    @keyframes guestbook-page-lily-float {
+      0%,
+      100% {
+        transform: rotate(-7deg) translate3d(0, 0, 0);
+      }
+
+      50% {
+        transform: rotate(-5deg) translate3d(12px, -14px, 0);
+      }
+    }
+
+    @keyframes guestbook-clock-breathe {
+      0%,
+      100% {
+        transform: translateX(-50%) translateY(0);
+        text-shadow:
+          0 10px 28px rgba(17, 42, 71, 0.36),
+          0 2px 6px rgba(17, 42, 71, 0.28);
+      }
+
+      50% {
+        transform: translateX(-50%) translateY(-4px);
+        text-shadow:
+          0 14px 34px rgba(17, 42, 71, 0.42),
+          0 2px 8px rgba(17, 42, 71, 0.3);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .guestbook-hero-card {
+        min-height: 740px;
+        padding: 16px;
+      }
+
+      .guestbook-copy-panel {
+        max-width: 100%;
+        margin-top: 0;
+        padding: 16px 16px 18px;
+      }
+
+      .guestbook-wallpaper-base {
+        transform: scale(1.06);
+        object-position: center 32%;
+      }
+
+      :global(body.theme-shinchan main)::before {
+        left: 12px;
+        bottom: 54px;
+        width: clamp(180px, 34vw, 260px);
+        height: clamp(180px, 34vw, 260px);
+        opacity: 0.92;
+      }
+
+      .guestbook-wallpaper-vignette {
+        background:
+          linear-gradient(180deg, rgba(244, 248, 253, 0.58) 0%, rgba(237, 244, 251, 0.18) 34%, rgba(16, 24, 36, 0.22) 100%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
+      }
+
+      .guestbook-wallpaper-clock {
+        left: 54%;
+        top: 56px;
+      }
+
+      .guestbook-wallpaper-time {
+        font-size: clamp(52px, 12vw, 78px);
+      }
+
+      .guestbook-wallpaper-date {
+        font-size: 16px;
+      }
+
+      .guestbook-copy-panel .intro-lead {
+        font-size: 18px;
+      }
+
+      .guestbook-copy-panel p:not(.eyebrow):not(.intro-lead) {
+        font-size: 14px;
+      }
+
+      :global(body.theme-shinchan) {
+        background:
+          url("/theme/guestbook-water-base.webp") center top / cover no-repeat,
+          var(--bg);
+      }
+
+      :global(body.theme-shinchan)::before,
+      :global(body.theme-shinchan)::after {
+        display: none;
+      }
+    }
+  </style>
 </Layout>

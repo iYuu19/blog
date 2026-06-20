@@ -1,0 +1,40 @@
+---
+interface StickerItem {
+  badge: string;
+  name: string;
+  note: string;
+  tone: string;
+}
+
+interface Props {
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+
+const fullItems: StickerItem[] = [
+  { badge: "新", name: "小新", note: "主线发起人", tone: "red" },
+  { badge: "白", name: "小白", note: "线索嗅探", tone: "blue" },
+  { badge: "风", name: "风间", note: "题解速记", tone: "teal" },
+  { badge: "妮", name: "妮妮", note: "赛后复盘", tone: "pink" },
+  { badge: "呆", name: "阿呆", note: "专题沉淀", tone: "stone" },
+  { badge: "正", name: "正男", note: "辅助观察", tone: "mint" },
+  { badge: "美", name: "美冴", note: "秩序整理", tone: "peach" },
+  { badge: "广", name: "广志", note: "现场推进", tone: "gold" },
+  { badge: "葵", name: "向日葵", note: "彩蛋道具", tone: "yellow" },
+  { badge: "巧", name: "巧克比", note: "便签收纳", tone: "cookie" },
+  { badge: "动", name: "动感超人", note: "高亮行动", tone: "hero" }
+];
+
+const compactItems = fullItems.slice(0, 6);
+const items = compact ? compactItems : fullItems;
+---
+
+<div class:list={["sticker-board", compact ? "is-compact" : ""]} aria-label="蜡笔小新主题角色贴纸板">
+  {items.map((item) => (
+    <article class="sticker-board-item" data-tone={item.tone}>
+<strong>{item.name}</strong>
+      <small>{item.note}</small>
+    </article>
+  ))}
+</div>

@@ -2,3 +2,11 @@ node_modules
 dist
 .astro
 preview.log
+.codex-previews/
+.codex-dev*.log
+.codex-dev-live*.log
+.codex-live*.html
+_home_debug.html
+preview-*.png
+public/theme/stickers/shinchan-walker.old.png
+public/theme/stickers/shinchan-walker.pre-transparent.png

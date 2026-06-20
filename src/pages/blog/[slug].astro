@@ -4,7 +4,7 @@ import ArticleTocTree from "../../components/ArticleTocTree.astro";
 import GiscusComments from "../../components/GiscusComments.astro";
 import Layout from "../../layouts/Layout.astro";
 import TagPill from "../../components/TagPill.astro";
-import { getContestSlug } from "../../utils/content";
+import { getCaseCode, getCategoryAccent, getCategoryDefinitions, getContestSlug } from "../../utils/content";
 import { getSiteSettings } from "../../utils/site";
 
 interface TocNode {
@@ -93,10 +93,48 @@ const difficultyClassMap: Record<string, string> = {
 const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-notes";
 const contestLabel = post.data.contest || post.data.oj || null;
 const contestHref = contestLabel ? `/contests/${getContestSlug(post)}/` : null;
+const categoryDefinitions = await getCategoryDefinitions();
+const categoryDefinition = categoryDefinitions.find((item) => item.name === post.data.category);
+const categoryColor = getCategoryAccent(post.data.category);
+const categoryFocus =
+  categoryDefinition?.writingFocus ?? "这篇内容归档在这个分类下，方便按主题连续阅读。";
+const categoryDescription =
+  categoryDefinition?.description ?? "适合与同类文章一起浏览，快速建立主题上下文。";
+const categoryTopic = categoryDefinition?.exampleTopics?.[0] ?? post.data.track ?? "按主题归档";
 const tocItems = headings.filter(({ depth, slug, text }) => depth >= 2 && depth <= 4 && slug && text);
 const tocTree = buildTocTree(tocItems);
 const articleSignals = analyzeArticleContent(post.body);
 const readingMinutes = articleSignals.readingMinutes;
+const caseCode = getCaseCode(post.slug, post.data.pubDate);
+const backToTopSticker = "/theme/stickers/shiro-complete.png";
+const readingCompanion = (() => {
+  const topicSeed = [post.data.category, post.data.track, contestLabel].filter(Boolean).join(" ");
+
+  if (/forensics|取证/i.test(topicSeed)) {
+    return {
+      name: "小白",
+      sticker: "/theme/stickers/shiro-complete.png"
+    };
+  }
+
+  if (/复盘|总结|review|notes/i.test(topicSeed)) {
+    return {
+      name: "小新",
+      sticker: "/theme/stickers/shinchan-sign.png"
+    };
+  }
+
+  return {
+    name: "小新",
+    sticker: "/theme/stickers/shinchan-walker.png"
+  };
+})();
+const readingCompanionMilestones = [
+  { at: 25, text: `${readingCompanion.name}：先把这一段线索看完！` },
+  { at: 50, text: `${readingCompanion.name}：已经到一半了，继续追！` },
+  { at: 75, text: `${readingCompanion.name}：快接近结论区了！` },
+  { at: 100, text: `${readingCompanion.name}：本集档案阅读完成！` }
+];
 ---
 
 <Layout
@@ -104,19 +142,81 @@ const readingMinutes = articleSignals.readingMinutes;
   description={post.data.description}
   socialImage={post.data.coverImage || site.defaultCoverImage || site.defaultSocialImage}
 >
-  <section class="shell article-layout fade-up">
-    <aside class="index-column article-index-column">
-      <div class="article-rail">
-        {
-          tocItems.length > 0 && (
+  <section class:list={["shell", "article-layout", "fade-up", tocItems.length > 0 ? "has-toc" : "no-toc"]}>
+    {
+      tocItems.length > 0 && (
+        <aside class="index-column article-index-column">
+          <div class="article-rail article-rail-left">
             <div class="site-index article-index">
               <p class="index-title">本文目录</p>
               <p class="article-index-meta">{tocItems.length} sections · {readingMinutes} min read</p>
               <ArticleTocTree nodes={tocTree} />
             </div>
-          )
-        }
+          </div>
+        </aside>
+      )
+    }
 
+    <article class="article-shell" data-article-content>
+      <header class="article-header">
+        <p class="article-back">
+          <a href="/blog">返回文章列表</a>
+        </p>
+        <p class="eyebrow">{post.data.category}</p>
+        <h1>{post.data.title}</h1>
+        <p class="article-description">{post.data.description}</p>
+        <div class="article-character-banner" style={`--char-color: ${categoryColor}`}>
+          <span class="article-character-marker" aria-hidden="true"></span>
+          <div>
+            <strong>{post.data.category} 分类</strong>
+            <p>{categoryFocus}</p>
+            <p class="article-character-motif">{categoryTopic}</p>
+          </div>
+        </div>
+        <div class="article-dossier-grid">
+          <article class="article-dossier-card article-dossier-card-primary">
+            <span class="article-dossier-label">CASE FILE</span>
+            <strong>{caseCode}</strong>
+            <p>{contestLabel || post.data.category}</p>
+          </article>
+          <article class="article-dossier-card">
+            <span class="article-dossier-label">READING</span>
+            <strong>{readingMinutes} min</strong>
+            <p>{articleSignals.headingCount} sections / {articleSignals.codeBlockCount} code blocks</p>
+          </article>
+          <article class="article-dossier-card">
+            <span class="article-dossier-label">FOCUS</span>
+            <strong>{post.data.category}</strong>
+            <p>{categoryTopic}</p>
+          </article>
+        </div>
+        <div class="article-context">
+          {contestLabel && (contestHref ? <a href={contestHref}>{contestLabel}</a> : <span>{contestLabel}</span>)}
+          {post.data.track && <span>{post.data.track}</span>}
+        </div>
+        <div class="article-meta">
+          <span>发布于 {dateText}</span>
+          {updatedDateText && <span>更新于 {updatedDateText}</span>}
+          <span>{readingMinutes} min read</span>
+          <span class:list={["difficulty-pill", difficultyClass]}>{post.data.difficulty}</span>
+          <span>{post.data.language}</span>
+        </div>
+        <div class="tag-row">
+          {post.data.tags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
+        </div>
+      </header>
+
+      <div class="article-body prose">
+        <Content />
+      </div>
+
+      <div data-comments-anchor>
+        <GiscusComments />
+      </div>
+    </article>
+
+    <aside class="index-column article-utility-column">
+      <div class="article-rail article-rail-right">
         <section class="article-rail-card article-overview-card">
           <div class="article-overview-head">
             <div>
@@ -168,49 +268,43 @@ const readingMinutes = articleSignals.readingMinutes;
           </p>
 
           <div class="article-rail-actions">
-            <button type="button" class="article-rail-button" data-scroll-top>
-              回到顶部
+            <button type="button" class="article-rail-button rail-btn-top" data-scroll-top>
+              <span class="article-rail-button-icon rail-shiro-icon" aria-hidden="true">
+                <img
+                  class="shiro-top-img"
+                  src={backToTopSticker}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+              小白带我回顶部
             </button>
             <button type="button" class="article-rail-button is-soft" data-scroll-comments>
+              <span class="article-rail-button-icon article-rail-button-icon-text" aria-hidden="true">评</span>
               跳到评论区
             </button>
           </div>
         </section>
+
+        <section class="article-rail-card article-companion-card" style={`--char-color: ${categoryColor}`}>
+          <p class="index-title">分类说明</p>
+          <div class="article-companion-head">
+            <span class="article-companion-marker" aria-hidden="true"></span>
+            <div>
+              <strong>{post.data.category}</strong>
+              <p>{categoryFocus}</p>
+              <p class="article-companion-motif">{categoryTopic}</p>
+            </div>
+          </div>
+          <p class="article-companion-note">{categoryDescription}</p>
+          <div class="article-overview-pills">
+            <span>{post.data.category}</span>
+            <span>阅读 {readingMinutes} 分钟</span>
+          </div>
+        </section>
       </div>
     </aside>
-
-    <article class="article-shell" data-article-content>
-      <header class="article-header">
-        <p class="article-back">
-          <a href="/blog">返回文章列表</a>
-        </p>
-        <p class="eyebrow">{post.data.category}</p>
-        <h1>{post.data.title}</h1>
-        <p class="article-description">{post.data.description}</p>
-        <div class="article-context">
-          {contestLabel && (contestHref ? <a href={contestHref}>{contestLabel}</a> : <span>{contestLabel}</span>)}
-          {post.data.track && <span>{post.data.track}</span>}
-        </div>
-        <div class="article-meta">
-          <span>发布于 {dateText}</span>
-          {updatedDateText && <span>更新于 {updatedDateText}</span>}
-          <span>{readingMinutes} min read</span>
-          <span class:list={["difficulty-pill", difficultyClass]}>{post.data.difficulty}</span>
-          <span>{post.data.language}</span>
-        </div>
-        <div class="tag-row">
-          {post.data.tags.map((tag) => <TagPill label={tag} href={`/tags/${tag}/`} />)}
-        </div>
-      </header>
-
-      <div class="article-body prose">
-        <Content />
-      </div>
-
-      <div data-comments-anchor>
-        <GiscusComments />
-      </div>
-    </article>
   </section>
 
   {
@@ -235,11 +329,12 @@ const readingMinutes = articleSignals.readingMinutes;
 
           if (headingEntries.length === 0) return;
 
-          const setActive = (id) => {
+          const setActive = (id, options = {}) => {
             if (!id) return;
             const currentEntry = headingEntries.find((entry) => entry.id === id);
             if (!currentEntry) return;
             activeId = id;
+            const revealInToc = options.revealInToc ?? false;
 
             const activeTrailIds = new Set();
             let currentNode = currentEntry.link.closest("[data-toc-node]");
@@ -257,7 +352,7 @@ const readingMinutes = articleSignals.readingMinutes;
               const isTrail = activeTrailIds.has(entry.id);
               entry.link.classList.toggle("is-active", isActive);
               entry.link.classList.toggle("is-trail", isTrail);
-              if (isActive) {
+              if (isActive && revealInToc) {
                 entry.link.scrollIntoView({
                   block: "nearest",
                   inline: "nearest"
@@ -339,7 +434,7 @@ const readingMinutes = articleSignals.readingMinutes;
             const targetTop = Math.max(0, window.scrollY + entry.heading.getBoundingClientRect().top - scrollPaddingTop);
             const nextHash = entry.link.getAttribute("href") || `#${entry.id}`;
 
-            setActive(entry.id);
+            setActive(entry.id, { revealInToc: true });
             history.replaceState(null, "", nextHash);
             smoothScrollTo(targetTop, entry.id);
           };
@@ -509,10 +604,15 @@ const readingMinutes = articleSignals.readingMinutes;
 
           try {
             await navigator.clipboard.writeText(text);
-            button.textContent = "已复制";
+            button.innerHTML = '<span class="copy-success-icon">⚡</span> 动感认证';
+            button.classList.add("is-copied");
+
+            showToast("动感超人认证：代码已经复制好了");
+
             window.setTimeout(() => {
               button.textContent = "复制代码";
-            }, 1600);
+              button.classList.remove("is-copied");
+            }, 2200);
           } catch (error) {
             console.error(error);
             button.textContent = "复制失败";
@@ -523,6 +623,26 @@ const readingMinutes = articleSignals.readingMinutes;
         });
 
         block.appendChild(button);
+      }
+
+      // 巧克比 Toast 通知
+      function showToast(message) {
+        const existing = document.querySelector(".shinchan-toast");
+        if (existing) existing.remove();
+
+        const toast = document.createElement("div");
+        toast.className = "shinchan-toast";
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        requestAnimationFrame(() => {
+          toast.classList.add("is-visible");
+        });
+
+        setTimeout(() => {
+          toast.classList.remove("is-visible");
+          setTimeout(() => toast.remove(), 400);
+        }, 2000);
       }
     })();
   </script>
@@ -742,6 +862,89 @@ const readingMinutes = articleSignals.readingMinutes;
 
       markZoomableImages();
       document.body.appendChild(overlay);
+    })();
+  </script>
+
+  <!-- 阅读进度角色反馈 -->
+  <script
+    is:inline
+    define:vars={{ readingCompanionSticker: readingCompanion.sticker, readingCompanionMilestones }}
+  >
+    (() => {
+      const article = document.querySelector("[data-article-content]");
+      const progressBar = document.querySelector("[data-reading-progress-bar]");
+      if (!article || !progressBar) return;
+
+      // 创建阅读鼓励气泡
+      const cheerBubble = document.createElement("div");
+      cheerBubble.className = "reading-cheer-bubble";
+      cheerBubble.setAttribute("aria-hidden", "true");
+      cheerBubble.innerHTML = `
+        <span class="cheer-avatar" aria-hidden="true">
+          <img class="cheer-avatar-img" src="${readingCompanionSticker}" alt="" loading="lazy" decoding="async" />
+        </span>
+        <span class="cheer-text"></span>
+      `;
+      document.body.appendChild(cheerBubble);
+
+      const cheerText = cheerBubble.querySelector(".cheer-text");
+      const milestones = readingCompanionMilestones;
+      const shown = new Set();
+
+      // 监听进度变化
+      const observer = new MutationObserver(() => {
+        const width = parseFloat(progressBar.style.width) || 0;
+        const percent = Math.round(width);
+
+        for (const m of milestones) {
+          if (percent >= m.at && !shown.has(m.at)) {
+            shown.add(m.at);
+            showCheer(m.text);
+            break;
+          }
+        }
+      });
+
+      observer.observe(progressBar, { attributes: true, attributeFilter: ["style"] });
+
+      function showCheer(text) {
+        if (!cheerText) return;
+        cheerText.textContent = text;
+        cheerBubble.classList.add("is-visible");
+
+        setTimeout(() => {
+          cheerBubble.classList.remove("is-visible");
+        }, 3500);
+      }
+    })();
+  </script>
+
+  <!-- 文章内容滚动入场动画 -->
+  <script is:inline>
+    (() => {
+      const article = document.querySelector("[data-article-content]");
+      if (!article) return;
+
+      // 为文章内容元素添加动画类
+      const animTargets = article.querySelectorAll(
+        "h2, h3, h4, p, ul, ol, blockquote, pre, figure, .prose > table"
+      );
+
+      animTargets.forEach((el) => el.classList.add("scroll-reveal"));
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-revealed");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+      );
+
+      animTargets.forEach((el) => observer.observe(el));
     })();
   </script>
 </Layout>

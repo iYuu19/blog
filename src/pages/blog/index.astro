@@ -3,7 +3,11 @@ import { getCollection, getEntry } from "astro:content";
 import ArchiveRow from "../../components/ArchiveRow.astro";
 import TagPill from "../../components/TagPill.astro";
 import Layout from "../../layouts/Layout.astro";
-import { slugifySegment } from "../../utils/content";
+import {
+  getCategoryAccent,
+  getCategoryDefinitions,
+  slugifySegment
+} from "../../utils/content";
 import { getPageLayouts } from "../../utils/site";
 
 const archivePage =
@@ -27,6 +31,7 @@ const archivePage =
     commonTagsHeading: "常看标签"
   };
 const pageLayouts = await getPageLayouts();
+const categoryDefinitions = await getCategoryDefinitions();
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
@@ -44,6 +49,22 @@ const latestDate = latest
       day: "2-digit"
     }).format(latest.data.pubDate)
   : "";
+const archiveCategories = [...new Set(posts.map((post) => post.data.category).filter(Boolean))]
+  .map((name) => {
+    const categoryPosts = posts.filter((post) => post.data.category === name);
+    const definition = categoryDefinitions.find((item) => item.name === name);
+
+    return {
+      name,
+      color: getCategoryAccent(name),
+      count: categoryPosts.length,
+      description: definition?.description ?? "这个分类下的文章会围绕同一主题持续累积。",
+      focus: definition?.writingFocus ?? "适合按主题连续阅读，快速建立上下文。",
+      topic: definition?.exampleTopics?.[0] ?? "按主题持续补充",
+      sortOrder: definition?.sortOrder ?? 999
+    };
+  })
+  .sort((a, b) => a.sortOrder - b.sortOrder || b.count - a.count);
 const groupedPosts = Object.entries(
   posts.reduce<Record<string, typeof posts>>((acc, post) => {
     const year = String(post.data.pubDate.getFullYear());
@@ -73,28 +94,62 @@ const archiveSections = (pageLayouts.archiveSections?.length ? pageLayouts.archi
 ---
 
 <Layout title={`${archivePage.pageTitle} | iYuu Notes`} description={archivePage.pageDescription}>
-  <section class="shell page-intro">
-    <p class="eyebrow">{archivePage.heroEyebrow}</p>
-    <h1>{archivePage.heroTitle}</h1>
-    <p>{archivePage.heroIntro}</p>
-    <p class="meta-line">
-      目前一共 {posts.length} 篇。
-      {latest && <> 最近一篇是 <a href={`/blog/${latest.slug}/`}>{latest.data.title}</a> · {latestDate}</>}
-    </p>
-    <dl class="page-stats">
-      <div>
-        <dt>{archivePage.postsLabel}</dt>
-        <dd>{posts.length}</dd>
+  <section class="shell page-intro page-intro-with-companion archive-index-intro">
+    <div class="page-intro-main">
+      <p class="eyebrow">{archivePage.heroEyebrow}</p>
+      <h1>{archivePage.heroTitle}</h1>
+      <p>{archivePage.heroIntro}</p>
+      <p class="meta-line">
+        目前一共 {posts.length} 篇。
+        {latest && <> 最近一篇是 <a href={`/blog/${latest.slug}/`}>{latest.data.title}</a> · {latestDate}</>}
+      </p>
+      <dl class="page-stats">
+        <div>
+          <dt>{archivePage.postsLabel}</dt>
+          <dd>{posts.length}</dd>
+        </div>
+        <div>
+          <dt>{archivePage.writeupsLabel}</dt>
+          <dd>{wpCount}</dd>
+        </div>
+        <div>
+          <dt>{archivePage.reviewsLabel}</dt>
+          <dd>{reviewCount}</dd>
+        </div>
+      </dl>
+    </div>
+
+    <aside class="page-scene-card">
+      <div class="page-scene-image page-scene-image-board archive-summary-board">
+        {archiveCategories.slice(0, 4).map((category) => (
+          <article class="archive-summary-item" style={`--char-color: ${category.color}`}>
+            <strong>{category.name}</strong>
+            <span>{category.count} 篇</span>
+          </article>
+        ))}
       </div>
-      <div>
-        <dt>{archivePage.writeupsLabel}</dt>
-        <dd>{wpCount}</dd>
+      <div class="page-scene-copy">
+        <p class="page-scene-kicker">归档概览</p>
+        <strong>按时间归档，也能按分类快速回看内容。</strong>
+        <p>如果你想连续读某一类文章，可以直接从分类、标签或年度列表切入。</p>
       </div>
-      <div>
-        <dt>{archivePage.reviewsLabel}</dt>
-        <dd>{reviewCount}</dd>
-      </div>
-    </dl>
+    </aside>
+  </section>
+
+  <section class="shell page-companion-strip" aria-label="归档分类概览">
+    {archiveCategories.slice(0, 4).map((category) => (
+      <article class="page-companion-card" style={`--char-color: ${category.color}`}>
+        <p class="page-companion-kicker">分类说明</p>
+        <div class="page-companion-head">
+          <span class="page-companion-marker" aria-hidden="true"></span>
+          <div>
+            <strong>{category.name}</strong>
+            <p>{category.focus}</p>
+            <p class="page-companion-motif">{category.count} 篇 · {category.topic}</p>
+          </div>
+        </div>
+      </article>
+    ))}
   </section>
 
   <section class="shell archive-page">

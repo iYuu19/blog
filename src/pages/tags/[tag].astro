@@ -55,24 +55,27 @@ const latestPost = posts[0];
 ---
 
 <Layout title={`${tag} | ${site.siteTitle}`} description={pageDescription}>
-  <section class="shell page-intro fade-up">
-    <p class="eyebrow">{tagPage.pageEyebrow}</p>
-    <h1>#{tag}</h1>
-    <p>{heroIntro}</p>
-    <dl class="page-stats">
-      <div>
-        <dt>内容数</dt>
-        <dd>{posts.length}</dd>
-      </div>
-      <div>
-        <dt>比赛数</dt>
-        <dd>{contestCount}</dd>
-      </div>
-      <div>
-        <dt>{tagPage.relatedCategoryLabel}</dt>
-        <dd>{definition?.relatedCategory ?? "未设置"}</dd>
-      </div>
-    </dl>
+  <section class="shell page-intro">
+    <div class="page-intro-main">
+      <p class="eyebrow">{tagPage.pageEyebrow}</p>
+      <h1>#{tag}</h1>
+      <p>{heroIntro}</p>
+      <dl class="page-stats">
+        <div>
+          <dt>内容数</dt>
+          <dd>{posts.length}</dd>
+        </div>
+        <div>
+          <dt>比赛数</dt>
+          <dd>{contestCount}</dd>
+        </div>
+        <div>
+          <dt>{tagPage.relatedCategoryLabel}</dt>
+          <dd>{definition?.relatedCategory ?? "未设置"}</dd>
+        </div>
+      </dl>
+    </div>
+
   </section>
 
   <section class="shell section-block">

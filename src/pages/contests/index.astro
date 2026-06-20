@@ -84,10 +84,12 @@ const contestsSections = (pageLayouts.contestsSections?.length ? pageLayouts.con
 ---
 
 <Layout title={`${contestsPage.pageTitle} | iYuu Notes`} description={contestsPage.pageDescription}>
-  <section class="shell page-intro">
-    <p class="eyebrow">{contestsPage.heroEyebrow}</p>
-    <h1>{contestsPage.heroTitle}</h1>
-    <p>{contestsPage.heroIntro}</p>
+  <section class:list={["shell", "page-intro", "contest-index-intro"]}>
+    <div class="contest-index-intro-card">
+      <p class="eyebrow">{contestsPage.heroEyebrow}</p>
+      <h1>{contestsPage.heroTitle}</h1>
+      <p>{contestsPage.heroIntro}</p>
+    </div>
   </section>
 
   {contestsSections.map((section) => (

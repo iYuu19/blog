@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import DifficultyStars from "./DifficultyStars.astro";
 import TagPill from "./TagPill.astro";
 
 interface Props {
@@ -13,20 +14,12 @@ const dateText = new Intl.DateTimeFormat("zh-CN", {
   day: "numeric"
 }).format(post.data.pubDate);
 
-const difficultyClassMap: Record<string, string> = {
-  Easy: "difficulty-easy",
-  Medium: "difficulty-medium",
-  Hard: "difficulty-hard",
-  Notes: "difficulty-notes"
-};
-
-const difficultyClass = difficultyClassMap[post.data.difficulty] ?? "difficulty-notes";
 ---
 
 <article class="post-card">
   <div class="post-card-head">
     <span class="archive-code">{post.data.oj}</span>
-    <span class:list={["difficulty-pill", difficultyClass]}>{post.data.difficulty}</span>
+    <DifficultyStars difficulty={post.data.difficulty} compact />
   </div>
   <h3>
     <a href={`/blog/${post.slug}/`}>{post.data.title}</a>

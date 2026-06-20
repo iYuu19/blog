@@ -1,0 +1,44 @@
+---
+interface Props {
+  character?: "shinchan" | "shiro" | "action" | "chocobi";
+  class?: string;
+  alt?: string;
+  loading?: "lazy" | "eager";
+}
+
+const {
+  character = "shinchan",
+  class: className = "",
+  alt = "",
+  loading = "lazy"
+} = Astro.props;
+
+const stickerMap = {
+  shinchan: {
+    src: "/theme/stickers/shinchan-walker.png",
+    label: "小新贴纸"
+  },
+  shiro: {
+    src: "/theme/stickers/shiro-complete.png",
+    label: "小白贴纸"
+  },
+  action: {
+    src: "/theme/stickers/shinchan-sign.png",
+    label: "行动贴纸"
+  },
+  chocobi: {
+    src: "/theme/stickers/shinchan-peek.png",
+    label: "巧克比风格贴纸"
+  }
+} as const;
+
+const sticker = stickerMap[character];
+---
+
+<img
+  class:list={["shinchan-character-sticker", `is-${character}`, className]}
+  src={sticker.src}
+  alt={alt || sticker.label}
+  loading={loading}
+  decoding="async"
+/>

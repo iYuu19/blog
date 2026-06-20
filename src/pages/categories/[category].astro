@@ -88,23 +88,26 @@ const pageDescription = categoryPage.pageDescriptionTemplate.replace("{{category
 
 <Layout title={`${category} | ${site.siteTitle}`} description={pageDescription}>
   <section class="shell page-intro">
-    <p class="eyebrow">{categoryPage.pageEyebrow}</p>
-    <h1>{category}</h1>
-    <p>{description}</p>
-    <dl class="page-stats">
-      <div>
-        <dt>{categoryPage.postsLabel}</dt>
-        <dd>{posts.length}</dd>
-      </div>
-      <div>
-        <dt>{categoryPage.contestsLabel}</dt>
-        <dd>{contestCount}</dd>
-      </div>
-      <div>
-        <dt>{categoryPage.latestUpdateLabel}</dt>
-        <dd>{latestDateText || categoryPage.emptyLatestUpdateText}</dd>
-      </div>
-    </dl>
+    <div class="page-intro-main">
+      <p class="eyebrow">{categoryPage.pageEyebrow}</p>
+      <h1>{category}</h1>
+      <p>{description}</p>
+      <dl class="page-stats">
+        <div>
+          <dt>{categoryPage.postsLabel}</dt>
+          <dd>{posts.length}</dd>
+        </div>
+        <div>
+          <dt>{categoryPage.contestsLabel}</dt>
+          <dd>{contestCount}</dd>
+        </div>
+        <div>
+          <dt>{categoryPage.latestUpdateLabel}</dt>
+          <dd>{latestDateText || categoryPage.emptyLatestUpdateText}</dd>
+        </div>
+      </dl>
+    </div>
+
   </section>
 
   <section class="shell category-overview section-block">

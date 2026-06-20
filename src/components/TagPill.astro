@@ -5,14 +5,34 @@ interface Props {
 }
 
 const { label, href } = Astro.props;
+
+const normalized = label.toLowerCase();
+
+const palette = /取证|forensics/.test(label)
+  ? { tone: "forensics", mark: "白" }
+  : /web/.test(normalized)
+    ? { tone: "web", mark: "动" }
+    : /流量|traffic/.test(label)
+      ? { tone: "traffic", mark: "流" }
+      : /misc|隐写|stego/.test(normalized + label)
+        ? { tone: "misc", mark: "巧" }
+        : /crypto|密码|hash/.test(normalized + label)
+          ? { tone: "crypto", mark: "风" }
+          : /ctf/.test(normalized)
+            ? { tone: "ctf", mark: "新" }
+            : { tone: "default", mark: "案" };
 ---
 
 {
   href ? (
-    <a class="tag-pill" href={href}>
-      #{label}
+    <a class="tag-pill tag-pill-sticker" data-tone={palette.tone} href={href}>
+      <span class="tag-pill-mark" aria-hidden="true">{palette.mark}</span>
+      <span class="tag-pill-text">#{label}</span>
     </a>
   ) : (
-    <span class="tag-pill">#{label}</span>
+    <span class="tag-pill tag-pill-sticker" data-tone={palette.tone}>
+      <span class="tag-pill-mark" aria-hidden="true">{palette.mark}</span>
+      <span class="tag-pill-text">#{label}</span>
+    </span>
   )
 }
