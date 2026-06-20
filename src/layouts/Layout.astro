@@ -64,11 +64,11 @@ const bodyClass = [
   </head>
   <body class={bodyClass} data-home-page={isHomePage ? "true" : "false"}>
     <div class="page-progress" aria-hidden="true"></div>
-<button class="shinchan-radio" aria-label="鎾斁/鏆傚仠 鍔ㄦ劅瓒呬汉 BGM" id="shinchan-radio" type="button">
+<button class="shinchan-radio" aria-label="播放或暂停欢迎语音" id="shinchan-radio" type="button">
       <span class="shinchan-radio-disc" aria-hidden="true"></span>
       <span class="shinchan-radio-text">
         <strong>iYuu Radio</strong>
-        <small>鍔ㄦ劅瓒呬汉姝ｅ湪鍊肩彮</small>
+        <small>欢迎你回家</small>
       </span>
     </button>
     <!-- 灏忔柊璧拌矾 - 椤甸潰搴曢儴 -->
@@ -494,7 +494,7 @@ const bodyClass = [
             const isPaused = radio.classList.contains("is-paused");
             const small = radio.querySelector(".shinchan-radio-text small");
             if (small) {
-              small.textContent = isPaused ? "鍔ㄦ劅瓒呬汉鍘讳紤鎭簡" : "鍔ㄦ劅瓒呬汉姝ｅ湪鍊肩彮";
+              small.textContent = isPaused ? "欢迎语音已暂停" : "欢迎你回家";
             }
           });
         }
