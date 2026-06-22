@@ -7,10 +7,10 @@ homeIntro:
 heroLinks:
   - label: 看比赛
     href: /contests
-  - label: 看全部文章
+  - label: 搜索文章
+    href: /search
+  - label: 看归档
     href: /blog
-  - label: 关于
-    href: /about
 browseTitle: 浏览方式
 browseTips:
   - 比赛页适合按赛事集中查看一整场记录
@@ -19,7 +19,7 @@ commonEntryTitle: 常用入口
 featuredHeading: 先看这一篇
 freshHeading: 最近在补这些
 freshNote: 把零散记录慢慢补成一个自己的知识库
-writeupsHeading: 最近比赛 WP
+writeupsHeading: 最近题解
 writeupsEmpty: 目前公开的比赛 WP 还不多，先从上面那篇开始，后面会慢慢把每场比赛的过程补起来。
 contestsHeading: 按比赛分类
 categoriesHeading: 按内容分类

@@ -28,12 +28,14 @@ const isHomePage = Astro.url.pathname === "/";
 const isContestsIndexPage = Astro.url.pathname === "/contests/" || Astro.url.pathname === "/contests";
 const isArchiveIndexPage = Astro.url.pathname === "/blog/" || Astro.url.pathname === "/blog";
 const isAboutPage = Astro.url.pathname === "/about/" || Astro.url.pathname === "/about";
+const isSearchPage = Astro.url.pathname === "/search/" || Astro.url.pathname === "/search";
 const bodyClass = [
   "theme-shinchan",
   isHomePage ? "page-home" : "",
   isContestsIndexPage ? "page-contests-index" : "",
   isArchiveIndexPage ? "page-archive-index" : "",
-  isAboutPage ? "page-about" : ""
+  isAboutPage ? "page-about" : "",
+  isSearchPage ? "page-search" : ""
 ]
   .filter(Boolean)
   .join(" ");

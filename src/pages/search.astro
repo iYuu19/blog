@@ -1,0 +1,109 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="搜索 | iYuu Notes" description="搜索 iYuu Notes 里的比赛 WP、赛后复盘和专题记录。">
+  <section class="shell page-intro search-intro">
+    <p class="eyebrow">Search</p>
+    <h1>搜索</h1>
+    <p>按题名、比赛、标签、工具或关键字查找文章。</p>
+  </section>
+
+  <section class="shell search-page" data-pagefind-ignore>
+    <div id="search" class="search-widget" data-pagefind-ui></div>
+    <noscript>
+      <p class="empty-feed">搜索需要启用 JavaScript。</p>
+    </noscript>
+  </section>
+
+  <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+  <script is:inline data-astro-rerun>
+    (() => {
+      const loadPagefindUi = () => {
+        if (window.PagefindUI) {
+          return Promise.resolve();
+        }
+
+        if (window.__iyuuPagefindLoading) {
+          return window.__iyuuPagefindLoading;
+        }
+
+        window.__iyuuPagefindLoading = new Promise((resolve, reject) => {
+          const existing = document.querySelector("script[data-pagefind-script]");
+          if (existing) {
+            existing.addEventListener("load", resolve, { once: true });
+            existing.addEventListener("error", reject, { once: true });
+            return;
+          }
+
+          const script = document.createElement("script");
+          script.src = "/pagefind/pagefind-ui.js";
+          script.dataset.pagefindScript = "true";
+          script.addEventListener("load", resolve, { once: true });
+          script.addEventListener("error", reject, { once: true });
+          document.head.appendChild(script);
+        });
+
+        return window.__iyuuPagefindLoading;
+      };
+
+      const initPagefindSearch = async () => {
+        const searchRoot = document.querySelector("[data-pagefind-ui]");
+        if (!(searchRoot instanceof HTMLElement)) {
+          return;
+        }
+
+        if (searchRoot.dataset.pagefindReady === "true" && searchRoot.querySelector(".pagefind-ui__search-input")) {
+          return;
+        }
+
+        searchRoot.dataset.pagefindReady = "loading";
+        searchRoot.innerHTML = "";
+
+        try {
+          await loadPagefindUi();
+          if (!document.body.contains(searchRoot) || !window.PagefindUI) {
+            return;
+          }
+
+          new window.PagefindUI({
+            element: "#search",
+            showSubResults: true,
+            showImages: false,
+            resetStyles: false,
+            translations: {
+              placeholder: "搜索 WP、标签、工具、payload...",
+              clear_search: "清空",
+              load_more: "加载更多",
+              search_label: "搜索本站",
+              filters_label: "筛选",
+              zero_results: "没有找到结果",
+              many_results: "[COUNT] 个结果",
+              one_result: "1 个结果",
+              searching: "搜索中..."
+            }
+          });
+
+          searchRoot.dataset.pagefindReady = "true";
+        } catch (error) {
+          searchRoot.dataset.pagefindReady = "false";
+          console.error("Pagefind failed to initialize", error);
+        }
+      };
+
+      window.__iyuuInitPagefindSearch = initPagefindSearch;
+
+      if (!window.__iyuuPagefindEventsBound) {
+        document.addEventListener("astro:page-load", () => window.__iyuuInitPagefindSearch?.());
+        window.addEventListener("pageshow", () => window.__iyuuInitPagefindSearch?.());
+        window.__iyuuPagefindEventsBound = true;
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initPagefindSearch, { once: true });
+      } else {
+        initPagefindSearch();
+      }
+    })();
+  </script>
+</Layout>

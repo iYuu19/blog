@@ -431,6 +431,14 @@ body.theme-shinchan.page-about::after {
     linear-gradient(180deg, rgba(255, 255, 255, 0.006), rgba(255, 255, 255, 0) 28%, rgba(255, 255, 255, 0.012));
 }
 
+body.theme-shinchan.page-search {
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 217, 121, 0.28), transparent 24%),
+    radial-gradient(circle at 82% 22%, rgba(126, 215, 248, 0.18), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0) 240px),
+    var(--bg);
+}
+
 @keyframes rise-in {
   from {
     opacity: 0;
@@ -1303,6 +1311,95 @@ h3 {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 16px;
+}
+
+.search-intro {
+  max-width: var(--shell);
+}
+
+.search-page {
+  padding-top: 18px;
+}
+
+.search-widget {
+  padding: 24px;
+  border: 2px solid rgba(221, 180, 107, 0.42);
+  border-radius: 28px 22px 30px 22px;
+  background:
+    radial-gradient(circle at top right, rgba(126, 215, 248, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(255, 253, 249, 0.96), rgba(248, 243, 233, 0.92));
+  box-shadow: var(--shadow);
+}
+
+.pagefind-ui {
+  --pagefind-ui-scale: 0.92;
+  --pagefind-ui-primary: var(--accent);
+  --pagefind-ui-text: var(--text);
+  --pagefind-ui-background: rgba(255, 253, 249, 0.92);
+  --pagefind-ui-border: rgba(221, 180, 107, 0.5);
+  --pagefind-ui-tag: var(--accent-soft);
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: 18px;
+  --pagefind-ui-font: var(--font-sans);
+}
+
+.pagefind-ui__form {
+  position: relative;
+}
+
+.pagefind-ui__search-input {
+  min-height: 56px;
+  padding-inline: 52px 18px !important;
+  border-radius: 20px 16px 22px 16px !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  font-weight: 700;
+}
+
+.pagefind-ui__search-clear {
+  border-radius: 999px !important;
+}
+
+.pagefind-ui__drawer {
+  margin-top: 18px;
+}
+
+.pagefind-ui__result {
+  padding: 20px 0 !important;
+  border-top: 1px dashed rgba(221, 180, 107, 0.52) !important;
+}
+
+.pagefind-ui__result:first-child {
+  border-top: 0 !important;
+}
+
+.pagefind-ui__result-title {
+  font-family: var(--font-serif);
+  font-size: 22px !important;
+}
+
+.pagefind-ui__result-title a {
+  color: var(--text) !important;
+}
+
+.pagefind-ui__result-title a:hover {
+  color: var(--accent) !important;
+}
+
+.pagefind-ui__result-excerpt,
+.pagefind-ui__result-nested {
+  color: var(--soft-text) !important;
+}
+
+html.is-dark-mode .search-widget {
+  background:
+    radial-gradient(circle at top right, rgba(78, 205, 196, 0.1), transparent 28%),
+    linear-gradient(180deg, rgba(30, 32, 54, 0.96), rgba(24, 26, 46, 0.94));
+  border-color: rgba(94, 224, 214, 0.16);
+}
+
+html.is-dark-mode .pagefind-ui {
+  --pagefind-ui-background: rgba(33, 35, 56, 0.88);
+  --pagefind-ui-border: rgba(94, 224, 214, 0.18);
 }
 
 .archive-list {

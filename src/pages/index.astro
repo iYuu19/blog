@@ -150,7 +150,7 @@ const routeCards = site.routeCards.map((route) => {
     href: `/categories/${slugifySegment(route.title)}/`,
     latestTitle: routePosts[0]?.data.title ?? route.emptyLatestTitle
   };
-});
+}).filter((route) => route.count > 0);
 
 const sectionTitleDefaults: Record<string, string> = {
   featured: site.featuredHeading,
@@ -296,20 +296,6 @@ const shinchanSpeech = latest
             </p>
           )
         }
-        <dl class="intro-stats">
-          <div>
-            <dt>文章</dt>
-            <dd>{posts.length}</dd>
-          </div>
-          <div>
-            <dt>比赛</dt>
-            <dd>{contestCount}</dd>
-          </div>
-          <div>
-            <dt>分类</dt>
-            <dd>{categoryCount}</dd>
-          </div>
-        </dl>
       </div>
 
       <aside class="hero-aside">

@@ -6,12 +6,15 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "astro build && pagefind --site dist",
     "preview": "astro preview"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.3.0",
     "astro": "^5.10.0",
     "prismjs": "^1.30.0"
+  },
+  "devDependencies": {
+    "pagefind": "^1.5.2"
   }
 }
