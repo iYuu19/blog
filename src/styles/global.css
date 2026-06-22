@@ -4465,6 +4465,32 @@ body.theme-shinchan.page-home .main-column::before {
   content: none;
 }
 
+body.theme-shinchan.page-home #writeups.section {
+  position: relative;
+  padding: clamp(18px, 2.4vw, 28px);
+  border: 2px solid rgba(221, 180, 107, 0.64);
+  border-radius: 30px 24px 32px 22px;
+  background:
+    radial-gradient(circle at top right, rgba(126, 215, 248, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(255, 251, 244, 0.66), rgba(255, 246, 232, 0.5));
+  box-shadow:
+    0 18px 38px rgba(131, 102, 60, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.64);
+  backdrop-filter: blur(10px);
+}
+
+body.theme-shinchan.page-home #writeups.section::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  width: 58px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255, 190, 178, 0.46);
+  transform: rotate(7deg);
+}
+
 body.theme-shinchan.page-home .archive-list {
   gap: 14px;
 }
