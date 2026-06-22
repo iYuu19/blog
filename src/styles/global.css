@@ -4470,23 +4470,6 @@ body.theme-shinchan.page-home .main-column::before {
 body.theme-shinchan.page-home #writeups.section {
   position: relative;
   padding: clamp(18px, 2.4vw, 28px);
-  border: 2px solid rgba(221, 180, 107, 0.64);
-  border-radius: 30px 24px 32px 22px;
-  box-shadow:
-    0 16px 28px rgba(131, 102, 60, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.74);
-}
-
-body.theme-shinchan.page-home #writeups.section::before {
-  content: "";
-  position: absolute;
-  top: 14px;
-  right: 18px;
-  width: 58px;
-  height: 12px;
-  border-radius: 999px;
-  background: rgba(255, 190, 178, 0.46);
-  transform: rotate(7deg);
 }
 
 body.theme-shinchan.page-home .archive-list {
@@ -4710,6 +4693,7 @@ body.theme-shinchan .signal-card,
 body.theme-shinchan .route-card,
 body.theme-shinchan .track-board:not(.has-cover),
 body.theme-shinchan .rich-section-card,
+body.theme-shinchan.page-home #writeups.section,
 body.theme-shinchan .footer-brand-block,
 body.theme-shinchan .footer-meta-card {
   position: relative;
@@ -4741,6 +4725,7 @@ body.theme-shinchan .signal-card::after,
 body.theme-shinchan .route-card::after,
 body.theme-shinchan .track-board::after,
 body.theme-shinchan .rich-section-card::after,
+body.theme-shinchan.page-home #writeups.section::after,
 body.theme-shinchan .footer-brand-block::after,
 body.theme-shinchan .footer-meta-card::after {
   content: "";
@@ -4872,6 +4857,7 @@ body.theme-shinchan .signal-card,
 body.theme-shinchan .route-card,
 body.theme-shinchan .track-board,
 body.theme-shinchan .rich-section-card,
+body.theme-shinchan.page-home #writeups.section,
 body.theme-shinchan .hero-note-card {
   overflow: hidden;
   isolation: isolate;
@@ -4885,6 +4871,7 @@ body.theme-shinchan .signal-card::before,
 body.theme-shinchan .route-card::before,
 body.theme-shinchan .track-board::before,
 body.theme-shinchan .rich-section-card::before,
+body.theme-shinchan.page-home #writeups.section::before,
 body.theme-shinchan .hero-note-card::before {
   content: "";
   position: absolute;
@@ -4909,6 +4896,7 @@ body.theme-shinchan .signal-card:hover::before,
 body.theme-shinchan .route-card:hover::before,
 body.theme-shinchan .track-board:hover::before,
 body.theme-shinchan .rich-section-card:hover::before,
+body.theme-shinchan.page-home #writeups.section:hover::before,
 body.theme-shinchan .hero-note-card:hover::before {
   opacity: 0.72;
 }
