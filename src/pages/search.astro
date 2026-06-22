@@ -48,8 +48,16 @@ import Layout from "../layouts/Layout.astro";
       };
 
       const initPagefindSearch = async () => {
+        if (window.__iyuuPagefindInitializing) {
+          return window.__iyuuPagefindInitializing;
+        }
+
         const searchRoot = document.querySelector("[data-pagefind-ui]");
         if (!(searchRoot instanceof HTMLElement)) {
+          return;
+        }
+
+        if (searchRoot.dataset.pagefindReady === "loading") {
           return;
         }
 
@@ -60,7 +68,8 @@ import Layout from "../layouts/Layout.astro";
         searchRoot.dataset.pagefindReady = "loading";
         searchRoot.innerHTML = "";
 
-        try {
+        window.__iyuuPagefindInitializing = (async () => {
+          try {
           await loadPagefindUi();
           if (!document.body.contains(searchRoot) || !window.PagefindUI) {
             return;
@@ -85,10 +94,15 @@ import Layout from "../layouts/Layout.astro";
           });
 
           searchRoot.dataset.pagefindReady = "true";
-        } catch (error) {
-          searchRoot.dataset.pagefindReady = "false";
-          console.error("Pagefind failed to initialize", error);
-        }
+          } catch (error) {
+            searchRoot.dataset.pagefindReady = "false";
+            console.error("Pagefind failed to initialize", error);
+          } finally {
+            window.__iyuuPagefindInitializing = null;
+          }
+        })();
+
+        return window.__iyuuPagefindInitializing;
       };
 
       window.__iyuuInitPagefindSearch = initPagefindSearch;
