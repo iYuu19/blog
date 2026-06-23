@@ -720,6 +720,62 @@ const bodyClass = [
           }
         });
       }
+
+      const initPageViewTracking = () => {
+        const endpoint = "/api/track";
+        const storageKey = "iyuu-anonymous-visitor";
+
+        const getVisitorId = () => {
+          try {
+            let visitorId = window.localStorage.getItem(storageKey);
+            if (!visitorId) {
+              visitorId = crypto.randomUUID();
+              window.localStorage.setItem(storageKey, visitorId);
+            }
+            return visitorId;
+          } catch (error) {
+            return "";
+          }
+        };
+
+        const trackPageView = () => {
+          if (location.pathname.startsWith("/admin") || location.pathname.startsWith("/api/")) {
+            return;
+          }
+
+          const payload = JSON.stringify({
+            path: location.pathname,
+            title: document.title,
+            referrer: document.referrer,
+            visitorId: getVisitorId()
+          });
+
+          try {
+            if (navigator.sendBeacon) {
+              const body = new Blob([payload], { type: "application/json" });
+              navigator.sendBeacon(endpoint, body);
+              return;
+            }
+          } catch (error) {
+            // Fall back to fetch below.
+          }
+
+          fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: payload,
+            keepalive: true
+          }).catch(() => {});
+        };
+
+        trackPageView();
+        document.addEventListener("astro:page-load", trackPageView);
+      };
+
+      if (!siteState.analyticsReady) {
+        siteState.analyticsReady = true;
+        initPageViewTracking();
+      }
     </script>
   </body>
 </html>
