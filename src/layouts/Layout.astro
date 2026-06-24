@@ -724,6 +724,7 @@ const bodyClass = [
       const initPageViewTracking = () => {
         const endpoint = "/api/track";
         const storageKey = "iyuu-anonymous-visitor";
+        const ignoreStorageKey = "iyuu-analytics-ignore";
 
         const getVisitorId = () => {
           try {
@@ -738,8 +739,20 @@ const bodyClass = [
           }
         };
 
+        const shouldIgnoreTracking = () => {
+          try {
+            return window.localStorage.getItem(ignoreStorageKey) === "true";
+          } catch (error) {
+            return false;
+          }
+        };
+
         const trackPageView = () => {
           if (location.pathname.startsWith("/admin") || location.pathname.startsWith("/api/")) {
+            return;
+          }
+
+          if (shouldIgnoreTracking()) {
             return;
           }
 

@@ -32,6 +32,12 @@ function toTopPages(paths = {}, limit = 12) {
     .slice(0, limit);
 }
 
+function toArticlePages(paths = {}, limit = 30) {
+  return toTopPages(paths, 120)
+    .filter((item) => item.path.startsWith("/blog/") && item.path !== "/blog/")
+    .slice(0, limit);
+}
+
 function toReferrers(referrers = {}, limit = 8) {
   return Object.entries(referrers)
     .map(([name, views]) => ({ name, views }))
@@ -121,9 +127,11 @@ export async function onRequestGet({ request, env }) {
         views: today.views ?? 0,
         visitors: today.visitorIds?.length ?? 0,
         topPages: toTopPages(today.paths, 8),
+        articlePages: toArticlePages(today.paths, 12),
         referrers: toReferrers(today.referrers, 8)
       },
       recentDays,
+      articlePages: toArticlePages(summary.paths, 30),
       topPages: toTopPages(summary.paths, 12)
     },
     {
@@ -133,4 +141,3 @@ export async function onRequestGet({ request, env }) {
     }
   );
 }
-

@@ -106,6 +106,22 @@
         margin-bottom: 18px;
       }
 
+      .owner-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      .owner-copy {
+        display: grid;
+        gap: 4px;
+      }
+
+      .owner-copy p {
+        margin: 0;
+      }
+
       .grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -140,6 +156,10 @@
 
       .panel {
         padding: 22px;
+      }
+
+      .panel--wide {
+        grid-column: 1 / -1;
       }
 
       .panel h2 {
@@ -253,6 +273,15 @@
           display: grid;
         }
 
+        .owner-card {
+          align-items: stretch;
+          display: grid;
+        }
+
+        .panel--wide {
+          grid-column: auto;
+        }
+
         .grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
@@ -306,10 +335,18 @@
         </article>
       </section>
 
+      <section class="card setup-card owner-card" id="owner-card" hidden>
+        <div class="owner-copy">
+          <strong id="owner-tracking-title">本机访问会计入统计</strong>
+          <p class="muted" id="owner-tracking-text">开启排除后，这个浏览器访问博客不会增加浏览量。</p>
+        </div>
+        <button class="button" type="button" id="owner-tracking-toggle">排除本机访问</button>
+      </section>
+
       <section class="panels" id="panels" hidden>
         <article class="card panel">
-          <h2>热门页面</h2>
-          <div class="rows" id="top-pages"></div>
+          <h2>文章浏览排行</h2>
+          <div class="rows" id="article-pages"></div>
         </article>
 
         <aside class="card panel">
@@ -318,17 +355,27 @@
           <h2 style="margin-top: 24px">今日来源</h2>
           <div class="rows" id="referrers"></div>
         </aside>
+
+        <article class="card panel panel--wide">
+          <h2>热门页面</h2>
+          <div class="rows" id="top-pages"></div>
+        </article>
       </section>
     </main>
 
     <script>
       const tokenKey = "iyuu-analytics-token";
+      const ignoreTrackingKey = "iyuu-analytics-ignore";
       const statusTitle = document.getElementById("status-title");
       const statusText = document.getElementById("status-text");
       const tokenForm = document.getElementById("token-form");
       const tokenInput = document.getElementById("token-input");
       const metrics = document.getElementById("metrics");
       const panels = document.getElementById("panels");
+      const ownerCard = document.getElementById("owner-card");
+      const ownerTrackingTitle = document.getElementById("owner-tracking-title");
+      const ownerTrackingText = document.getElementById("owner-tracking-text");
+      const ownerTrackingToggle = document.getElementById("owner-tracking-toggle");
 
       function formatNumber(value) {
         return new Intl.NumberFormat("zh-CN").format(value || 0);
@@ -347,6 +394,19 @@
       function setMetric(name, value) {
         const node = document.querySelector(`[data-metric="${name}"]`);
         if (node) node.textContent = value;
+      }
+
+      function isOwnerTrackingIgnored() {
+        return localStorage.getItem(ignoreTrackingKey) === "true";
+      }
+
+      function updateOwnerTrackingUi() {
+        const ignored = isOwnerTrackingIgnored();
+        ownerTrackingTitle.textContent = ignored ? "本机访问已排除" : "本机访问会计入统计";
+        ownerTrackingText.textContent = ignored
+          ? "你用这个浏览器看博客时，不会再增加浏览量。"
+          : "开启排除后，这个浏览器访问博客不会增加浏览量。";
+        ownerTrackingToggle.textContent = ignored ? "恢复计入" : "排除本机访问";
       }
 
       function renderRows(container, rows, emptyText) {
@@ -432,17 +492,25 @@
         setMetric("todayVisitors", formatNumber(data.today.visitors));
         setMetric("lastSeen", formatDate(data.summary.lastSeen));
 
+        renderRows(document.getElementById("article-pages"), data.articlePages || [], "还没有文章浏览记录。");
         renderRows(document.getElementById("top-pages"), data.topPages || [], "还没有页面浏览记录。");
         renderRows(document.getElementById("referrers"), data.today.referrers || [], "今天还没有来源记录。");
         renderRecentDays(data.recentDays || []);
 
+        updateOwnerTrackingUi();
         metrics.hidden = false;
+        ownerCard.hidden = false;
         panels.hidden = false;
       }
 
       tokenForm.addEventListener("submit", (event) => {
         event.preventDefault();
         loadStats(tokenInput.value.trim());
+      });
+
+      ownerTrackingToggle.addEventListener("click", () => {
+        localStorage.setItem(ignoreTrackingKey, String(!isOwnerTrackingIgnored()));
+        updateOwnerTrackingUi();
       });
 
       loadStats().catch((error) => {
