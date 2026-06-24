@@ -93,6 +93,7 @@ import Layout from "../layouts/Layout.astro";
             }
           });
 
+          initSearchTermTracking(searchRoot);
           searchRoot.dataset.pagefindReady = "true";
           } catch (error) {
             searchRoot.dataset.pagefindReady = "false";
@@ -103,6 +104,87 @@ import Layout from "../layouts/Layout.astro";
         })();
 
         return window.__iyuuPagefindInitializing;
+      };
+
+      const initSearchTermTracking = (searchRoot, attempt = 0) => {
+        const input = searchRoot.querySelector(".pagefind-ui__search-input");
+        if (!(input instanceof HTMLInputElement)) {
+          if (attempt < 20) {
+            window.setTimeout(() => initSearchTermTracking(searchRoot, attempt + 1), 100);
+          }
+          return;
+        }
+
+        if (input.dataset.searchTrackingReady === "true") {
+          return;
+        }
+
+        input.dataset.searchTrackingReady = "true";
+        const endpoint = "/api/search";
+        const visitorStorageKey = "iyuu-anonymous-visitor";
+        const ignoreStorageKey = "iyuu-analytics-ignore";
+        let debounceTimer = 0;
+        let lastTrackedTerm = "";
+
+        const shouldIgnoreTracking = () => {
+          try {
+            return window.localStorage.getItem(ignoreStorageKey) === "true";
+          } catch (error) {
+            return false;
+          }
+        };
+
+        const getVisitorId = () => {
+          try {
+            let visitorId = window.localStorage.getItem(visitorStorageKey);
+            if (!visitorId) {
+              visitorId = crypto.randomUUID();
+              window.localStorage.setItem(visitorStorageKey, visitorId);
+            }
+            return visitorId;
+          } catch (error) {
+            return "";
+          }
+        };
+
+        const trackSearchTerm = () => {
+          if (shouldIgnoreTracking()) {
+            return;
+          }
+
+          const term = input.value.replace(/\s+/g, " ").trim();
+          if (term.length < 2 || term === lastTrackedTerm) {
+            return;
+          }
+
+          lastTrackedTerm = term;
+          const payload = JSON.stringify({
+            term,
+            visitorId: getVisitorId()
+          });
+
+          try {
+            if (navigator.sendBeacon) {
+              const body = new Blob([payload], { type: "application/json" });
+              navigator.sendBeacon(endpoint, body);
+              return;
+            }
+          } catch (error) {
+            // Fall back to fetch below.
+          }
+
+          fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: payload,
+            keepalive: true
+          }).catch(() => {});
+        };
+
+        input.addEventListener("input", () => {
+          window.clearTimeout(debounceTimer);
+          debounceTimer = window.setTimeout(trackSearchTerm, 1200);
+        });
       };
 
       window.__iyuuInitPagefindSearch = initPagefindSearch;

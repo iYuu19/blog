@@ -38,9 +38,40 @@ function toArticlePages(paths = {}, limit = 30) {
     .slice(0, limit);
 }
 
+function getPathViews(paths = {}, path = "") {
+  return paths?.[path]?.views ?? 0;
+}
+
+function toArticleDetails(articlePages = [], todayPaths = {}, recentDayItems = []) {
+  return articlePages.map((item) => {
+    const recentDays = recentDayItems.map((day) => ({
+      date: day.date,
+      views: getPathViews(day.paths, item.path)
+    }));
+
+    return {
+      ...item,
+      todayViews: getPathViews(todayPaths, item.path),
+      recentViews: recentDays.reduce((total, day) => total + day.views, 0),
+      recentDays
+    };
+  });
+}
+
 function toReferrers(referrers = {}, limit = 8) {
   return Object.entries(referrers)
     .map(([name, views]) => ({ name, views }))
+    .sort((a, b) => b.views - a.views)
+    .slice(0, limit);
+}
+
+function toSearchTerms(searchTerms = {}, limit = 12) {
+  return Object.entries(searchTerms)
+    .map(([name, item]) => ({
+      name,
+      views: item?.views ?? 0,
+      lastSeen: item?.lastSeen || ""
+    }))
     .sort((a, b) => b.views - a.views)
     .slice(0, limit);
 }
@@ -80,19 +111,21 @@ export async function onRequestGet({ request, env }) {
   const todayKey = getShanghaiDate(0);
   const recentKeys = Array.from({ length: 7 }, (_, index) => getShanghaiDate(-index)).reverse();
 
-  const [summary, today, recentDays] = await Promise.all([
+  const [summary, today, recentDayItems] = await Promise.all([
     readJson(store, "summary", {
       totalViews: 0,
       firstSeen: "",
       lastSeen: "",
-      paths: {}
+      paths: {},
+      searchTerms: {}
     }),
     readJson(store, `day:${todayKey}`, {
       date: todayKey,
       views: 0,
       visitorIds: [],
       paths: {},
-      referrers: {}
+      referrers: {},
+      searchTerms: {}
     }),
     Promise.all(
       recentKeys.map(async (date) => {
@@ -101,17 +134,21 @@ export async function onRequestGet({ request, env }) {
           views: 0,
           visitorIds: [],
           paths: {},
-          referrers: {}
+          referrers: {},
+          searchTerms: {}
         });
 
         return {
           date,
           views: item.views ?? 0,
-          visitors: item.visitorIds?.length ?? 0
+          visitors: item.visitorIds?.length ?? 0,
+          paths: item.paths ?? {}
         };
       })
     )
   ]);
+
+  const articlePages = toArticleDetails(toArticlePages(summary.paths, 30), today.paths, recentDayItems);
 
   return Response.json(
     {
@@ -128,10 +165,16 @@ export async function onRequestGet({ request, env }) {
         visitors: today.visitorIds?.length ?? 0,
         topPages: toTopPages(today.paths, 8),
         articlePages: toArticlePages(today.paths, 12),
-        referrers: toReferrers(today.referrers, 8)
+        referrers: toReferrers(today.referrers, 8),
+        searchTerms: toSearchTerms(today.searchTerms, 10)
       },
-      recentDays,
-      articlePages: toArticlePages(summary.paths, 30),
+      recentDays: recentDayItems.map((day) => ({
+        date: day.date,
+        views: day.views,
+        visitors: day.visitors
+      })),
+      articlePages,
+      searchTerms: toSearchTerms(summary.searchTerms, 20),
       topPages: toTopPages(summary.paths, 12)
     },
     {

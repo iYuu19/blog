@@ -215,6 +215,32 @@
         color: var(--muted);
       }
 
+      .article-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .sparkline {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        align-items: end;
+        gap: 4px;
+        width: min(260px, 100%);
+        height: 24px;
+        margin-top: 8px;
+      }
+
+      .sparkline span {
+        min-height: 4px;
+        border-radius: 999px 999px 2px 2px;
+        background: linear-gradient(180deg, #5cb9e6, #ffd56c, #e85c4a);
+      }
+
       .count {
         min-width: 56px;
         padding: 4px 10px;
@@ -370,6 +396,8 @@
           <div class="bars" id="recent-days"></div>
           <h2 style="margin-top: 24px">今日热门文章</h2>
           <div class="rows" id="today-article-pages"></div>
+          <h2 style="margin-top: 24px">今日搜索词</h2>
+          <div class="rows" id="today-search-terms"></div>
           <h2 style="margin-top: 24px">今日来源</h2>
           <div class="rows" id="referrers"></div>
         </aside>
@@ -377,6 +405,11 @@
         <article class="card panel panel--wide">
           <h2>热门页面</h2>
           <div class="rows" id="top-pages"></div>
+        </article>
+
+        <article class="card panel panel--wide">
+          <h2>搜索词排行</h2>
+          <div class="rows" id="search-terms"></div>
         </article>
       </section>
     </main>
@@ -452,6 +485,50 @@
         }
       }
 
+      function renderArticleRows(container, rows, emptyText) {
+        container.innerHTML = "";
+        if (!rows.length) {
+          container.innerHTML = `<p class="muted">${emptyText}</p>`;
+          return;
+        }
+
+        for (const item of rows) {
+          const row = document.createElement("div");
+          const recentDays = item.recentDays || [];
+          const maxRecentViews = Math.max(1, ...recentDays.map((day) => day.views || 0));
+          row.className = "row";
+          row.innerHTML = `
+            <div class="row-title">
+              <strong></strong>
+              <small></small>
+              <div class="article-meta">
+                <span data-meta="today"></span>
+                <span data-meta="recent"></span>
+                <span data-meta="last"></span>
+              </div>
+              <div class="sparkline" aria-hidden="true"></div>
+            </div>
+            <span class="count"></span>
+          `;
+          row.querySelector("strong").textContent = item.title || item.path;
+          row.querySelector("small").textContent = item.path || "";
+          row.querySelector(".count").textContent = formatNumber(item.views);
+          row.querySelector('[data-meta="today"]').textContent = `今日 ${formatNumber(item.todayViews)} PV`;
+          row.querySelector('[data-meta="recent"]').textContent = `近 7 天 ${formatNumber(item.recentViews)} PV`;
+          row.querySelector('[data-meta="last"]').textContent = `最近 ${formatDate(item.lastSeen)}`;
+
+          const sparkline = row.querySelector(".sparkline");
+          for (const day of recentDays) {
+            const bar = document.createElement("span");
+            bar.title = `${day.date}: ${formatNumber(day.views)} PV`;
+            bar.style.height = `${Math.max(4, ((day.views || 0) / maxRecentViews) * 24)}px`;
+            sparkline.appendChild(bar);
+          }
+
+          container.appendChild(row);
+        }
+      }
+
       function renderRecentDays(days) {
         const container = document.getElementById("recent-days");
         const max = Math.max(1, ...days.map((day) => day.views));
@@ -513,9 +590,11 @@
           setMetric("todayVisitors", formatNumber(data.today.visitors));
           setMetric("lastSeen", formatDate(data.summary.lastSeen));
 
-          renderRows(document.getElementById("article-pages"), data.articlePages || [], "还没有文章浏览记录。");
+          renderArticleRows(document.getElementById("article-pages"), data.articlePages || [], "还没有文章浏览记录。");
           renderRows(document.getElementById("today-article-pages"), data.today.articlePages || [], "今天还没有文章浏览记录。");
+          renderRows(document.getElementById("today-search-terms"), data.today.searchTerms || [], "今天还没有搜索记录。");
           renderRows(document.getElementById("top-pages"), data.topPages || [], "还没有页面浏览记录。");
+          renderRows(document.getElementById("search-terms"), data.searchTerms || [], "还没有搜索词记录。");
           renderRows(document.getElementById("referrers"), data.today.referrers || [], "今天还没有来源记录。");
           renderRecentDays(data.recentDays || []);
 
