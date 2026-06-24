@@ -2,6 +2,7 @@ const KV_BINDING = "BLOG_ANALYTICS";
 const MAX_VISITOR_IDS_PER_DAY = 5000;
 const MAX_TRACKED_PATHS = 120;
 const MAX_REFERRERS = 80;
+const PAGEVIEW_DEDUPE_SECONDS = 60;
 
 function getAnalyticsStore(env) {
   return env[KV_BINDING];
@@ -71,6 +72,31 @@ function trimObjectByViews(value, limit) {
   );
 }
 
+async function hashValue(value) {
+  const data = new TextEncoder().encode(value);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hash))
+    .slice(0, 16)
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function isDuplicatePageView(store, { today, visitorId, path }) {
+  if (!visitorId) {
+    return false;
+  }
+
+  const fingerprint = await hashValue(`${visitorId}:${path}`);
+  const key = `dedupe:${today}:${fingerprint}`;
+  const existing = await store.get(key);
+  if (existing) {
+    return true;
+  }
+
+  await store.put(key, "1", { expirationTtl: PAGEVIEW_DEDUPE_SECONDS });
+  return false;
+}
+
 async function recordPageView({ request, env }) {
   const store = getAnalyticsStore(env);
   if (!store) {
@@ -90,6 +116,10 @@ async function recordPageView({ request, env }) {
   const title = normalizeTitle(payload.title);
   const visitorId = typeof payload.visitorId === "string" ? payload.visitorId.slice(0, 80) : "";
   const referrer = normalizeReferrer(payload.referrer, origin);
+
+  if (await isDuplicatePageView(store, { today, visitorId, path })) {
+    return;
+  }
 
   const [summary, day] = await Promise.all([
     readJson(store, "summary", {
@@ -147,4 +177,3 @@ export async function onRequestPost(context) {
     }
   });
 }
-

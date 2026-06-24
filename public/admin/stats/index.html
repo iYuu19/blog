@@ -51,6 +51,14 @@
         gap: 16px;
       }
 
+      .top-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
       .brand {
         display: grid;
         gap: 4px;
@@ -88,6 +96,11 @@
         font-weight: 800;
         text-decoration: none;
         cursor: pointer;
+      }
+
+      .button:disabled {
+        cursor: wait;
+        opacity: 0.62;
       }
 
       main {
@@ -302,7 +315,10 @@
           <h1>访问统计</h1>
           <p class="muted">这里显示博客页面浏览、今日访客和热门文章。</p>
         </div>
-        <a class="button" href="/admin/">返回后台</a>
+        <div class="top-actions">
+          <button class="button" type="button" id="refresh-stats">刷新统计</button>
+          <a class="button" href="/admin/">返回后台</a>
+        </div>
       </div>
     </header>
 
@@ -352,6 +368,8 @@
         <aside class="card panel">
           <h2>最近 7 天</h2>
           <div class="bars" id="recent-days"></div>
+          <h2 style="margin-top: 24px">今日热门文章</h2>
+          <div class="rows" id="today-article-pages"></div>
           <h2 style="margin-top: 24px">今日来源</h2>
           <div class="rows" id="referrers"></div>
         </aside>
@@ -372,6 +390,7 @@
       const tokenInput = document.getElementById("token-input");
       const metrics = document.getElementById("metrics");
       const panels = document.getElementById("panels");
+      const refreshStatsButton = document.getElementById("refresh-stats");
       const ownerCard = document.getElementById("owner-card");
       const ownerTrackingTitle = document.getElementById("owner-tracking-title");
       const ownerTrackingText = document.getElementById("owner-tracking-text");
@@ -456,51 +475,57 @@
       }
 
       async function loadStats(token = localStorage.getItem(tokenKey) || "") {
+        refreshStatsButton.disabled = true;
         statusTitle.textContent = "正在读取统计...";
         statusText.textContent = "正在连接 /api/stats。";
         tokenForm.hidden = true;
 
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const response = await fetch("/api/stats", { headers, cache: "no-store" });
-        const data = await response.json().catch(() => ({}));
+        try {
+          const headers = token ? { Authorization: `Bearer ${token}` } : {};
+          const response = await fetch("/api/stats", { headers, cache: "no-store" });
+          const data = await response.json().catch(() => ({}));
 
-        if (response.status === 401) {
-          statusTitle.textContent = "需要后台统计 token";
-          statusText.textContent = "请输入 Cloudflare Pages 环境变量 ANALYTICS_ADMIN_TOKEN 的值。";
-          tokenForm.hidden = false;
-          tokenInput.focus();
-          return;
+          if (response.status === 401) {
+            statusTitle.textContent = "需要后台统计 token";
+            statusText.textContent = "请输入 Cloudflare Pages 环境变量 ANALYTICS_ADMIN_TOKEN 的值。";
+            tokenForm.hidden = false;
+            tokenInput.focus();
+            return;
+          }
+
+          if (!response.ok) {
+            statusTitle.textContent = "统计暂时不可用";
+            statusText.textContent = data.message || "请检查 Cloudflare Pages Functions 和 KV 绑定。";
+            return;
+          }
+
+          if (token) {
+            localStorage.setItem(tokenKey, token);
+          }
+
+          statusTitle.textContent = data.protected ? "统计已启用访问保护" : "统计已启用";
+          statusText.textContent = data.protected
+            ? "当前统计接口需要 token，适合放在后台查看。"
+            : "已启用 60 秒同页面去重；可以设置 ANALYTICS_ADMIN_TOKEN 环境变量给统计接口加锁。";
+
+          setMetric("totalViews", formatNumber(data.summary.totalViews));
+          setMetric("todayViews", formatNumber(data.today.views));
+          setMetric("todayVisitors", formatNumber(data.today.visitors));
+          setMetric("lastSeen", formatDate(data.summary.lastSeen));
+
+          renderRows(document.getElementById("article-pages"), data.articlePages || [], "还没有文章浏览记录。");
+          renderRows(document.getElementById("today-article-pages"), data.today.articlePages || [], "今天还没有文章浏览记录。");
+          renderRows(document.getElementById("top-pages"), data.topPages || [], "还没有页面浏览记录。");
+          renderRows(document.getElementById("referrers"), data.today.referrers || [], "今天还没有来源记录。");
+          renderRecentDays(data.recentDays || []);
+
+          updateOwnerTrackingUi();
+          metrics.hidden = false;
+          ownerCard.hidden = false;
+          panels.hidden = false;
+        } finally {
+          refreshStatsButton.disabled = false;
         }
-
-        if (!response.ok) {
-          statusTitle.textContent = "统计暂时不可用";
-          statusText.textContent = data.message || "请检查 Cloudflare Pages Functions 和 KV 绑定。";
-          return;
-        }
-
-        if (token) {
-          localStorage.setItem(tokenKey, token);
-        }
-
-        statusTitle.textContent = data.protected ? "统计已启用访问保护" : "统计已启用";
-        statusText.textContent = data.protected
-          ? "当前统计接口需要 token，适合放在后台查看。"
-          : "提示：可以设置 ANALYTICS_ADMIN_TOKEN 环境变量给统计接口加锁。";
-
-        setMetric("totalViews", formatNumber(data.summary.totalViews));
-        setMetric("todayViews", formatNumber(data.today.views));
-        setMetric("todayVisitors", formatNumber(data.today.visitors));
-        setMetric("lastSeen", formatDate(data.summary.lastSeen));
-
-        renderRows(document.getElementById("article-pages"), data.articlePages || [], "还没有文章浏览记录。");
-        renderRows(document.getElementById("top-pages"), data.topPages || [], "还没有页面浏览记录。");
-        renderRows(document.getElementById("referrers"), data.today.referrers || [], "今天还没有来源记录。");
-        renderRecentDays(data.recentDays || []);
-
-        updateOwnerTrackingUi();
-        metrics.hidden = false;
-        ownerCard.hidden = false;
-        panels.hidden = false;
       }
 
       tokenForm.addEventListener("submit", (event) => {
@@ -511,6 +536,13 @@
       ownerTrackingToggle.addEventListener("click", () => {
         localStorage.setItem(ignoreTrackingKey, String(!isOwnerTrackingIgnored()));
         updateOwnerTrackingUi();
+      });
+
+      refreshStatsButton.addEventListener("click", () => {
+        loadStats().catch((error) => {
+          statusTitle.textContent = "统计读取失败";
+          statusText.textContent = error.message || "未知错误";
+        });
       });
 
       loadStats().catch((error) => {
