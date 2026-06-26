@@ -5,7 +5,7 @@ const MAX_REFERRERS = 80;
 const MAX_VISITOR_DETAILS_PER_DAY = 80;
 const MAX_RECENT_VISITORS = 120;
 const MAX_VISITOR_PATHS = 10;
-const PAGEVIEW_DEDUPE_SECONDS = 60;
+const PAGEVIEW_DEDUPE_SECONDS = 1800;
 import {
   enforceRateLimit,
   getClientIp,
@@ -46,6 +46,15 @@ function normalizePath(pathname) {
 
 function normalizeTitle(title) {
   return typeof title === "string" ? title.slice(0, 140) : "";
+}
+
+function isLikelyBot(request) {
+  const userAgent = request.headers.get("user-agent") || "";
+  if (!userAgent) {
+    return true;
+  }
+
+  return /bot|crawler|spider|slurp|bingpreview|facebookexternalhit|whatsapp|telegrambot|discordbot|curl|wget|python-requests|httpclient|headless/i.test(userAgent);
 }
 
 function normalizeReferrer(referrer, origin) {
@@ -207,6 +216,10 @@ async function recordPageView({ request, env }) {
   }
 
   const origin = new URL(request.url).origin;
+  if (isLikelyBot(request)) {
+    return;
+  }
+
   const payload = await request.json().catch(() => ({}));
   const path = normalizePath(payload.path);
   if (!path) {
@@ -294,7 +307,7 @@ export async function onRequestPost(context) {
 
   const limited = await enforceRateLimit(store, context.request, {
     scope: "track",
-    limit: 60,
+    limit: 20,
     windowSeconds: 60
   });
   if (limited) {

@@ -830,33 +830,23 @@ const bodyClass = [
         };
 
         let lastTrackedPath = "";
-        let lastTrackedAt = 0;
         let pendingTrackTimer = 0;
+        let pendingPath = "";
+        let pendingTitle = "";
+        const MIN_ENGAGED_VIEW_MS = 3000;
 
         const getTrackablePath = () => `${location.pathname}${location.search || ""}`;
 
-        const trackPageView = () => {
-          const currentPath = getTrackablePath();
-          const now = Date.now();
-
-          if (location.pathname.startsWith("/admin") || location.pathname.startsWith("/api/")) {
+        const sendPageView = (path, title) => {
+          if (!path || path === lastTrackedPath) {
             return;
           }
 
-          if (shouldIgnoreTracking()) {
-            return;
-          }
-
-          if (currentPath === lastTrackedPath && now - lastTrackedAt < 1500) {
-            return;
-          }
-
-          lastTrackedPath = currentPath;
-          lastTrackedAt = now;
+          lastTrackedPath = path;
 
           const payload = JSON.stringify({
-            path: currentPath,
-            title: document.title,
+            path,
+            title,
             referrer: document.referrer,
             visitorId: getVisitorId()
           });
@@ -879,11 +869,32 @@ const bodyClass = [
           }).catch(() => {});
         };
 
-        const schedulePageView = () => {
+        const flushPendingPageView = () => {
           window.clearTimeout(pendingTrackTimer);
-          pendingTrackTimer = window.setTimeout(trackPageView, 80);
+          pendingTrackTimer = 0;
+          sendPageView(pendingPath, pendingTitle || document.title);
         };
 
+        const schedulePageView = () => {
+          const currentPath = getTrackablePath();
+
+          if (location.pathname.startsWith("/admin") || location.pathname.startsWith("/api/")) {
+            return;
+          }
+
+          if (shouldIgnoreTracking()) {
+            return;
+          }
+
+          if (currentPath === lastTrackedPath || currentPath === pendingPath) {
+            return;
+          }
+
+          window.clearTimeout(pendingTrackTimer);
+          pendingPath = currentPath;
+          pendingTitle = document.title;
+          pendingTrackTimer = window.setTimeout(flushPendingPageView, MIN_ENGAGED_VIEW_MS);
+        };
         const wrapHistoryMethod = (methodName) => {
           const original = history[methodName];
           if (typeof original !== "function") {
@@ -901,6 +912,12 @@ const bodyClass = [
         document.addEventListener("astro:page-load", schedulePageView);
         document.addEventListener("astro:after-swap", schedulePageView);
         window.addEventListener("popstate", schedulePageView);
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "hidden") {
+            flushPendingPageView();
+          }
+        });
+        window.addEventListener("pagehide", flushPendingPageView);
         wrapHistoryMethod("pushState");
         wrapHistoryMethod("replaceState");
       };
