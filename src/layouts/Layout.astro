@@ -253,13 +253,7 @@ const bodyClass = [
 
             const radio = target.closest("#shinchan-radio");
             if (radio) {
-              radio.classList.toggle("is-paused");
-              const small = radio.querySelector(".shinchan-radio-text small");
-              if (small) {
-                small.textContent = radio.classList.contains("is-paused")
-                  ? "欢迎语音已暂停"
-                  : "欢迎你回家";
-              }
+              window.dispatchEvent(new CustomEvent("iyuu:toggle-welcome-audio"));
               return;
             }
 
@@ -448,11 +442,50 @@ const bodyClass = [
           }
 
           const sessionKey = "iyuu-home-welcome-played";
+          const mutedKey = "iyuu-welcome-audio-muted";
+          const gentleVolume = 0.3;
+          const fadeDuration = 1200;
+          const fadeStepMs = 50;
+          const radio = document.getElementById("shinchan-radio");
+          const radioText = radio?.querySelector(".shinchan-radio-text small");
 
-          try {
-            if (window.sessionStorage.getItem(sessionKey) === "1") {
+          const getStoredMuted = () => {
+            try {
+              return window.localStorage.getItem(mutedKey) === "1";
+            } catch (error) {
+              return false;
+            }
+          };
+
+          const setStoredMuted = (value) => {
+            try {
+              window.localStorage.setItem(mutedKey, value ? "1" : "0");
+            } catch (error) {
+              // Ignore storage failures; the in-memory state still updates.
+            }
+          };
+
+          let isMuted = getStoredMuted();
+
+          const syncRadioState = () => {
+            if (!radio) {
               return;
             }
+
+            radio.classList.toggle("is-paused", isMuted);
+            radio.setAttribute("aria-pressed", isMuted ? "true" : "false");
+
+            if (radioText) {
+              radioText.textContent = isMuted ? "欢迎语音已暂停" : "欢迎你回家";
+            }
+          };
+
+          syncRadioState();
+
+          let hasPlayedThisSession = false;
+
+          try {
+            hasPlayedThisSession = window.sessionStorage.getItem(sessionKey) === "1";
           } catch (error) {
             // Ignore storage failures and continue with a best-effort greeting.
           }
@@ -460,10 +493,11 @@ const bodyClass = [
           try {
             const welcomeAudio = new Audio("/theme/audio/welcome-home.mp3");
             welcomeAudio.preload = "auto";
-            welcomeAudio.volume = 0.96;
+            welcomeAudio.volume = 0;
             welcomeAudio.load();
 
-            let hasPlayed = false;
+            let hasPlayed = hasPlayedThisSession;
+            let fadeFrame = 0;
             const fallbackEvents = [
               ["wheel", { passive: true }],
               ["touchmove", { passive: true }],
@@ -476,6 +510,28 @@ const bodyClass = [
               fallbackEvents.forEach(([eventName, options]) => {
                 window.removeEventListener(eventName, playWelcomeLine, options);
               });
+            };
+
+            const fadeInWelcomeLine = () => {
+              window.clearInterval(fadeFrame);
+              welcomeAudio.volume = 0;
+              const startedAt = window.performance.now();
+
+              fadeFrame = window.setInterval(() => {
+                if (isMuted || welcomeAudio.paused) {
+                  window.clearInterval(fadeFrame);
+                  welcomeAudio.volume = 0;
+                  return;
+                }
+
+                const elapsed = window.performance.now() - startedAt;
+                const progress = Math.min(elapsed / fadeDuration, 1);
+                welcomeAudio.volume = Number((gentleVolume * progress).toFixed(3));
+
+                if (progress >= 1) {
+                  window.clearInterval(fadeFrame);
+                }
+              }, fadeStepMs);
             };
 
             const markPlayed = () => {
@@ -495,19 +551,26 @@ const bodyClass = [
             };
 
             const playWelcomeLine = () => {
-              if (hasPlayed) {
+              if (hasPlayed || isMuted) {
                 return;
               }
 
               try {
                 welcomeAudio.currentTime = 0;
+                welcomeAudio.volume = 0;
                 const playback = welcomeAudio.play();
 
                 if (playback && typeof playback.then === "function") {
-                  playback.then(markPlayed).catch(() => {
-                    // Wait for a user gesture and try again.
-                  });
+                  playback
+                    .then(() => {
+                      fadeInWelcomeLine();
+                      markPlayed();
+                    })
+                    .catch(() => {
+                      // Wait for a user gesture and try again.
+                    });
                 } else {
+                  fadeInWelcomeLine();
                   markPlayed();
                 }
               } catch (error) {
@@ -515,9 +578,28 @@ const bodyClass = [
               }
             };
 
-            welcomeAudio.addEventListener("play", markPlayed, { once: true });
+            const toggleWelcomeAudio = () => {
+              isMuted = !isMuted;
+              setStoredMuted(isMuted);
+              syncRadioState();
+
+              if (isMuted) {
+                window.clearInterval(fadeFrame);
+                try {
+                  welcomeAudio.pause();
+                  welcomeAudio.volume = 0;
+                } catch (error) {
+                  // Ignore pause failures.
+                }
+              } else if (!hasPlayed) {
+                playWelcomeLine();
+              }
+            };
+
+            registerEvent(window, "iyuu:toggle-welcome-audio", toggleWelcomeAudio);
             registerCleanup(() => {
               cleanupFallbackEvents();
+              window.clearInterval(fadeFrame);
               try {
                 welcomeAudio.pause();
               } catch (error) {
