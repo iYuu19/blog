@@ -1,5 +1,6 @@
 const GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token";
 const STATE_COOKIE = "decap_cms_github_state";
+import { enforceRateLimit, noStoreHeaders } from "../_security.js";
 
 function html(title, body) {
   return `<!doctype html>
@@ -108,6 +109,16 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const origin = url.origin;
   const provider = "github";
+  const store = env.BLOG_ANALYTICS;
+  const limited = await enforceRateLimit(store, request, {
+    scope: "callback",
+    limit: 20,
+    windowSeconds: 60
+  });
+  if (limited) {
+    return limited;
+  }
+
   const clearStateCookie = serializeCookie(STATE_COOKIE, "", {
     maxAge: 0,
     path: "/api/callback",
@@ -131,7 +142,7 @@ export async function onRequestGet({ request, env }) {
       {
         status: 400,
         headers: {
-          "Content-Type": "text/html; charset=utf-8",
+          ...noStoreHeaders({ "Content-Type": "text/html; charset=utf-8" }),
           "Set-Cookie": clearStateCookie
         }
       }
@@ -151,7 +162,7 @@ export async function onRequestGet({ request, env }) {
       {
         status: 500,
         headers: {
-          "Content-Type": "text/html; charset=utf-8",
+          ...noStoreHeaders({ "Content-Type": "text/html; charset=utf-8" }),
           "Set-Cookie": clearStateCookie
         }
       }
@@ -175,7 +186,7 @@ export async function onRequestGet({ request, env }) {
       {
         status: 400,
         headers: {
-          "Content-Type": "text/html; charset=utf-8",
+          ...noStoreHeaders({ "Content-Type": "text/html; charset=utf-8" }),
           "Set-Cookie": clearStateCookie
         }
       }
@@ -195,7 +206,7 @@ export async function onRequestGet({ request, env }) {
       {
         status: 400,
         headers: {
-          "Content-Type": "text/html; charset=utf-8",
+          ...noStoreHeaders({ "Content-Type": "text/html; charset=utf-8" }),
           "Set-Cookie": clearStateCookie
         }
       }
@@ -234,7 +245,7 @@ export async function onRequestGet({ request, env }) {
       {
         status: 400,
         headers: {
-          "Content-Type": "text/html; charset=utf-8",
+          ...noStoreHeaders({ "Content-Type": "text/html; charset=utf-8" }),
           "Set-Cookie": clearStateCookie
         }
       }
@@ -258,7 +269,7 @@ export async function onRequestGet({ request, env }) {
     }),
     {
       headers: {
-        "Content-Type": "text/html; charset=utf-8",
+        ...noStoreHeaders({ "Content-Type": "text/html; charset=utf-8" }),
         "Set-Cookie": clearStateCookie
       }
     }

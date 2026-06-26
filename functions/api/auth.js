@@ -1,5 +1,6 @@
 const GITHUB_AUTHORIZE_URL = "https://github.com/login/oauth/authorize";
 const STATE_COOKIE = "decap_cms_github_state";
+import { enforceRateLimit, noStoreHeaders } from "../_security.js";
 
 function html(title, body) {
   return `<!doctype html>
@@ -76,6 +77,16 @@ function serializeCookie(name, value, options = {}) {
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const provider = url.searchParams.get("provider") || "github";
+  const store = env.BLOG_ANALYTICS;
+
+  const limited = await enforceRateLimit(store, request, {
+    scope: "auth",
+    limit: 10,
+    windowSeconds: 60
+  });
+  if (limited) {
+    return limited;
+  }
 
   if (provider !== "github") {
     return new Response(html("不支持的登录方式", "<h1>登录失败</h1><p>当前只支持 <code>github</code> 登录。</p>"), {
@@ -98,7 +109,7 @@ export async function onRequestGet({ request, env }) {
   }
 
   const origin = url.origin;
-  const scope = url.searchParams.get("scope") || "repo";
+  const scope = env.GITHUB_OAUTH_SCOPE || "repo";
   const state = crypto.randomUUID();
   const redirectUri = `${origin}/api/callback`;
   const authorizeUrl = new URL(GITHUB_AUTHORIZE_URL);
@@ -137,7 +148,7 @@ export async function onRequestGet({ request, env }) {
 
   return new Response(html("GitHub 登录", body), {
     headers: {
-      "Content-Type": "text/html; charset=utf-8",
+      ...noStoreHeaders({ "Content-Type": "text/html; charset=utf-8" }),
       "Set-Cookie": serializeCookie(STATE_COOKIE, state, {
         maxAge: 600,
         path: "/api/callback",

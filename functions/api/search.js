@@ -1,6 +1,12 @@
 const KV_BINDING = "BLOG_ANALYTICS";
 const MAX_SEARCH_TERMS = 100;
 const SEARCH_DEDUPE_SECONDS = 600;
+import {
+  enforceRateLimit,
+  noStoreHeaders,
+  rejectCrossOriginRequest,
+  rejectOversizedJson
+} from "../_security.js";
 
 function getAnalyticsStore(env) {
   return env[KV_BINDING];
@@ -25,7 +31,7 @@ function normalizeTerm(value) {
     return "";
   }
 
-  return value.replace(/\s+/g, " ").trim().slice(0, 80);
+  return value.replace(/[\u0000-\u001f\u007f]/g, "").replace(/\s+/g, " ").trim().slice(0, 80);
 }
 
 function trimObjectByViews(value, limit) {
@@ -122,6 +128,25 @@ async function recordSearchTerm({ request, env }) {
 
 export async function onRequestPost(context) {
   const store = getAnalyticsStore(context.env);
+  const rejectedOrigin = rejectCrossOriginRequest(context.request, context.env);
+  if (rejectedOrigin) {
+    return rejectedOrigin;
+  }
+
+  const rejectedBody = rejectOversizedJson(context.request, 1024);
+  if (rejectedBody) {
+    return rejectedBody;
+  }
+
+  const limited = await enforceRateLimit(store, context.request, {
+    scope: "search",
+    limit: 20,
+    windowSeconds: 60
+  });
+  if (limited) {
+    return limited;
+  }
+
   if (!store) {
     return new Response(null, { status: 204 });
   }
@@ -129,8 +154,6 @@ export async function onRequestPost(context) {
   context.waitUntil(recordSearchTerm(context));
   return new Response(null, {
     status: 204,
-    headers: {
-      "Cache-Control": "no-store"
-    }
+    headers: noStoreHeaders()
   });
 }

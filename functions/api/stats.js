@@ -1,4 +1,5 @@
 const KV_BINDING = "BLOG_ANALYTICS";
+import { enforceRateLimit, noStoreHeaders } from "../_security.js";
 
 function getAnalyticsStore(env) {
   return env[KV_BINDING];
@@ -76,10 +77,41 @@ function toSearchTerms(searchTerms = {}, limit = 12) {
     .slice(0, limit);
 }
 
+function toVisitorList(visitors = {}, limit = 24) {
+  return Object.entries(visitors)
+    .map(([key, item]) => {
+      const profile = item?.profile || {};
+      const topPaths = toTopPages(item?.paths || {}, 5);
+      const topReferrers = toReferrers(item?.referrers || {}, 3);
+
+      return {
+        id: item?.id || key.slice(-12),
+        views: item?.views ?? 0,
+        firstSeen: item?.firstSeen || "",
+        lastSeen: item?.lastSeen || "",
+        profile: {
+          country: profile.country || "unknown",
+          region: profile.region || "",
+          city: profile.city || "",
+          timezone: profile.timezone || "",
+          colo: profile.colo || "",
+          language: profile.language || "unknown",
+          browser: profile.browser || "unknown",
+          os: profile.os || "unknown",
+          device: profile.device || "unknown"
+        },
+        topPaths,
+        topReferrers
+      };
+    })
+    .sort((a, b) => new Date(b.lastSeen || 0) - new Date(a.lastSeen || 0))
+    .slice(0, limit);
+}
+
 function isAuthorized(request, env) {
   const expected = env.ANALYTICS_ADMIN_TOKEN;
   if (!expected) {
-    return true;
+    return false;
   }
 
   const authorization = request.headers.get("Authorization") || "";
@@ -98,13 +130,32 @@ export async function onRequestGet({ request, env }) {
     );
   }
 
+  const limited = await enforceRateLimit(store, request, {
+    scope: "stats",
+    limit: 20,
+    windowSeconds: 60
+  });
+  if (limited) {
+    return limited;
+  }
+
+  if (!env.ANALYTICS_ADMIN_TOKEN) {
+    return Response.json(
+      {
+        error: "missing_admin_token",
+        message: "Cloudflare Pages needs ANALYTICS_ADMIN_TOKEN before stats can be viewed."
+      },
+      { status: 503, headers: noStoreHeaders() }
+    );
+  }
+
   if (!isAuthorized(request, env)) {
     return Response.json(
       {
         error: "unauthorized",
         message: "需要统计后台 token。"
       },
-      { status: 401 }
+      { status: 401, headers: noStoreHeaders() }
     );
   }
 
@@ -117,7 +168,8 @@ export async function onRequestGet({ request, env }) {
       firstSeen: "",
       lastSeen: "",
       paths: {},
-      searchTerms: {}
+      searchTerms: {},
+      recentVisitors: {}
     }),
     readJson(store, `day:${todayKey}`, {
       date: todayKey,
@@ -125,7 +177,8 @@ export async function onRequestGet({ request, env }) {
       visitorIds: [],
       paths: {},
       referrers: {},
-      searchTerms: {}
+      searchTerms: {},
+      visitorDetails: {}
     }),
     Promise.all(
       recentKeys.map(async (date) => {
@@ -135,7 +188,8 @@ export async function onRequestGet({ request, env }) {
           visitorIds: [],
           paths: {},
           referrers: {},
-          searchTerms: {}
+          searchTerms: {},
+          visitorDetails: {}
         });
 
         return {
@@ -166,7 +220,8 @@ export async function onRequestGet({ request, env }) {
         topPages: toTopPages(today.paths, 8),
         articlePages: toArticlePages(today.paths, 12),
         referrers: toReferrers(today.referrers, 8),
-        searchTerms: toSearchTerms(today.searchTerms, 10)
+        searchTerms: toSearchTerms(today.searchTerms, 10),
+        visitorDetails: toVisitorList(today.visitorDetails, 18)
       },
       recentDays: recentDayItems.map((day) => ({
         date: day.date,
@@ -175,12 +230,11 @@ export async function onRequestGet({ request, env }) {
       })),
       articlePages,
       searchTerms: toSearchTerms(summary.searchTerms, 20),
-      topPages: toTopPages(summary.paths, 12)
+      topPages: toTopPages(summary.paths, 12),
+      recentVisitors: toVisitorList(summary.recentVisitors, 24)
     },
     {
-      headers: {
-        "Cache-Control": "no-store"
-      }
+      headers: noStoreHeaders()
     }
   );
 }

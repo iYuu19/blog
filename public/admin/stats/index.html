@@ -215,7 +215,8 @@
         color: var(--muted);
       }
 
-      .article-meta {
+      .article-meta,
+      .visitor-meta {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
@@ -223,6 +224,26 @@
         color: var(--muted);
         font-size: 12px;
         font-weight: 700;
+      }
+
+      .visitor-meta span,
+      .article-meta span {
+        min-width: 0;
+      }
+
+      .visitor-paths {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .visitor-paths span {
+        display: inline-block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        vertical-align: bottom;
+        white-space: nowrap;
       }
 
       .sparkline {
@@ -330,6 +351,14 @@
         .grid {
           grid-template-columns: 1fr;
         }
+
+        .row {
+          grid-template-columns: 1fr;
+        }
+
+        .count {
+          width: max-content;
+        }
       }
     </style>
   </head>
@@ -339,7 +368,7 @@
         <div class="brand">
           <p class="eyebrow">Admin Analytics</p>
           <h1>访问统计</h1>
-          <p class="muted">这里显示博客页面浏览、今日访客和热门文章。</p>
+          <p class="muted">这里显示博客页面浏览、今日访客、匿名访客明细和热门文章。</p>
         </div>
         <div class="top-actions">
           <button class="button" type="button" id="refresh-stats">刷新统计</button>
@@ -401,6 +430,16 @@
           <h2 style="margin-top: 24px">今日来源</h2>
           <div class="rows" id="referrers"></div>
         </aside>
+
+        <article class="card panel panel--wide">
+          <h2>今日匿名访客</h2>
+          <div class="rows" id="today-visitors"></div>
+        </article>
+
+        <article class="card panel panel--wide">
+          <h2>最近匿名访客</h2>
+          <div class="rows" id="recent-visitors"></div>
+        </article>
 
         <article class="card panel panel--wide">
           <h2>热门页面</h2>
@@ -529,6 +568,61 @@
         }
       }
 
+      function formatLocation(profile = {}) {
+        const parts = [profile.country, profile.region, profile.city].filter((item) => item && item !== "unknown");
+        return parts.length ? parts.join(" / ") : "未知地区";
+      }
+
+      function formatVisitorTech(profile = {}) {
+        return [profile.device, profile.os, profile.browser].filter((item) => item && item !== "unknown").join(" · ") || "未知设备";
+      }
+
+      function renderVisitorRows(container, rows, emptyText) {
+        container.innerHTML = "";
+        if (!rows.length) {
+          container.innerHTML = `<p class="muted">${emptyText}</p>`;
+          return;
+        }
+
+        for (const visitor of rows) {
+          const row = document.createElement("div");
+          const paths = visitor.topPaths || [];
+          const referrers = visitor.topReferrers || [];
+          const profile = visitor.profile || {};
+          row.className = "row";
+          row.innerHTML = `
+            <div class="row-title">
+              <strong></strong>
+              <small></small>
+              <div class="visitor-meta">
+                <span data-meta="location"></span>
+                <span data-meta="tech"></span>
+                <span data-meta="referrer"></span>
+                <span data-meta="first"></span>
+              </div>
+              <div class="visitor-paths"></div>
+            </div>
+            <span class="count"></span>
+          `;
+
+          row.querySelector("strong").textContent = `访客 ${visitor.id}`;
+          row.querySelector("small").textContent = `最近访问 ${formatDate(visitor.lastSeen)}`;
+          row.querySelector('[data-meta="location"]').textContent = formatLocation(profile);
+          row.querySelector('[data-meta="tech"]').textContent = formatVisitorTech(profile);
+          row.querySelector('[data-meta="referrer"]').textContent = `来源 ${referrers[0]?.name || "direct"}`;
+          row.querySelector('[data-meta="first"]').textContent = `首次 ${formatDate(visitor.firstSeen)}`;
+          row.querySelector(".count").textContent = `${formatNumber(visitor.views)} PV`;
+
+          const pathText = paths.length
+            ? paths.map((path) => `${path.title || path.path} (${formatNumber(path.views)})`).join(" / ")
+            : "暂无页面记录";
+          const pathNode = document.createElement("span");
+          pathNode.textContent = pathText;
+          row.querySelector(".visitor-paths").appendChild(pathNode);
+          container.appendChild(row);
+        }
+      }
+
       function renderRecentDays(days) {
         const container = document.getElementById("recent-days");
         const max = Math.max(1, ...days.map((day) => day.views));
@@ -583,7 +677,7 @@
           statusTitle.textContent = data.protected ? "统计已启用访问保护" : "统计已启用";
           statusText.textContent = data.protected
             ? "当前统计接口需要 token，适合放在后台查看。"
-            : "已启用 60 秒同页面去重；可以设置 ANALYTICS_ADMIN_TOKEN 环境变量给统计接口加锁。";
+            : "已启用 60 秒同页面去重；可设置 ANALYTICS_ADMIN_TOKEN 环境变量给统计接口加锁。";
 
           setMetric("totalViews", formatNumber(data.summary.totalViews));
           setMetric("todayViews", formatNumber(data.today.views));
@@ -596,6 +690,8 @@
           renderRows(document.getElementById("top-pages"), data.topPages || [], "还没有页面浏览记录。");
           renderRows(document.getElementById("search-terms"), data.searchTerms || [], "还没有搜索词记录。");
           renderRows(document.getElementById("referrers"), data.today.referrers || [], "今天还没有来源记录。");
+          renderVisitorRows(document.getElementById("today-visitors"), data.today.visitorDetails || [], "今天还没有可展示的匿名访客。");
+          renderVisitorRows(document.getElementById("recent-visitors"), data.recentVisitors || [], "还没有可展示的匿名访客。");
           renderRecentDays(data.recentDays || []);
 
           updateOwnerTrackingUi();
