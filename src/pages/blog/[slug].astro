@@ -874,6 +874,7 @@ const readingCompanionMilestones = [
       const article = document.querySelector("[data-article-content]");
       const progressBar = document.querySelector("[data-reading-progress-bar]");
       if (!article || !progressBar) return;
+      if (window.matchMedia("(pointer: coarse)").matches) return;
 
       // 创建阅读鼓励气泡
       const cheerBubble = document.createElement("div");
@@ -924,6 +925,7 @@ const readingCompanionMilestones = [
     (() => {
       const article = document.querySelector("[data-article-content]");
       if (!article) return;
+      if (window.matchMedia("(pointer: coarse)").matches) return;
 
       // 为文章内容元素添加动画类
       const animTargets = article.querySelectorAll(

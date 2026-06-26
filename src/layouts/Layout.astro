@@ -66,14 +66,14 @@ const bodyClass = [
   </head>
   <body class={bodyClass} data-home-page={isHomePage ? "true" : "false"}>
     <div class="page-progress" aria-hidden="true"></div>
-<button class="shinchan-radio" aria-label="播放或暂停欢迎语音" id="shinchan-radio" type="button">
+    <button class="shinchan-radio" aria-label="播放或暂停欢迎语音" id="shinchan-radio" type="button">
       <span class="shinchan-radio-disc" aria-hidden="true"></span>
       <span class="shinchan-radio-text">
         <strong>iYuu Radio</strong>
         <small>欢迎你回家</small>
       </span>
     </button>
-    <!-- 灏忔柊璧拌矾 - 椤甸潰搴曢儴 -->
+    <!-- 小新走路 - 页面底部 -->
     <div class="shinchan-walker" aria-hidden="true" id="shinchan-walker">
       <img
         class="character-sticker walker-sticker"
@@ -84,7 +84,7 @@ const bodyClass = [
       />
     </div>
 
-    <!-- 灏忕櫧鎺㈠ご - 鍙充笅瑙?-->
+    <!-- 小白探头 - 右下角 -->
     <div class="shiro-corner" aria-hidden="true" id="shiro-corner">
       <img
         class="character-sticker shiro-sticker"
@@ -95,7 +95,7 @@ const bodyClass = [
       />
     </div>
 
-    <!-- 鍔ㄦ劅瓒呬汉 - 鍋跺皵椋炶繃 -->
+    <!-- 动感超人 - 偶尔飞过 -->
     <div class="action-flyer" aria-hidden="true" id="action-flyer">
       <img
         class="character-sticker action-sticker"
@@ -200,6 +200,8 @@ const bodyClass = [
 
         siteState.persistentReady = true;
         initThemePreference();
+        const motionPointer = window.matchMedia("(pointer: fine)").matches;
+        const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
 
         const burstStickers = [
           { text: "CTF", tone: "red" },
@@ -257,13 +259,15 @@ const bodyClass = [
               return;
             }
 
-            spawnClickBurst(event.clientX, event.clientY);
+            if (motionPointer) {
+              spawnClickBurst(event.clientX, event.clientY);
+            }
           },
           { passive: false }
         );
 
         const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        if (prefersReducedMotion) {
+        if (prefersReducedMotion || coarsePointer) {
           return;
         }
 
@@ -425,6 +429,7 @@ const bodyClass = [
         const isHomePage = body?.dataset.homePage === "true";
         const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         const motionPointer = window.matchMedia("(pointer: fine)").matches;
+        const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
 
         const updateScrollProgress = () => {
           const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -448,6 +453,7 @@ const bodyClass = [
           const fadeStepMs = 50;
           const radio = document.getElementById("shinchan-radio");
           const radioText = radio?.querySelector(".shinchan-radio-text small");
+          const allowAutoplayAttempt = !coarsePointer;
 
           const getStoredMuted = () => {
             try {
@@ -492,9 +498,11 @@ const bodyClass = [
 
           try {
             const welcomeAudio = new Audio("/theme/audio/welcome-home.mp3");
-            welcomeAudio.preload = "auto";
+            welcomeAudio.preload = allowAutoplayAttempt ? "auto" : "none";
             welcomeAudio.volume = 0;
-            welcomeAudio.load();
+            if (allowAutoplayAttempt) {
+              welcomeAudio.load();
+            }
 
             let hasPlayed = hasPlayedThisSession;
             let fadeFrame = 0;
@@ -607,10 +615,12 @@ const bodyClass = [
               }
             });
 
-            registerTimeout(playWelcomeLine, 320);
-            fallbackEvents.forEach(([eventName, options]) => {
-              registerEvent(window, eventName, playWelcomeLine, options);
-            });
+            if (allowAutoplayAttempt) {
+              registerTimeout(playWelcomeLine, 320);
+              fallbackEvents.forEach(([eventName, options]) => {
+                registerEvent(window, eventName, playWelcomeLine, options);
+              });
+            }
           } catch (error) {
             // Ignore welcome voice failures so content rendering still works.
           }
@@ -804,7 +814,7 @@ const bodyClass = [
       }
 
       const initPageViewTracking = () => {
-        const endpoint = "/api/track";
+        const endpoint = "/api/pageview";
         const storageKey = "iyuu-anonymous-visitor";
         const ignoreStorageKey = "iyuu-analytics-ignore";
 
@@ -837,7 +847,7 @@ const bodyClass = [
 
         const getTrackablePath = () => `${location.pathname}${location.search || ""}`;
 
-        const sendPageView = (path, title) => {
+        const sendPageView = (path, title, useBeacon = false) => {
           if (!path || path === lastTrackedPath) {
             return;
           }
@@ -851,14 +861,15 @@ const bodyClass = [
             visitorId: getVisitorId()
           });
 
-          try {
-            if (navigator.sendBeacon) {
+          if (useBeacon && navigator.sendBeacon) {
+            try {
               const body = new Blob([payload], { type: "application/json" });
-              navigator.sendBeacon(endpoint, body);
-              return;
+              if (navigator.sendBeacon(endpoint, body)) {
+                return;
+              }
+            } catch (error) {
+              // Fall back to fetch below.
             }
-          } catch (error) {
-            // Fall back to fetch below.
           }
 
           fetch(endpoint, {
@@ -869,12 +880,11 @@ const bodyClass = [
           }).catch(() => {});
         };
 
-        const flushPendingPageView = () => {
+        const flushPendingPageView = (useBeacon = false) => {
           window.clearTimeout(pendingTrackTimer);
           pendingTrackTimer = 0;
-          sendPageView(pendingPath, pendingTitle || document.title);
+          sendPageView(pendingPath, pendingTitle || document.title, useBeacon);
         };
-
         const schedulePageView = () => {
           const currentPath = getTrackablePath();
 
@@ -893,7 +903,7 @@ const bodyClass = [
           window.clearTimeout(pendingTrackTimer);
           pendingPath = currentPath;
           pendingTitle = document.title;
-          pendingTrackTimer = window.setTimeout(flushPendingPageView, MIN_ENGAGED_VIEW_MS);
+          pendingTrackTimer = window.setTimeout(() => flushPendingPageView(false), MIN_ENGAGED_VIEW_MS);
         };
         const wrapHistoryMethod = (methodName) => {
           const original = history[methodName];
@@ -917,7 +927,7 @@ const bodyClass = [
             flushPendingPageView();
           }
         });
-        window.addEventListener("pagehide", flushPendingPageView);
+        window.addEventListener("pagehide", () => flushPendingPageView(true));
         wrapHistoryMethod("pushState");
         wrapHistoryMethod("replaceState");
       };

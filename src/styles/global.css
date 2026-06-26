@@ -5003,6 +5003,13 @@ body.theme-shinchan .hero-note-card:hover::before {
     grid-template-columns: 1fr;
   }
 
+  .article-layout.has-toc,
+  .article-layout.no-toc {
+    width: min(100%, calc(100vw - 24px));
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
   .page-scene-image {
     height: 204px;
   }
@@ -5123,6 +5130,13 @@ body.theme-shinchan .hero-note-card:hover::before {
     border-bottom: 1px solid var(--line);
   }
 
+  .article-index-column,
+  .article-utility-column,
+  .article-shell {
+    min-width: 0;
+    width: 100%;
+  }
+
   .article-rail {
     position: static;
     gap: 12px;
@@ -5176,12 +5190,17 @@ body.theme-shinchan .hero-note-card:hover::before {
   }
 
   .prose img {
+    width: auto;
     max-width: 100%;
   }
 
   .article-shell {
-    padding: 26px 22px 30px;
+    padding: 26px 18px 30px;
     border-radius: 22px;
+  }
+
+  .prose pre {
+    max-width: 100%;
   }
 
   .image-lightbox {
@@ -5195,6 +5214,17 @@ body.theme-shinchan .hero-note-card:hover::before {
   .image-lightbox-image {
     max-width: 100%;
     max-height: 86vh;
+  }
+}
+
+@media (max-width: 640px), (pointer: coarse) {
+  .shinchan-walker,
+  .shiro-corner,
+  .action-flyer,
+  .click-burst,
+  .floating-stickers,
+  .reading-cheer-bubble {
+    display: none !important;
   }
 }
 
