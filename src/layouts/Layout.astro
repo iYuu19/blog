@@ -908,7 +908,7 @@ const bodyClass = [
           };
         };
 
-        trackPageView();
+        schedulePageView();
         document.addEventListener("astro:page-load", schedulePageView);
         document.addEventListener("astro:after-swap", schedulePageView);
         window.addEventListener("popstate", schedulePageView);
