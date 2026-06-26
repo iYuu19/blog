@@ -1,4 +1,4 @@
-﻿---
+---
 import "../styles/global.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
@@ -829,7 +829,16 @@ const bodyClass = [
           }
         };
 
+        let lastTrackedPath = "";
+        let lastTrackedAt = 0;
+        let pendingTrackTimer = 0;
+
+        const getTrackablePath = () => `${location.pathname}${location.search || ""}`;
+
         const trackPageView = () => {
+          const currentPath = getTrackablePath();
+          const now = Date.now();
+
           if (location.pathname.startsWith("/admin") || location.pathname.startsWith("/api/")) {
             return;
           }
@@ -838,8 +847,15 @@ const bodyClass = [
             return;
           }
 
+          if (currentPath === lastTrackedPath && now - lastTrackedAt < 1500) {
+            return;
+          }
+
+          lastTrackedPath = currentPath;
+          lastTrackedAt = now;
+
           const payload = JSON.stringify({
-            path: location.pathname,
+            path: currentPath,
             title: document.title,
             referrer: document.referrer,
             visitorId: getVisitorId()
@@ -863,8 +879,30 @@ const bodyClass = [
           }).catch(() => {});
         };
 
+        const schedulePageView = () => {
+          window.clearTimeout(pendingTrackTimer);
+          pendingTrackTimer = window.setTimeout(trackPageView, 80);
+        };
+
+        const wrapHistoryMethod = (methodName) => {
+          const original = history[methodName];
+          if (typeof original !== "function") {
+            return;
+          }
+
+          history[methodName] = function wrappedHistoryMethod(...args) {
+            const result = original.apply(this, args);
+            schedulePageView();
+            return result;
+          };
+        };
+
         trackPageView();
-        document.addEventListener("astro:page-load", trackPageView);
+        document.addEventListener("astro:page-load", schedulePageView);
+        document.addEventListener("astro:after-swap", schedulePageView);
+        window.addEventListener("popstate", schedulePageView);
+        wrapHistoryMethod("pushState");
+        wrapHistoryMethod("replaceState");
       };
 
       if (!siteState.analyticsReady) {
