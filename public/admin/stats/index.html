@@ -416,14 +416,14 @@
 
       <section class="panels" id="panels" hidden>
         <article class="card panel">
-          <h2>文章浏览排行</h2>
+          <h2>内容浏览排行</h2>
           <div class="rows" id="article-pages"></div>
         </article>
 
         <aside class="card panel">
           <h2>最近 7 天</h2>
           <div class="bars" id="recent-days"></div>
-          <h2 style="margin-top: 24px">今日热门文章</h2>
+          <h2 style="margin-top: 24px">今日热门内容</h2>
           <div class="rows" id="today-article-pages"></div>
           <h2 style="margin-top: 24px">今日搜索词</h2>
           <div class="rows" id="today-search-terms"></div>
@@ -684,8 +684,8 @@
           setMetric("todayVisitors", formatNumber(data.today.visitors));
           setMetric("lastSeen", formatDate(data.summary.lastSeen));
 
-          renderArticleRows(document.getElementById("article-pages"), data.articlePages || [], "还没有文章浏览记录。");
-          renderRows(document.getElementById("today-article-pages"), data.today.articlePages || [], "今天还没有文章浏览记录。");
+          renderArticleRows(document.getElementById("article-pages"), data.articlePages || [], "还没有内容浏览记录。");
+          renderRows(document.getElementById("today-article-pages"), data.today.articlePages || [], "今天还没有内容浏览记录。");
           renderRows(document.getElementById("today-search-terms"), data.today.searchTerms || [], "今天还没有搜索记录。");
           renderRows(document.getElementById("top-pages"), data.topPages || [], "还没有页面浏览记录。");
           renderRows(document.getElementById("search-terms"), data.searchTerms || [], "还没有搜索词记录。");

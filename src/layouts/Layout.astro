@@ -924,7 +924,7 @@ const bodyClass = [
         window.addEventListener("popstate", schedulePageView);
         document.addEventListener("visibilitychange", () => {
           if (document.visibilityState === "hidden") {
-            flushPendingPageView();
+            flushPendingPageView(true);
           }
         });
         window.addEventListener("pagehide", () => flushPendingPageView(true));
